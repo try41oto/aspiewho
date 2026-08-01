@@ -42,7 +42,7 @@ SHORT_URL_HREF='https://sites.google.com/view/aspiewho'
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
 LINK_INTENT='https://www.youtube.com/watch?v=HvdUHeEzltA&t=60s'
-QR='iVBORw0KGgoAAAANSUhEUgAAAJgAAACXAQAAAADB769ZAAAB60lEQVR42qWWQWrdMBCGf1vOQXqIgiGbLmwseFfoLpBT2GiCj5FlzvDgleyCRQfeEQpd9Rgapgs/2SZ1wOnoX1lIP2PNp9EUin9G+VQU1eb7qSiqCgAi1TzrvgBQYmfvzlwFAPevqx+A0qkSC2U5VTrqh5HcqOsYyY0lAKx2H+79MD5HyFrXic/6jN885y5Zyxwb/Or3fiEh+ixGSIf9QIDbnB8BrgIAPvpvO+dXr98/AEBVdQrpJlVVPepX7DBZxfF8Gi6cAYQ7n0x+YLnA+ewnr+1o8SsZ0TMvGWnbwVv8kPqQutRNs5o+pM4UH8C8BVBs8ZXgOLQbnKW1+cXWx2FYLzCDTX7SDhQ3dnyc531eIrmLZF6uF6GrMR+RhBg3yWA7P9c+v909v909fpn18Pub6fwwBU19s/AXUlAbz02Ymi6tCj9tfl3qm7C49X1juh/Q1HRTvxSs1NjiK4WEol/4i2TkT06Er8QLf7DeDw/EDX8Ujfw9vLz8Wvl7/M5/bPmYmpBW/vrO+n5cwPX1fJo1EGpnvL9ApFv9az2i5/99f5e3UdpcsDxHsvk51U39Y8Tj9f59f6WqWs391fr+or5+rr8ad9bxQh9YyBLf3F/ljqj10Yu3+YUEltxeiReCOb8LL15IbPndY/Iv/bsOQ2OFyVkAAAAASUVORK5CYII='
+QR='iVBORw0KGgoAAAANSUhEUgAAAL0AAAC9AQAAAADOrEGdAAABcklEQVR4nNWYQW7cMAxFH60JlJ1yA+cmnpvZc5SepJ6bKDdwFgE0gEY/C7nTFnDQZdi/oWFuHogvUpSJQ92G4//wrQlaD6pxg7mFAkAoXnGDJC0NGKUWSpLUvOIOcDM7A1HXM6HCm5kDqmOdHl+3l+1i7fThgeqfCavwdvZGdZSI0gqhMEpWYZQcUH2hvTO0UFKeFu+dYTBJkrg/M65YjZKk6ra6eyMLJWUAklZMTquLalSetJcVojKecVV6kDKz9eDWuyc9fTD++Dk03l8nkwHQnjx7N0+LVBhXeMxir7iQ8iSrpMxM0DZKfr37q7qVpBWIG469uzcyWd1bgrZxxbEZQklaH1MNYFrk1gx9qKkRJalbQ25xB1mXSr/o3l4AnZw2soE+hLk/v09a+lFzQPV1Yt8mAObhbvbKZfh+qmP93iZIV5vbQNpg8Yr7Z2JcLwRtXK05ovpb+wVSNSrvi/vkewj3sL8zSFpnt7j2f73ifALf0P3jUHHXtgAAAABJRU5ErkJggg=='
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
 # ================= 設定ここまで =================
 
@@ -121,16 +121,6 @@ for gi,(name,cats) in enumerate(groups):
                 f'width="266" height="254" loading="lazy" decoding="async"></div>')
     idx+=f'<section class="blk"><h2>{html.escape(name)}</h2><div class="items">{items}</div></section>'
 
-secs=''
-secs+=(f'<section class="cat solo" id="rec"><div class="wrap"><a class="back" href="#top">← もどる</a>'
- f'<header><h1>つぎにこのへんオススメはいかが</h1>'
- f'<p class="desc">カテゴリをまたいで、気に入っているものを。</p></header>'
- f'{pkgrid(MORE)}<a class="back bottom" href="#top">← もどる</a></div></section>')
-secs+=(f'<section class="cat solo" id="kamikai"><div class="wrap"><a class="back" href="#top">← もどる</a>'
- f'<header><h1>神回★</h1>'
- f'<p class="desc">名作お気に入り</p></header>'
- f'{pkgrid(KAMI)}<a class="back bottom" href="#top">← もどる</a></div></section>')
-
 CSS='''
 :root{--bg:#FFF;--face:#FAFBFC;--line:#C4CFD9;--line2:#E2E7EC;--fg:#16212D;--dim:#4B5A6B;
 --accent:#8A5F0F;--sub:#245670;--tint:#FFF8E9;--soft:#F3F7F9;--deep:#1D6483;
@@ -150,12 +140,13 @@ background:var(--face);font-size:16px;color:var(--sub);text-decoration:none;font
 .mins{margin:16px 0 0;font-size:18px;color:var(--dim)}
 .thanks{margin:6px 0 0;font-size:18px;color:var(--dim)}
 .thanks a,.note a{color:var(--sub);text-underline-offset:3px}
-.ahawrap{display:flex;align-items:center;gap:16px;margin:22px 0 0}
-.aha{margin:0;flex:1 1 auto;min-width:0;font-size:clamp(32px,9.5vw,52px);font-weight:800;letter-spacing:.04em;line-height:1.3}
+.aha{margin:22px 0 0;font-size:clamp(32px,9.5vw,52px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
+.ahawrap{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:16px 0 0}
 .stk{display:block;height:auto;flex:0 0 auto}
+.arigcol{display:flex;flex-direction:column;align-items:flex-start;gap:10px;flex:0 0 auto}
 .arig{width:64px;margin-right:-4px}
+.gamestart{width:104px}
 .qrbox{display:flex;align-items:flex-end;gap:8px;flex:0 0 auto}
-.nk{width:92px}
 .red{color:#B02E24;font-weight:700}
 .qr{flex:0 0 auto;text-align:center;text-decoration:none;color:var(--fg);display:block;min-height:44px}
 .qr .qr1{display:block;font-size:13px;font-weight:700;color:var(--dim);letter-spacing:-.02em}
@@ -182,7 +173,6 @@ font-style:italic;font-style:oblique 12deg}
 .item.solo .t{color:var(--blue)}
 .stkitem{display:flex;align-items:center;justify-content:flex-end;padding:4px}
 .stkitem img{width:88px;height:auto}
-.cat.solo h1{color:var(--blue)}
 .pks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px;margin-bottom:16px}
 .pk{text-decoration:none;display:block;min-height:44px}
 .pk img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block;
@@ -238,16 +228,6 @@ details.item[open]>summary .d{display:none}
 details.item[open] .closelbl{display:inline-block;margin-left:auto;flex:0 0 auto;
 font-size:16px;font-weight:800;color:#fff;background:var(--accent);
 padding:6px 14px;border-radius:20px;white-space:nowrap}
-/* カテゴリ中身 */
-.cat{display:none;padding:18px 0 48px}
-.cat:target{display:block}
-.cat header{padding:16px 0;border-bottom:2px solid var(--fg);margin-bottom:16px}
-.cat h1{margin:0;font-size:28px;line-height:1.4}
-.cat .desc{margin:8px 0 0;font-size:17px;color:var(--dim)}
-.back{display:inline-flex;align-items:center;min-height:48px;padding:11px 22px;border:1px solid var(--line);border-radius:8px;
-background:var(--face);font-size:17px;text-decoration:none;color:var(--sub)}
-.back:active{background:var(--tint)}
-.back.bottom{margin-top:30px}
 /* 動画1本ぶん（スマホ：左サムネ＋右タイトル） */
 .rows{display:flex;flex-direction:column}
 .row{display:flex;gap:12px;align-items:center;min-height:48px;padding:16px 4px;
@@ -269,11 +249,11 @@ font-size:13px;font-weight:700;vertical-align:1px}
  .wrap{padding:0 24px}
  .items{grid-template-columns:repeat(2,1fr)}
  .pks{grid-template-columns:repeat(3,1fr);gap:20px 16px}
- .cat h1{font-size:30px}
  .endgrid{grid-template-columns:repeat(3,1fr);align-items:end}
  .banner img{width:168px;height:94px}
  .qr img{width:120px}
  .arig{width:80px}
+ .gamestart{width:128px}
  .banner .lbl{font-size:21px}
 }
 @media(min-width:940px){
@@ -294,24 +274,22 @@ font-size:13px;font-weight:700;vertical-align:1px}
 /* PC（マウスがある画面）：文字だけ並べて、乗せるとフワッと出す（画面中央に固定し、絶対にはみ出さない） */
 @media (hover:hover) and (pointer:fine) and (min-width:700px){
  .banner .pop{display:block;position:fixed;left:50%;top:50%;
-  width:min(1040px,94vw,166vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
+  width:min(720px,66vw,116vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
   background:#fff center/cover no-repeat;box-shadow:0 20px 60px rgba(10,18,28,.45);
   opacity:0;transform:translate(-50%,-50%) scale(.96);
-  transition:opacity .22s ease,transform .22s ease;pointer-events:none;z-index:20}
- .banner:hover .pop,.banner:focus-visible .pop{background-image:var(--th);opacity:1;
-  transform:translate(-50%,-50%) scale(1)}
+  transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
+ .banner.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
  .rows{display:grid;grid-template-columns:repeat(2,1fr);column-gap:36px;row-gap:4px}
  .row{padding:18px 4px}
  .row .mini{display:none}
  .row .ttl{display:block;-webkit-line-clamp:unset;overflow:visible;
   font-size:34px;line-height:1.45;font-weight:700}
  .row .pop{display:block;position:fixed;left:50%;top:50%;
-  width:min(1040px,94vw,166vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
+  width:min(720px,66vw,116vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
   background:#fff center/cover no-repeat;box-shadow:0 20px 60px rgba(10,18,28,.45);
   opacity:0;transform:translate(-50%,-50%) scale(.96);
-  transition:opacity .22s ease,transform .22s ease;pointer-events:none;z-index:20}
- .row:hover .pop,.row:focus-visible .pop{background-image:var(--th);opacity:1;
-  transform:translate(-50%,-50%) scale(1)}
+  transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
+ .row.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
  .row:hover .ttl{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--accent)}
  .row:hover{background:transparent}
 }
@@ -331,7 +309,8 @@ HTML=f'''<!DOCTYPE html>
 <div class="hero">
 <p class="mins">1つ視聴に25分。🥴</p>
 <p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p>
-<div class="ahawrap"><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async"><p class="aha"><small>必ずみつかる、</small>脳アハ！</p><div class="qrbox"><img class="stk nk" src="{IMGS['norikome']}" alt="" width="274" height="252" decoding="async"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><span class="qr1">［ＵＲＬ１１文字］</span><span class="qr2">ｎ９．ｃｌ／ｔｒｙ４ａ</span><img src="data:image/png;base64,{QR}" alt="" width="152" height="151" decoding="async"></a></div></div>
+<p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
+<div class="ahawrap"><div class="arigcol"><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async"><img class="stk gamestart" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async"></div><div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><span class="qr1">［ＵＲＬ１２文字］</span><span class="qr2">ｎ９．ｃｌ／ｆ０ａ０９ｓ</span><img src="data:image/png;base64,{QR}" alt="" width="152" height="151" decoding="async"></a></div></div>
 <p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
 </div>
 <div class="note">
@@ -344,14 +323,18 @@ HTML=f'''<!DOCTYPE html>
 </div>
 </div>
 <div class="pkwrap"><h2>まずはこのあたりから</h2>{first}
-<div class="items"><a class="item solo" href="#rec">
-<span class="row1"><span class="pm" aria-hidden="true">＋</span>
-<span class="t">つぎにこのへんオススメはいかが</span></span>
-<span class="d">カテゴリをまたいで、気に入っているものを。</span></a>
-<a class="item solo" href="#kamikai">
-<span class="row1"><span class="pm" aria-hidden="true">＋</span>
-<span class="t">神回★</span></span>
-<span class="d">名作お気に入り</span></a></div>
+<div class="items"><details class="item solo">
+<summary><span class="row1"><span class="pm" aria-hidden="true">＋</span>
+<span class="t">次のオススメ</span>
+<span class="closelbl" aria-hidden="true">↑ とじる</span></span>
+<span class="d">名作名作・・</span></summary>
+<div class="catbody">{pkgrid(MORE)}</div></details>
+<details class="item solo">
+<summary><span class="row1"><span class="pm" aria-hidden="true">＋</span>
+<span class="t">神回★</span>
+<span class="closelbl" aria-hidden="true">↑ とじる</span></span>
+<span class="d">名作お気に入り</span></summary>
+<div class="catbody">{pkgrid(KAMI)}</div></details></div>
 </div>
 {idx}
 <div class="endwrap">
@@ -363,7 +346,35 @@ HTML=f'''<!DOCTYPE html>
 </div></div>
 <div class="tail"></div>
 </div>
-{secs}
+<script>
+document.addEventListener('toggle',function(e){{
+ var d=e.target;
+ if(d.tagName==='DETAILS'&&d.open){{
+  requestAnimationFrame(function(){{d.scrollIntoView({{behavior:'smooth',block:'start'}});}});
+ }}
+}},true);
+(function(){{
+ var SHOW=2000,COOLDOWN=5000;
+ function release(el){{
+  if(el.classList.contains('popshow')){{el.classList.remove('popshow');el._hiddenAt=Date.now();}}
+  clearTimeout(el._popTimer);
+ }}
+ function trigger(el){{
+  var now=Date.now();
+  if(el._hiddenAt&&now-el._hiddenAt<COOLDOWN)return;
+  if(el.classList.contains('popshow'))return;
+  el.classList.add('popshow');
+  clearTimeout(el._popTimer);
+  el._popTimer=setTimeout(function(){{release(el);}},SHOW);
+ }}
+ document.querySelectorAll('.row,.banner').forEach(function(el){{
+  el.addEventListener('mouseenter',function(){{trigger(el);}});
+  el.addEventListener('mouseleave',function(){{release(el);}});
+  el.addEventListener('focus',function(){{trigger(el);}});
+  el.addEventListener('blur',function(){{release(el);}});
+ }});
+}})();
+</script>
 </body></html>'''
 open(OUT,'w').write(HTML)
 print(f'{OUT} {os.path.getsize(OUT)/1024:.1f}KB / gzip {len(gzip.compress(HTML.encode()))/1024:.1f}KB')
