@@ -29,8 +29,7 @@ PHRASES=['学ぶことがだいすきなアナタ、本日もようこそ、こ�
  'あの〜、ちょっと想像してみてほしいんですけど．．','まさにそこなんですよ','パラダイムシフト',
  'よーし、これらを紐解いていきましょう',
  'さいごあなたに、挑発的な思考のタネを投げかけて、この思考の旅を、、']
-PHRASE_AT=[0,4,8,11,15,18]      # 何番目の分野の前に置くか
-BANNER_AT=10                     # 「一気見」バナーを置く位置
+BANNER_AT=10                     # 「一気見」バナーを置く位置（分野の前・カテゴリボックス数換算）
 
 # 1504本のうち外に出した2本（入れ替わっていたら下の2行を交換）
 ID_ICHIMI='uBtnbr0gu80'   # 1500タイトルを24分で一気見！
@@ -76,10 +75,14 @@ def pkgrid(ids,extra=''):
      f'<img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
      f'<p>{html.escape(V[i]["title"])}</p></a>' for i in ids)+extra+'</div>'
 
-def onerow(href,thumb,title):
-    return (f'<a class="row" href="{href}" target="_blank" rel="noopener" style="--th:url({thumb})">'
-            f'<img class="mini" src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">'
-            f'<span class="ttl">{html.escape(title)}</span><span class="pop" aria-hidden="true"></span></a>')
+def pkcard(href,thumb,title,cls=''):
+    return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener">'
+            f'<img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">'
+            f'<p>{html.escape(title)}</p></a>')
+
+def ilink(href,vid,text):
+    return (f'<a class="ilink" href="{href}" target="_blank" rel="noopener" style="--th:url({tnhq(vid)})">'
+            f'{text}<span class="pop" aria-hidden="true"></span></a>')
 
 def rows(vids):
     out=''
@@ -93,41 +96,58 @@ def rows(vids):
 
 KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos'] if v['kamikai']]
 
-CHIKO=('<div class="stkcell"><img src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async"></div>')
-first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+pkgrid(i,CHIKO) for c,i in FIRST)
+CHIKO=('<img class="stk chiko" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async">')
+first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+pkgrid(i) for c,i in FIRST)
 
-phr={p:(k,PHRASES[k]) for k,p in enumerate(PHRASE_AT)}
-idx=''
-for gi,(name,cats) in enumerate(groups):
-    if gi in phr:
-        k,txt=phr[gi]
-        idx+=f'<p class="say{" l" if k%2 else ""}">{html.escape(txt)}</p>'
-    if gi==BANNER_AT:
-        idx+=(f'<a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" '
-              f'style="--th:url({tnhq(ID_ICHIMI)})">'
-              f'<img src="{tn(ID_ICHIMI)}" alt="" width="320" height="180" loading="lazy" decoding="async">'
-              f'<span class="lbl"><em>＞</em>{html.escape(TXT_ICHIMI)}<i>click</i></span>'
-              f'<span class="pop" aria-hidden="true"></span>'
-              f'<img class="stk nori" src="{IMGS['nori']}" alt="" width="270" height="254" loading="lazy" decoding="async"></a>')
-    items=''.join(
-     f'<details class="item" id="c{c["category_id"]}">'
-     f'<summary><span class="row1"><span class="pm" aria-hidden="true">＋</span>'
+TOTAL_CATS=sum(len(cats) for name,cats in groups if name!=tname)
+_banner_raw=sum(len(cats) for gi,(name,cats) in enumerate(groups) if gi<BANNER_AT and name!=tname)
+BANNER_N=-(-_banner_raw//4)*4  # 4列の行の途中で割れないよう、行の切れ目（4の倍数）まで繰り下げる
+NPHR=len(PHRASES)
+SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
+THR={SEG*i:i for i in range(1,NPHR-1)}
+
+def catbox(name,c):
+    return (f'<details class="item" id="c{c["category_id"]}">'
+     f'<summary><span class="blklabel">{html.escape(name)}</span>'
+     f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
      f'<span class="t">{html.escape(c["name"])}</span>'
      f'<span class="closelbl" aria-hidden="true">↑ とじる</span></span>'
      f'<span class="d">{html.escape(c["description"])}</span></summary>'
-     f'<div class="catbody">{rows(c["videos"])}</div></details>' for c in cats)
+     f'<div class="catbody">{rows(c["videos"])}</div></details>')
+
+HARMONICA_BOXES=''.join(catbox(tname,C[x]) for x in tids)
+
+gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>']
+n=0
+for gi,(name,cats) in enumerate(groups):
     if name==tname:
-        items+=(f'<div class="stkitem"><img src="{IMGS['kome']}" alt="" '
-                f'width="266" height="254" loading="lazy" decoding="async"></div>')
-    idx+=f'<section class="blk"><h2>{html.escape(name)}</h2><div class="items">{items}</div></section>'
+        continue
+    for c in cats:
+        gitems.append(catbox(name,c))
+        n+=1
+        if n==BANNER_N:
+            gitems.append(
+                  '<div class="bannerrow full">'
+                  f'<a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" '
+                  f'style="--th:url({tnhq(ID_ICHIMI)})">'
+                  f'<span class="lbl"><em>＞</em>{html.escape(TXT_ICHIMI)}<i>click</i></span>'
+                  f'<span class="pop" aria-hidden="true"></span></a>'
+                  f'<img class="nori" src="{IMGS['nori']}" alt="" width="270" height="254" loading="lazy" decoding="async">'
+                  '</div>')
+        if n in THR:
+            k=THR[n]
+            gitems.append(f'<p class="say{" l" if k%2 else ""} full">{html.escape(PHRASES[k])}</p>')
+klast=NPHR-1
+gitems.append(f'<p class="say{" l" if klast%2 else ""} full">{html.escape(PHRASES[klast])}</p>')
+idx=f'<div class="items">{"".join(gitems)}</div>'
 
 CSS='''
 :root{--bg:#FFF;--face:#FAFBFC;--line:#C4CFD9;--line2:#E2E7EC;--fg:#16212D;--dim:#4B5A6B;
 --accent:#8A5F0F;--sub:#245670;--tint:#FFF8E9;--soft:#F3F7F9;--deep:#1D6483;
---green:#EEF6EE;--greenline:#CFE3CF;--alt:#FFFCF0;--blue:#125A93}
+--green:#F8FCF8;--greenline:#CFE3CF;--alt:#FFFCF0;--blue:#125A93;--ltblue:#E7F2FA;--ltblue2:#D6EAF7}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--fg);font-size:18px;line-height:1.85;
+body{margin:0;background:var(--bg);color:var(--fg);font-size:19px;line-height:1.85;
 font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
 -webkit-font-smoothing:antialiased}
 .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
@@ -135,75 +155,83 @@ a{color:inherit}
 a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
 .hero{padding:28px 0 4px}
 .url{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:6px;
-background:var(--face);font-size:16px;color:var(--sub);text-decoration:none;font-variant-numeric:tabular-nums}
+background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font-variant-numeric:tabular-nums}
 .url b{color:var(--fg);font-weight:700}
-.mins{margin:16px 0 0;font-size:18px;color:var(--dim)}
-.thanks{margin:6px 0 0;font-size:18px;color:var(--dim)}
+.mins{margin:16px 0 0;font-size:19px;color:var(--dim)}
+.thankswrap{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:6px 0 0}
+.thanks{margin:0;font-size:19px;color:var(--dim)}
 .thanks a,.note a{color:var(--sub);text-underline-offset:3px}
-.aha{margin:22px 0 0;font-size:clamp(32px,9.5vw,52px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
-.ahawrap{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:16px 0 0}
+.aha{margin:22px 0 0;font-size:clamp(34px,10vw,54px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
+.ahawrap{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin:16px 0 0}
 .stk{display:block;height:auto;flex:0 0 auto}
 .arigcol{display:flex;flex-direction:column;align-items:flex-start;gap:10px;flex:0 0 auto}
 .arig{width:64px;margin-right:-4px}
-.gamestart{width:104px}
+.gamestart{width:clamp(160px,44vw,220px)}
+.chiko{width:clamp(120px,32vw,170px)}
 .qrbox{display:flex;align-items:flex-end;gap:8px;flex:0 0 auto}
 .red{color:#B02E24;font-weight:700}
-.qr{flex:0 0 auto;text-align:center;text-decoration:none;color:var(--fg);display:block;min-height:44px}
-.qr .qr1{display:block;font-size:13px;font-weight:700;color:var(--dim);letter-spacing:-.02em}
-.qr .qr2{display:block;font-size:16px;font-weight:800;color:var(--sub);
+.hl{color:var(--blue);font-size:24px;font-weight:800;letter-spacing:.04em}
+.qr{flex:0 0 auto;text-align:left;text-decoration:none;color:var(--fg);display:block;min-height:44px}
+.qr .qr1{display:block;font-size:16px;font-weight:700;color:var(--dim);letter-spacing:-.02em}
+.qr .qr2{display:block;font-size:17px;font-weight:800;color:var(--sub);
 letter-spacing:-.04em;margin:2px 0 4px;white-space:nowrap}
-.qr img{display:block;width:100px;height:auto;padding:5px;background:#fff;
+.qr img{display:block;width:115px;height:auto;padding:5px;background:#fff;
 border:1px solid var(--line);border-radius:5px;image-rendering:pixelated}
-.aha small{display:block;font-size:17px;font-weight:600;color:var(--dim);letter-spacing:.06em;margin-bottom:3px}
-.lead{margin:14px 0 0;font-size:18px;line-height:1.95}
-.note{margin:26px 0 0;padding:20px 18px;background:var(--green);border-radius:8px;font-size:17px;line-height:1.95}
-.note h3{margin:0 0 8px;font-size:16px;letter-spacing:.1em;color:var(--sub);font-weight:700}
+.aha small{display:block;font-size:18px;font-weight:600;color:var(--dim);letter-spacing:.06em;margin-bottom:3px}
+.lead{margin:0;font-size:17px;line-height:1.7;flex:1 1 150px;min-width:140px;text-align:center;color:var(--dim)}
+.note{margin:26px 0 0;padding:20px 18px;background:var(--green);border-radius:8px;font-size:18px;line-height:1.95}
+.note h3{margin:0 0 8px;font-size:17px;letter-spacing:.1em;color:var(--sub);font-weight:700}
 .note .sep{margin:14px 0 0;padding-top:14px;border-top:1px solid var(--greenline)}
 .note .ff{font-weight:700}
 /* 口ぐせの帯 */
 .say{margin:36px 0;padding:30px 22px;background:var(--deep);color:#fff;border-radius:6px;
 font-family:"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","游明朝","YuMincho",
 "Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif;
-font-size:clamp(20px,5.2vw,28px);line-height:2;letter-spacing:.08em;font-weight:400;
+font-size:clamp(21px,5.4vw,29px);line-height:2;letter-spacing:.08em;font-weight:400;
 font-style:italic;font-style:oblique 12deg}
 .say.l{font-style:normal;font-style:oblique -12deg}
 /* ピックアップ */
 .pkwrap{margin:32px 0 0}
-.pkwrap h2{margin:0 0 14px;font-size:22px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
+.pkwrap h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
 .item.solo .t{color:var(--blue)}
 .stkitem{display:flex;align-items:center;justify-content:flex-end;padding:4px}
-.stkitem img{width:88px;height:auto}
+.stkitem img{width:clamp(160px,44vw,220px);height:auto}
 .pks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px;margin-bottom:16px}
 .pk{text-decoration:none;display:block;min-height:44px}
 .pk img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block;
 border:1px solid var(--line2);border-radius:6px;background:var(--face)}
-.pk p{margin:8px 0 0;font-size:16px;line-height:1.6;
+.pk p{margin:8px 0 0;font-size:17px;line-height:1.6;
 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .pks .stkcell{display:flex;align-items:center;justify-content:center}
 .pks .stkcell img{width:100%;max-width:190px;height:auto}
-.pkcap{margin:8px 0 14px;font-size:clamp(21px,5.6vw,28px);font-weight:700;
+.pkcap{margin:8px 0 14px;font-size:clamp(22px,5.8vw,29px);font-weight:700;
 color:var(--blue);letter-spacing:.02em;line-height:1.5}
-.allnote{margin:36px 0 0;padding-top:16px;border-top:1px solid var(--line);font-size:16px;color:var(--dim)}
 /* 一気見バナー */
-.banner{display:flex;gap:14px;align-items:center;min-height:44px;margin:32px 0;padding:16px;
-background:var(--tint);border:1px solid var(--accent);border-radius:8px;text-decoration:none}
-.banner img{width:128px;height:72px;object-fit:cover;border-radius:4px;flex:0 0 auto;border:1px solid var(--line2)}
-.banner{position:relative}
-.banner .nori{width:92px;margin-left:auto;flex:0 0 auto}
+.bannerrow{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;margin:32px 0}
+.banner{display:inline-flex;align-items:center;min-height:44px;margin:0;padding:14px 20px;
+background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-decoration:none;position:relative}
+.nori{display:block;height:auto;flex:0 0 auto;width:clamp(160px,44vw,220px)}
+@media(min-width:480px){
+ .bannerrow .nori{position:absolute;right:0;top:50%;transform:translateY(-50%)}
+}
 .banner .pop{display:none}
-.banner .lbl{font-size:19px;font-weight:800;line-height:1.5;
-text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:4px}
-.banner em{font-style:normal;color:var(--accent);margin-right:6px;text-decoration:none;display:inline-block}
-.banner i{display:block;font-style:normal;font-size:14px;font-weight:600;color:var(--accent);
+.banner .lbl{font-size:24px;font-weight:800;letter-spacing:.04em;line-height:1.4;color:var(--blue)}
+.banner em{font-style:normal;color:var(--blue);margin-right:6px;text-decoration:none;display:inline-block}
+.banner i{display:block;font-style:normal;font-size:15px;font-weight:600;color:var(--blue);
 letter-spacing:.12em;text-decoration:none;margin-top:4px}
+/* 文中リンクのフワッとプレビュー */
+.ilink{position:relative}
+.ilink .pop{display:none}
 /* カテゴリ一覧 */
-.blk{margin:28px 0 0}
-.blk h2{margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line);
-font-size:17px;letter-spacing:.1em;color:var(--sub);font-weight:700}
-.items{display:grid;grid-template-columns:1fr;gap:10px}
-.item{display:block;min-height:44px;padding:18px 16px;text-decoration:none;background:#FFF;
+.full{grid-column:1/-1}
+.items{display:grid;grid-template-columns:1fr;gap:28px 10px}
+.item .blklabel{position:absolute;top:-13px;left:14px;display:inline-block;
+background:#FFF;padding:0 8px;font-size:18px;letter-spacing:.1em;color:var(--sub);font-weight:700;line-height:1.4}
+.item:nth-of-type(even) .blklabel{background:var(--alt)}
+details.item[open]>summary .blklabel{display:none}
+.item{display:block;position:relative;min-height:44px;padding:26px 16px 18px;text-decoration:none;background:#FFF;
 border:1px solid var(--line);border-radius:8px;transition:background .12s,border-color .12s}
-.item:nth-child(even){background:var(--alt)}
+.item:nth-of-type(even){background:var(--alt)}
 .item:active{background:var(--tint)}
 .item summary{cursor:pointer;list-style:none}
 .item summary::-webkit-details-marker{display:none}
@@ -212,21 +240,21 @@ border:1px solid var(--line);border-radius:8px;transition:background .12s,border
 .item .pm{font-size:22px;font-weight:700;color:var(--accent);flex:0 0 auto;line-height:1.4;
 display:inline-block;transition:transform .15s ease}
 details.item[open] .pm{transform:rotate(45deg)}
-.item .t{font-size:24px;font-weight:700;flex:1;min-width:0;text-decoration:underline;
+.item .t{font-size:26px;font-weight:700;flex:1;min-width:0;text-decoration:underline;
 text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:var(--line)}
-.item .d{display:block;margin-top:8px;padding-left:29px;font-size:22px;color:var(--dim);line-height:1.7;font-weight:500}
+.item .d{display:block;margin-top:8px;padding-left:29px;font-size:23px;color:var(--dim);line-height:1.7;font-weight:500}
 .item.solo .d{color:var(--dim)}
 .closelbl{display:none}
 .items details.item[open]{grid-column:1/-1;background:#FFF}
 .item .catbody{margin:16px 0 0;padding-top:16px;border-top:1px solid var(--line2)}
 /* 展開時：見出しを「閉じるボタン」として大きく目立たせ、スクロール中も追従させる */
-details.item[open]>summary{position:sticky;top:0;z-index:5;margin:-18px -16px 0;
+details.item[open]>summary{position:sticky;top:0;z-index:5;margin:-26px -16px 0;
 padding:18px 16px;background:var(--tint);border-bottom:2px solid var(--accent);
 box-shadow:0 3px 10px rgba(20,35,50,.14)}
 details.item[open]>summary .t{color:var(--accent)}
 details.item[open]>summary .d{display:none}
 details.item[open] .closelbl{display:inline-block;margin-left:auto;flex:0 0 auto;
-font-size:16px;font-weight:800;color:#fff;background:var(--accent);
+font-size:17px;font-weight:800;color:#fff;background:var(--accent);
 padding:6px 14px;border-radius:20px;white-space:nowrap}
 /* 動画1本ぶん（スマホ：左サムネ＋右タイトル） */
 .rows{display:flex;flex-direction:column}
@@ -234,27 +262,30 @@ padding:6px 14px;border-radius:20px;white-space:nowrap}
 border-bottom:1px solid var(--line2);text-decoration:none;position:relative}
 .row .mini{width:55%;max-width:220px;height:auto;aspect-ratio:16/9;object-fit:cover;
 border-radius:6px;border:1px solid var(--line2);background:var(--face);flex:0 0 auto}
-.row .ttl{font-size:19px;line-height:1.5;min-width:0;font-weight:600;
+.row .ttl{font-size:21px;line-height:1.5;min-width:0;font-weight:600;
 display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
 .row .pop{display:none}
 .row b{display:inline-block;margin-right:6px;padding:3px 8px;border-radius:3px;
 background:var(--tint);border:1px solid var(--accent);color:var(--accent);
-font-size:13px;font-weight:700;vertical-align:1px}
+font-size:14px;font-weight:700;vertical-align:1px}
 .row:active{background:var(--tint)}
 .endwrap{margin:48px 0 32px}
-.endgrid{display:grid;grid-template-columns:1fr;gap:16px 28px;margin-top:18px}
-.endgrid .pkcap{margin:0 0 8px}
+.endgrid{margin-top:18px;gap:28px 14px}
+.endgrid .endkome{grid-column:1/-1}
+.endgrid details.item[open]{grid-column:1/-1;background:#FFF}
+.owariend{margin:20px 0 0;text-align:right;font-size:19px;color:var(--sub)}
 .tail{margin:40px 0 28px;height:1px;background:var(--line)}
 @media(min-width:600px){
  .wrap{padding:0 24px}
  .items{grid-template-columns:repeat(2,1fr)}
  .pks{grid-template-columns:repeat(3,1fr);gap:20px 16px}
- .endgrid{grid-template-columns:repeat(3,1fr);align-items:end}
- .banner img{width:168px;height:94px}
- .qr img{width:120px}
+ .qr img{width:140px}
  .arig{width:80px}
- .gamestart{width:128px}
- .banner .lbl{font-size:21px}
+ .gamestart{width:240px}
+ .chiko{width:200px}
+ .stkitem img{width:200px}
+ .nori{width:190px}
+ .endgrid .endkome{grid-column:auto}
 }
 @media(min-width:940px){
  .wrap{max-width:1180px}
@@ -264,7 +295,11 @@ font-size:13px;font-weight:700;vertical-align:1px}
  .item:hover .t{text-decoration-color:var(--accent)}
  .pk:hover img{border-color:var(--accent)}
  .back:hover{background:var(--tint);border-color:var(--accent)}
- .banner:hover{background:#FFF3D6}
+ .banner:hover{background:var(--ltblue2)}
+ .gamestart{width:300px}
+ .chiko{width:250px}
+ .stkitem img{width:250px}
+ .nori{width:210px}
 }
 @media(min-width:1280px){
  .wrap{max-width:1320px}
@@ -273,12 +308,13 @@ font-size:13px;font-weight:700;vertical-align:1px}
 }
 /* PC（マウスがある画面）：文字だけ並べて、乗せるとフワッと出す（画面中央に固定し、絶対にはみ出さない） */
 @media (hover:hover) and (pointer:fine) and (min-width:700px){
- .banner .pop{display:block;position:fixed;left:50%;top:50%;
+ .banner .pop,.ilink .pop{display:block;position:fixed;left:50%;top:50%;
   width:min(720px,66vw,116vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
   background:#fff center/cover no-repeat;box-shadow:0 20px 60px rgba(10,18,28,.45);
   opacity:0;transform:translate(-50%,-50%) scale(.96);
   transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
- .banner.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
+ .banner.popshow .pop,.ilink.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
+ .ilink:hover{text-decoration:underline;text-underline-offset:3px}
  .rows{display:grid;grid-template-columns:repeat(2,1fr);column-gap:36px;row-gap:4px}
  .row{padding:18px 4px}
  .row .mini{display:none}
@@ -308,17 +344,16 @@ HTML=f'''<!DOCTYPE html>
 <div class="wrap" id="top">
 <div class="hero">
 <p class="mins">1つ視聴に25分。🥴</p>
-<p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p>
+<div class="thankswrap"><p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async"></div>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
-<div class="ahawrap"><div class="arigcol"><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async"><img class="stk gamestart" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async"></div><div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><span class="qr1">［ＵＲＬ１２文字］</span><span class="qr2">ｎ９．ｃｌ／ｆ０ａ０９ｓ</span><img src="data:image/png;base64,{QR}" alt="" width="152" height="151" decoding="async"></a></div></div>
-<p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
+<div class="ahawrap"><div class="arigcol"><img class="stk gamestart" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async"></div><p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p><div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><span class="qr1">［ＵＲＬ１２文字］</span><span class="qr2">ｎ９．ｃｌ／ｆ０ａ０９ｓ</span><img src="data:image/png;base64,{QR}" alt="" width="152" height="151" decoding="async"></a>{CHIKO}</div></div>
 </div>
 <div class="note">
 <h3>［ あらかじめ ］</h3>
-ＡＩは音読み・訓読みが苦手です。<a href="{LINK_IKKI}" target="_blank" rel="noopener">五木寛之氏</a>を「ごきかんゆき」<span class="red">(失礼！)</span>、と読んだりします。<br>
-そういえばワタクシたちも、人名・地名は難しいですね。人もAIも永遠の課題だと思われます。「温かく」聞き流しを。
+ＡＩは音読み・訓読みが苦手です。{ilink(LINK_IKKI,'hpo7e3-MewI','五木寛之氏')}を「ごきかんゆき」<span class="red">(失礼！)</span>、と読んだりします。<br>
+人もAIも人名や地名は難しいですね。<span class="hl">「温かく」聞き流しを。</span>
 <div class="sep">
-動画「前／中／後」３回の、耳痛いハーモニカ演奏は、<a href="{LINK_INTENT}" target="_blank" rel="noopener">意図があって</a>挿入しています。<br>
+動画「前／中／後」３回の、耳痛いハーモニカ演奏は、{ilink(LINK_INTENT,'HvdUHeEzltA','意図があって')}挿入しています。<br>
 <span class="red">倍速や早送りなど推奨</span>(⇒<a href="{LINK_STAR}" target="_blank" rel="noopener">★</a>)　<span class="red">どうぞ！早送りくださいませ。</span>
 </div>
 </div>
@@ -338,20 +373,37 @@ HTML=f'''<!DOCTYPE html>
 </div>
 {idx}
 <div class="endwrap">
-<p class="allnote">1502本を125のカテゴリに分けました。</p>
-<div class="endgrid">
-<div><p class="pkcap">{html.escape(CAP_WAR)}</p>{onerow(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
-<div>{onerow(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}</div>
-<div>{onerow(wu(ID_OWARI),tn(ID_OWARI),TXT_OWARI)}</div>
-</div></div>
+<p class="pkcap">{html.escape(CAP_WAR)}</p>
+<div class="pks endgrid">
+{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}
+{pkcard(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}
+<div class="stkitem endkome"><img src="{IMGS['kome']}" alt="" width="266" height="254" loading="lazy" decoding="async"></div>
+{HARMONICA_BOXES}
+</div>
+<p class="owariend">{ilink(wu(ID_OWARI),ID_OWARI,html.escape(TXT_OWARI))}</p>
+</div>
 <div class="tail"></div>
 </div>
 <script>
 document.addEventListener('toggle',function(e){{
  var d=e.target;
- if(d.tagName==='DETAILS'&&d.open){{
+ if(d.tagName!=='DETAILS')return;
+ if(d.open){{
   requestAnimationFrame(function(){{d.scrollIntoView({{behavior:'smooth',block:'start'}});}});
+  return;
  }}
+ requestAnimationFrame(function(){{
+  if(d.classList.contains('solo')){{
+   document.getElementById('top').scrollIntoView({{behavior:'smooth',block:'start'}});
+   return;
+  }}
+  var el=d.previousElementSibling,band=null;
+  while(el){{
+   if(el.classList.contains('say')){{band=el;break;}}
+   el=el.previousElementSibling;
+  }}
+  (band||d).scrollIntoView({{behavior:'smooth',block:'start'}});
+ }});
 }},true);
 (function(){{
  var SHOW=2000,COOLDOWN=5000;
@@ -367,7 +419,7 @@ document.addEventListener('toggle',function(e){{
   clearTimeout(el._popTimer);
   el._popTimer=setTimeout(function(){{release(el);}},SHOW);
  }}
- document.querySelectorAll('.row,.banner').forEach(function(el){{
+ document.querySelectorAll('.row,.banner,.ilink').forEach(function(el){{
   el.addEventListener('mouseenter',function(){{trigger(el);}});
   el.addEventListener('mouseleave',function(){{release(el);}});
   el.addEventListener('focus',function(){{trigger(el);}});
