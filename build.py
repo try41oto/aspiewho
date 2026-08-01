@@ -41,7 +41,7 @@ SHORT_URL_HREF='https://sites.google.com/view/aspiewho'
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
 LINK_INTENT='https://www.youtube.com/watch?v=HvdUHeEzltA&t=60s'
-QR='iVBORw0KGgoAAAANSUhEUgAAAL0AAAC9AQAAAADOrEGdAAABcklEQVR4nNWYQW7cMAxFH60JlJ1yA+cmnpvZc5SepJ6bKDdwFgE0gEY/C7nTFnDQZdi/oWFuHogvUpSJQ92G4//wrQlaD6pxg7mFAkAoXnGDJC0NGKUWSpLUvOIOcDM7A1HXM6HCm5kDqmOdHl+3l+1i7fThgeqfCavwdvZGdZSI0gqhMEpWYZQcUH2hvTO0UFKeFu+dYTBJkrg/M65YjZKk6ra6eyMLJWUAklZMTquLalSetJcVojKecVV6kDKz9eDWuyc9fTD++Dk03l8nkwHQnjx7N0+LVBhXeMxir7iQ8iSrpMxM0DZKfr37q7qVpBWIG469uzcyWd1bgrZxxbEZQklaH1MNYFrk1gx9qKkRJalbQ25xB1mXSr/o3l4AnZw2soE+hLk/v09a+lFzQPV1Yt8mAObhbvbKZfh+qmP93iZIV5vbQNpg8Yr7Z2JcLwRtXK05ovpb+wVSNSrvi/vkewj3sL8zSFpnt7j2f73ifALf0P3jUHHXtgAAAABJRU5ErkJggg=='
+QR=base64.b64encode(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'QR_586356.png'),'rb').read()).decode()
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
 # ================= 設定ここまで =================
 
@@ -71,14 +71,14 @@ assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']
 
 def pkgrid(ids,extra=''):
     return '<div class="pks">'+''.join(
-     f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
+     f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener" style="--th:url({V[i]["thumbnail_url"]})">'
      f'<img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
-     f'<p>{html.escape(V[i]["title"])}</p></a>' for i in ids)+extra+'</div>'
+     f'<p>{html.escape(V[i]["title"])}</p><span class="pop" aria-hidden="true"></span></a>' for i in ids)+extra+'</div>'
 
 def pkcard(href,thumb,title,cls=''):
-    return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener">'
+    return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener" style="--th:url({thumb})">'
             f'<img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">'
-            f'<p>{html.escape(title)}</p></a>')
+            f'<p>{html.escape(title)}</p><span class="pop" aria-hidden="true"></span></a>')
 
 def ilink(href,vid,text):
     return (f'<a class="ilink" href="{href}" target="_blank" rel="noopener" style="--th:url({tnhq(vid)})">'
@@ -172,9 +172,6 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .red{color:#B02E24;font-weight:700}
 .hl{color:var(--blue);font-size:24px;font-weight:800;letter-spacing:.04em}
 .qr{flex:0 0 auto;text-align:left;text-decoration:none;color:var(--fg);display:block;min-height:44px}
-.qr .qr1{display:block;font-size:16px;font-weight:700;color:var(--dim);letter-spacing:-.02em}
-.qr .qr2{display:block;font-size:17px;font-weight:800;color:var(--sub);
-letter-spacing:-.04em;margin:2px 0 4px;white-space:nowrap}
 .qr img{display:block;width:115px;height:auto;padding:5px;background:#fff;
 border:1px solid var(--line);border-radius:5px;image-rendering:pixelated}
 .aha small{display:block;font-size:18px;font-weight:600;color:var(--dim);letter-spacing:.06em;margin-bottom:3px}
@@ -197,13 +194,12 @@ font-style:italic;font-style:oblique 12deg}
 .stkitem{display:flex;align-items:center;justify-content:flex-end;padding:4px}
 .stkitem img{width:clamp(160px,44vw,220px);height:auto}
 .pks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px;margin-bottom:16px}
-.pk{text-decoration:none;display:block;min-height:44px}
+.pk{text-decoration:none;display:block;min-height:44px;position:relative}
 .pk img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block;
 border:1px solid var(--line2);border-radius:6px;background:var(--face)}
 .pk p{margin:8px 0 0;font-size:17px;line-height:1.6;
 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pks .stkcell{display:flex;align-items:center;justify-content:center}
-.pks .stkcell img{width:100%;max-width:190px;height:auto}
+.pk .pop{display:none}
 .pkcap{margin:8px 0 14px;font-size:clamp(22px,5.8vw,29px);font-weight:700;
 color:var(--blue);letter-spacing:.02em;line-height:1.5}
 /* 一気見バナー */
@@ -308,12 +304,12 @@ font-size:14px;font-weight:700;vertical-align:1px}
 }
 /* PC（マウスがある画面）：文字だけ並べて、乗せるとフワッと出す（画面中央に固定し、絶対にはみ出さない） */
 @media (hover:hover) and (pointer:fine) and (min-width:700px){
- .banner .pop,.ilink .pop{display:block;position:fixed;left:50%;top:50%;
+ .banner .pop,.ilink .pop,.pk .pop{display:block;position:fixed;left:50%;top:50%;
   width:min(720px,66vw,116vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
   background:#fff center/cover no-repeat;box-shadow:0 20px 60px rgba(10,18,28,.45);
   opacity:0;transform:translate(-50%,-50%) scale(.96);
   transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
- .banner.popshow .pop,.ilink.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
+ .banner.popshow .pop,.ilink.popshow .pop,.pk.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
  .ilink:hover{text-decoration:underline;text-underline-offset:3px}
  .rows{display:grid;grid-template-columns:repeat(2,1fr);column-gap:36px;row-gap:4px}
  .row{padding:18px 4px}
@@ -346,7 +342,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="mins">1つ視聴に25分。🥴</p>
 <div class="thankswrap"><p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async"></div>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
-<div class="ahawrap"><div class="arigcol"><img class="stk gamestart" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async"></div><p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p><div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><span class="qr1">［ＵＲＬ１２文字］</span><span class="qr2">ｎ９．ｃｌ／ｆ０ａ０９ｓ</span><img src="data:image/png;base64,{QR}" alt="" width="152" height="151" decoding="async"></a>{CHIKO}</div></div>
+<div class="ahawrap"><div class="arigcol"><img class="stk gamestart" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async"></div><p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p><div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="data:image/png;base64,{QR}" alt="" width="216" height="216" decoding="async"></a>{CHIKO}</div></div>
 </div>
 <div class="note">
 <h3>［ あらかじめ ］</h3>
@@ -419,7 +415,7 @@ document.addEventListener('toggle',function(e){{
   clearTimeout(el._popTimer);
   el._popTimer=setTimeout(function(){{release(el);}},SHOW);
  }}
- document.querySelectorAll('.row,.banner,.ilink').forEach(function(el){{
+ document.querySelectorAll('.row,.banner,.ilink,.pk').forEach(function(el){{
   el.addEventListener('mouseenter',function(){{trigger(el);}});
   el.addEventListener('mouseleave',function(){{release(el);}});
   el.addEventListener('focus',function(){{trigger(el);}});
