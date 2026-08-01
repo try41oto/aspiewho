@@ -106,16 +106,17 @@ NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
 
-def catbox(name,c):
+def catbox(name,c,desc=True):
+    d=f'<span class="d">{html.escape(c["description"])}</span>' if desc else ''
     return (f'<details class="item" id="c{c["category_id"]}">'
      f'<summary><span class="blklabel">{html.escape(name)}</span>'
      f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
      f'<span class="t">{html.escape(c["name"])}</span>'
      f'<span class="closelbl" aria-hidden="true">↑ とじる</span></span>'
-     f'<span class="d">{html.escape(c["description"])}</span></summary>'
+     f'{d}</summary>'
      f'<div class="catbody">{rows(c["videos"])}</div></details>')
 
-HARMONICA_BOXES=''.join(catbox(tname,C[x]) for x in tids)
+HARMONICA_BOXES=''.join(catbox(tname,C[x],desc=False) for x in tids)
 
 gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>']
 n=0
