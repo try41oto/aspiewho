@@ -320,15 +320,19 @@ details.item[open]>summary .d{display:none}
 details.item[open] .closelbl{display:inline-block;margin-left:auto;flex:0 0 auto;
 font-size:17px;font-weight:800;color:#fff;background:var(--accent);
 padding:6px 14px;border-radius:20px;white-space:nowrap}
-/* 動画1本ぶん（スマホ：左サムネ＋右タイトル） */
+/* 動画1本ぶん（スマホ：左右2カラム、サムネは行の高さいっぱいに表示） */
 .rows{display:flex;flex-direction:column}
-.row{display:flex;gap:12px;align-items:center;min-height:48px;padding:16px 4px;
+.row{display:flex;align-items:stretch;min-height:48px;padding:0;
 border-bottom:1px dashed var(--line2);text-decoration:none;position:relative}
 .row:nth-child(even){background:var(--rowalt)}
-.row .mini{width:55%;max-width:220px;height:auto;aspect-ratio:16/9;object-fit:cover;
-border-radius:6px;border:1px solid var(--line2);background:var(--face);flex:0 0 auto}
-.row .ttl{font-size:21px;line-height:1.5;min-width:0;font-weight:600;
-display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.row .mini{width:50%;flex:0 0 auto;height:auto;object-fit:cover;
+border-radius:6px;border:1px solid var(--line2);background:var(--face)}
+.row .ttl{width:50%;flex:0 0 auto;box-sizing:border-box;padding:12px 12px 12px 14px;font-size:21px;line-height:1.5;min-width:0;font-weight:600;
+display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;align-self:center}
+@media(max-width:359px){
+ .row .mini{width:45%}
+ .row .ttl{width:55%}
+}
 .row .pop{display:none}
 .row b{display:inline-block;margin-right:6px;padding:3px 9px;border-radius:3px;
 background:#1B5E3A;border:1px solid #1B5E3A;color:#fff;
