@@ -172,7 +172,7 @@ BELOW_PRIORITY_IDS=set(MOVE_IDS)|{ID_WAR,ID_HAIBOKU}
 KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos']
       if v['kamikai'] and v['video_id'] not in FIRST_IDS|set(MORE)|BELOW_PRIORITY_IDS]
 
-CHIKO=('<img class="stk masc" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async" fetchpriority="high">')
+CHIKO=('<img class="stk masc chikoimg" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async" fetchpriority="high">')
 first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+
  pkgrid([x for x in i+MORE if x not in BELOW_PRIORITY_IDS],cls=' pksfirst') for c,i in FIRST)
 
@@ -242,7 +242,16 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .thankswrap{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:6px 0 0}
 .thanks{margin:0;font-size:19px;color:var(--dim)}
 .thanks a,.note a{color:var(--sub);text-underline-offset:3px}
-.aha{margin:22px 0 0;font-size:clamp(34px,10vw,54px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
+.aha{margin:0;font-size:clamp(34px,10vw,54px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
+.ahatop{display:flex;align-items:center;gap:10px;margin:22px 0 0}
+.ahatop .aha{text-align:left;flex:1 1 auto;min-width:0}
+.ahawrap .noripc{display:none}
+@media(min-width:940px){
+ .ahatop{display:block}
+ .ahatop .aha{text-align:center}
+ .ahatop .norimobile{display:none}
+ .ahawrap .noripc{display:block}
+}
 .ahawrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px;margin:16px 0 0}
 .leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
@@ -273,6 +282,15 @@ font-family:inherit}
 .qr{flex:0 0 auto;text-align:left;text-decoration:none;color:var(--fg);display:block;min-height:44px}
 .qr img{display:block;width:115px;height:auto;padding:5px;background:#fff;
 border:1px solid var(--line);border-radius:5px;image-rendering:pixelated}
+@media(max-width:939.98px){
+ .qrbox{display:grid;grid-template-columns:auto auto;grid-template-areas:"book share" "qr chiko";align-items:center;justify-content:center;gap:10px 16px}
+ .qrcol{display:contents}
+ .addhome{grid-area:book}
+ .sharebtn{grid-area:share}
+ .qr{grid-area:qr}
+ .qr::after{content:none}
+ .chikoimg{grid-area:chiko}
+}
 .aha small{display:block;font-size:18px;font-weight:600;color:var(--dim);letter-spacing:.06em;margin-bottom:3px}
 .lead{margin:0;font-size:17px;line-height:1.7;text-align:left;color:var(--dim)}
 .note{margin:26px 0 0;padding:20px 18px;background:var(--green);border-radius:8px;font-size:18px;line-height:1.95}
@@ -319,9 +337,11 @@ color:var(--blue);letter-spacing:.02em;line-height:1.5}
 background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-decoration:none;position:relative}
 .banner .pop{display:none}
 .banner .lbl{font-size:24px;font-weight:800;letter-spacing:.04em;line-height:1.4;color:var(--blue)}
-.banner em{font-style:normal;color:var(--blue);margin-right:6px;text-decoration:none;display:inline-block}
 .banner i{display:block;font-style:normal;font-size:15px;font-weight:600;color:var(--blue);
 letter-spacing:.12em;text-decoration:none;margin-top:4px}
+@media(max-width:939.98px){
+ .banner i{display:inline;margin-top:0;margin-left:6px}
+}
 /* 文中リンクのフワッとプレビュー */
 .ilink{position:relative}
 .ilink .pop{display:none}
@@ -461,14 +481,17 @@ HTML=f'''<!DOCTYPE html>
 <div class="hero">
 <p class="mins">1つ視聴に25分。🥴</p>
 <div class="thankswrap"><p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"></div>
+<div class="ahatop">
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
+<img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
+</div>
 <div class="ahawrap">
-<img class="stk masc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
+<img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 <div class="leadcol">
 <p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
 <div class="bannerrow top">
 <a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" style="--th:url({tnhq(ID_ICHIMI)})">
-<span class="lbl"><em>＞</em>{html.escape(TXT_ICHIMI)}<i>click</i></span>
+<span class="lbl">{html.escape(TXT_ICHIMI)}<i>click</i></span>
 <span class="pop" aria-hidden="true"></span></a>
 </div>
 </div>
