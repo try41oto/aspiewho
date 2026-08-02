@@ -60,6 +60,9 @@ B={b['block']:b for b in d['blocks']}
 C={c['category_id']:c for b in d['blocks'] for c in b['categories']}
 V={v['video_id']:v for b in d['blocks'] for c in b['categories'] for v in c['videos']}
 V['lXz5Y8umPxY']['title']=V['lXz5Y8umPxY']['title'].removeprefix('100本目】')
+for _v in V.values():
+    if _v['title'].startswith('神回★】'):
+        _v['title']=_v['title'].removeprefix('神回★】')
 
 import csv as _csv
 MUSIC_CATS={'複音ハーモニカの演奏','楽曲の歌詞を深掘りする','童謡・唱歌と日本の歌','世界の音楽とクラシック',
@@ -128,6 +131,11 @@ groups.append((NEWCAT_GROUP,[NEWCAT]))
 assert sum(len(cs) for _,cs in groups)==len(C)
 assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']-len(SOLO_IDS)
 
+def best_cols(n,options):
+    # 最終行の空きマスが最小の列数を選ぶ。同数なら列数が多い方を優先
+    def empty(g): return (-n)%g
+    return max(options,key=lambda g:(-empty(g),g))
+
 def pkgrid(ids,extra='',cls=''):
     return f'<div class="pks{cls}">'+''.join(
      f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
@@ -150,7 +158,7 @@ def vlink(vid,text):
 def rows(vids):
     out=''
     for v in vids:
-        t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])
+        t=html.escape(v['title'])
         out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener">'
               f'<span class="thumb"><img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(v["video_id"])}{CLIPICON}</span>'
               f'<span class="ttl"><span class="ttlx">{t}</span>{reflink(v["video_id"])}</span>'
@@ -173,20 +181,27 @@ NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
 
-def catbox(name,c,desc=True):
+def catbox(name,c,desc=True,grid=False):
     d=f'<span class="d">{html.escape(c["description"])}</span>' if desc else ''
+    if grid:
+        n=c['count']
+        g=best_cols(n,(2,3)); pc=best_cols(n,(5,6))
+        ids=[v['video_id'] for v in c['videos']]
+        body=pkgrid(ids,cls=f' g{g} pc{pc}')
+    else:
+        body=rows(c['videos'])
     return (f'<details class="item" id="c{c["category_id"]}">'
      f'<summary><span class="blklabel">{html.escape(name)}</span>'
      f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
      f'<span class="t">{html.escape(c["name"])}</span>'
      f'<span class="closelbl" aria-hidden="true">↑ とじる</span></span>'
      f'{d}</summary>'
-     f'<div class="catbody">{rows(c["videos"])}</div></details>')
+     f'<div class="catbody">{body}</div></details>')
 
 HARMONICA_MERGED={'category_id':'harmonica','name':'ハーモニカ演奏とその歴史・調律',
  'videos':[v for x in tids for v in C[x]['videos']]}
 HARMONICA_BOXES=catbox(tname,HARMONICA_MERGED,desc=False)
-NEWCAT_BOX=catbox(NEWCAT_GROUP,NEWCAT,desc=False)
+NEWCAT_BOX=catbox(NEWCAT_GROUP,NEWCAT,desc=False,grid=True)
 
 gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>']
 n=0
@@ -280,6 +295,10 @@ font-style:italic;font-style:oblique 12deg}
 .stkitem{display:flex;align-items:center;justify-content:flex-end;padding:4px}
 .pks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px;margin-bottom:16px}
 .pks.pksfirst{grid-template-columns:repeat(3,1fr)}
+@media(max-width:939.98px){
+ .pks.g2{grid-template-columns:repeat(2,1fr)}
+ .pks.g3{grid-template-columns:repeat(3,1fr)}
+}
 .pk{text-decoration:none;display:block;min-height:44px}
 .thumb{position:relative;display:block}
 .pk .thumb img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block;
@@ -353,9 +372,6 @@ align-self:center}
  .row .ttl{width:55%}
 }
 .row .pop{display:none}
-.row b{display:inline-block;margin-right:6px;padding:3px 9px;border-radius:3px;
-background:#1B5E3A;border:1px solid #1B5E3A;color:#fff;
-font-size:14px;font-weight:700;vertical-align:1px}
 .row:active{background:var(--tint)}
 .reflink{color:#FF0000;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none}
 .refbadge{position:absolute;top:6px;right:6px;min-width:34px;height:34px;padding:0 7px;
