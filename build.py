@@ -73,15 +73,15 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'work','out-to
         _is_music=_row['category_name'] in MUSIC_CATS or _row['video_id'] in MUSIC_OVERRIDE_IDS
         REF[_row['video_id']]={'symbol':'♫' if _is_music else '＠','url':_url}
 
-def reflink(vid):
-    r=REF.get(vid)
-    if not r: return ''
-    return f' <span class="reflink" data-url="{html.escape(r["url"])}">[ {r["symbol"]} ]</span>'
-
 def refbadge(vid):
     r=REF.get(vid)
     if not r: return ''
     return f'<span class="reflink refbadge" data-url="{html.escape(r["url"])}">{r["symbol"]}</span>'
+
+def reflink(vid):
+    r=REF.get(vid)
+    if not r: return ''
+    return f' <span class="reflink" data-url="{html.escape(r["url"])}">[ {r["symbol"]} ]</span>'
 
 CLIPICON='<span class="clipicon" aria-hidden="true">🔗</span>'
 ZERO_CATS={'029'}          # 冒頭から再生するカテゴリ
@@ -95,17 +95,22 @@ for c in C.values():
         v['start_sec']=0 if z else 60
         v['watch_url']=f'https://www.youtube.com/watch?v={v["video_id"]}'+('' if z else '&t=60s')
 
+SOLO_IDS={ID_WAR,ID_HAIBOKU}  # 末尾で専用カード表示するため、通常カテゴリの一覧からは外す（重複表示防止）
 moved_map={}
+solo_map={}
 for c in C.values():
     keep=[]
     for v in c['videos']:
         if v['video_id'] in MOVE_IDS:
             moved_map[v['video_id']]=v
+        elif v['video_id'] in SOLO_IDS:
+            solo_map[v['video_id']]=v
         else:
             keep.append(v)
     c['videos']=keep
     c['count']=len(keep)
 assert len(moved_map)==len(MOVE_IDS)
+assert len(solo_map)==len(SOLO_IDS)
 NEWCAT={'category_id':NEWCAT_ID,'name':NEWCAT_TITLE,'videos':[moved_map[i] for i in MOVE_IDS],'count':len(MOVE_IDS)}
 C[NEWCAT_ID]=NEWCAT
 for b in d['blocks']:
@@ -120,7 +125,7 @@ for n in ORDER:
 groups.append((tname,[C[x] for x in tids]))
 groups.append((NEWCAT_GROUP,[NEWCAT]))
 assert sum(len(cs) for _,cs in groups)==len(C)
-assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']
+assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']-len(SOLO_IDS)
 
 def pkgrid(ids,extra='',cls=''):
     return f'<div class="pks{cls}">'+''.join(
@@ -146,15 +151,21 @@ def rows(vids):
     for v in vids:
         t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])
         out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener">'
-              f'<span class="thumb"><img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{CLIPICON}</span>'
+              f'<span class="thumb"><img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(v["video_id"])}{CLIPICON}</span>'
               f'<span class="ttl"><span class="ttlx">{t}</span>{reflink(v["video_id"])}</span>'
               f'<span class="pop" aria-hidden="true"></span></a>')
     return f'<div class="rows">{out}</div>'
 
-KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos'] if v['kamikai']]
+# ピックアップ枠の重複防止：FIRST/MORE（最上部）と WAR・HAIBOKU・ハーモニカ移設組（末尾の専用カード）は
+# それぞれ別枠で確定表示するので、神回★グリッドには二重に出さない
+FIRST_IDS={i for _,ids in FIRST for i in ids}
+BELOW_PRIORITY_IDS=set(MOVE_IDS)|{ID_WAR,ID_HAIBOKU}
+KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos']
+      if v['kamikai'] and v['video_id'] not in FIRST_IDS|set(MORE)|BELOW_PRIORITY_IDS]
 
 CHIKO=('<img class="stk masc" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async" fetchpriority="high">')
-first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+pkgrid(i+MORE,cls=' pksfirst') for c,i in FIRST)
+first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+
+ pkgrid([x for x in i+MORE if x not in BELOW_PRIORITY_IDS],cls=' pksfirst') for c,i in FIRST)
 
 TOTAL_CATS=sum(len(cats) for name,cats in groups if name!=tname)
 NPHR=len(PHRASES)
@@ -335,6 +346,7 @@ border-radius:6px;border:1px solid var(--line2);background:var(--face)}
 .row .ttl{width:50%;flex:0 0 auto;box-sizing:border-box;padding:12px 12px 12px 14px;font-size:21px;line-height:1.5;min-width:0;font-weight:600;
 align-self:center}
 .row .ttl .ttlx{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.row .ttl .reflink{display:none}
 @media(max-width:359px){
  .row .thumb{width:45%}
  .row .ttl{width:55%}
@@ -343,12 +355,12 @@ align-self:center}
 .row b{display:inline-block;margin-right:6px;padding:3px 9px;border-radius:3px;
 background:#1B5E3A;border:1px solid #1B5E3A;color:#fff;
 font-size:14px;font-weight:700;vertical-align:1px}
-.row .reflink{display:inline-block;margin-top:4px}
 .row:active{background:var(--tint)}
 .reflink{color:#FF0000;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none}
-.refbadge{position:absolute;top:6px;right:6px;min-width:24px;height:24px;padding:0 5px;
-display:flex;align-items:center;justify-content:center;border-radius:12px;
-background:#FF0000;color:#fff;font-size:14px;line-height:1;z-index:2}
+.refbadge{position:absolute;top:6px;right:6px;min-width:34px;height:34px;padding:0 7px;
+display:flex;align-items:center;justify-content:center;border-radius:17px;
+background:#FF0000;color:#fff;font-size:20px;font-weight:700;line-height:1;z-index:2;
+box-shadow:0 1px 4px rgba(0,0,0,.35)}
 .clipicon{position:absolute;bottom:3px;right:3px;font-size:8px;line-height:1;
 padding:2px 3px;border-radius:3px;background:rgba(15,25,35,.6);pointer-events:none;z-index:2}
 a.pk::after,a.row::after{content:none}
@@ -400,7 +412,7 @@ a.pk::after,a.row::after{content:none}
  .row .thumb{display:none}
  .row .ttl{width:100%;font-size:34px;line-height:1.45;font-weight:700}
  .row .ttl .ttlx{-webkit-line-clamp:6}
- .row .reflink{margin-top:8px}
+ .row .ttl .reflink{display:inline-block;margin-top:8px}
  .row .pop{display:block;position:fixed;left:50%;top:50%;
   width:min(720px,66vw,116vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
   background:#fff center/cover no-repeat;box-shadow:0 20px 60px rgba(10,18,28,.45);
