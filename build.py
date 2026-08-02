@@ -13,7 +13,7 @@ NEWCAT_GROUP='この動画生成'
 NEWCAT_TITLE='失敗と勉強の動画作りと公開'
 NEWCAT_ID='genvid'
 MOVE_IDS=['8UFhGDi4YUg','4gZthMfSs2Y','bQJ4fE9GQSI','HvdUHeEzltA','o4HopqoW8ek','QPwuHSsXyU4',
- 'H9-7-fHTvoY','ddjkcRM3H4s','nsl3lWw2ZEc','uG0WFwTonJw','DGjNEqHEIDQ','MpkyVKiV1pk','lXz5Y8umPxY',
+ 'H9-7-fHTvoY','ddjkcRM3H4s','nsl3lWw2ZEc','uG0WFwTonJw','DGjNEqHEIDQ','MpkyVKiV1pk',
  'pgQQI_ykxUI']
 
 FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','1fg64F4OBnU','QrSTV7drbUo','KxMbR6po5wA','ARyDkAJ4FBQ'])]
@@ -59,6 +59,7 @@ d=json.load(open(SRC))
 B={b['block']:b for b in d['blocks']}
 C={c['category_id']:c for b in d['blocks'] for c in b['categories']}
 V={v['video_id']:v for b in d['blocks'] for c in b['categories'] for v in c['videos']}
+V['lXz5Y8umPxY']['title']=V['lXz5Y8umPxY']['title'].removeprefix('100本目】')
 
 import csv as _csv
 MUSIC_CATS={'複音ハーモニカの演奏','楽曲の歌詞を深掘りする','童謡・唱歌と日本の歌','世界の音楽とクラシック',
