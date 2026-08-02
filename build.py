@@ -9,8 +9,14 @@ ORDER=['サブカル','お笑い','生活・文化','言葉','音楽','スポー
  '心理・知覚','健康・医療','障がい・福祉','教育','思想・宗教','社会・政治','経済',
  'メディア','デバイス・デジタル生活','IT基盤','AI']
 TAIL_GROUP=('ハーモニカ',['029','033'])
+NEWCAT_GROUP='この動画生成'
+NEWCAT_TITLE='失敗と勉強の動画作りと公開'
+NEWCAT_ID='genvid'
+MOVE_IDS=['8UFhGDi4YUg','4gZthMfSs2Y','bQJ4fE9GQSI','HvdUHeEzltA','o4HopqoW8ek','QPwuHSsXyU4',
+ 'H9-7-fHTvoY','ddjkcRM3H4s','nsl3lWw2ZEc','uG0WFwTonJw','DGjNEqHEIDQ','MpkyVKiV1pk','lXz5Y8umPxY',
+ 'pgQQI_ykxUI']
 
-FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','ARyDkAJ4FBQ'])]
+FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','1fg64F4OBnU','QrSTV7drbUo','KxMbR6po5wA','ARyDkAJ4FBQ'])]
 ID_WAR='cEkx8UrBpAU'
 CAP_WAR='量産のきっかけは、戦争の話。'
 ID_HAIBOKU='NjBJJ3JSqag'
@@ -29,18 +35,26 @@ PHRASES=['学ぶことがだいすきなアナタ、本日もようこそ、こ�
  'あの〜、ちょっと想像してみてほしいんですけど．．','まさにそこなんですよ','パラダイムシフト',
  'よーし、これらを紐解いていきましょう',
  'さいごあなたに、挑発的な思考のタネを投げかけて、この思考の旅を、、']
-BANNER_AT=10                     # 「一気見」バナーを置く位置（分野の前・カテゴリボックス数換算）
 
 # 1504本のうち外に出した2本（入れ替わっていたら下の2行を交換）
 ID_ICHIMI='uBtnbr0gu80'   # 1500タイトルを24分で一気見！
 ID_OWARI ='76XZgkPmg2s'   # 終わり☆AI能力把握実験、脳内発散訓練、遺言】動画量産1500本
 TXT_ICHIMI='1500タイトルを24分で一気見！'
 TXT_OWARI='終わり☆AI能力把握実験、脳内発散訓練、遺言】動画量産1500本'
+ID_SELFINTRO='zQP6i3wEvPY'   # 自己紹介】積極奇異型アスペルガー(ASD)症候群、ワタシはココに居ます！(自慢)
+TXT_SELFINTRO='自己紹介'
+ID_KEITORA='hZIE2BqHt6c'    # 軽自動車 as a Japanese Service
+ID_CFRZ6='ffXw0GwXpP8'      # レッツノート究極の開発哲学
+ID_XUBUNTU='th1DV_2jO2c'    # Corei5,メモリ4gb,hdd500gで中古4千円のパナレッツノート...xubuntuで結構使える
+ID_SWIFT='Xq5R_9k6lLg'      # 90年代国産スポーツカーとMT車の再評価と魅力
+ID_M1='PfPNEnZWqU0'         # 神回★】Armプロセッサは他とどう違うのか
+ID_A2337='yw2PKdR2I3A'      # 神回★】MacPCでLinuxを動かすためAppleSiliconをハックする...
+ID_ASAHI='Og-FD63kuxk'      # MacbookをハックしてるAsahiLinuxって、どうして日本語っぽい朝日Asahiと命名されているのですか？
+NORI_AT_CAT='073'   # のり画像を差し込むカテゴリ（発達障害の特性とライフハック）
 
 SHORT_URL_HREF='https://sites.google.com/view/aspiewho'
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
-LINK_INTENT='https://www.youtube.com/watch?v=HvdUHeEzltA&t=60s'
 QR=base64.b64encode(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'QR_586356.png'),'rb').read()).decode()
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
 # ================= 設定ここまで =================
@@ -60,17 +74,35 @@ for c in C.values():
         v['start_sec']=0 if z else 60
         v['watch_url']=f'https://www.youtube.com/watch?v={v["video_id"]}'+('' if z else '&t=60s')
 
+moved_map={}
+for c in C.values():
+    keep=[]
+    for v in c['videos']:
+        if v['video_id'] in MOVE_IDS:
+            moved_map[v['video_id']]=v
+        else:
+            keep.append(v)
+    c['videos']=keep
+    c['count']=len(keep)
+assert len(moved_map)==len(MOVE_IDS)
+NEWCAT={'category_id':NEWCAT_ID,'name':NEWCAT_TITLE,'videos':[moved_map[i] for i in MOVE_IDS],'count':len(MOVE_IDS)}
+C[NEWCAT_ID]=NEWCAT
+for b in d['blocks']:
+    b['categories']=[c for c in b['categories'] if c['count']>0]
+C={cid:c for cid,c in C.items() if c['count']>0}
+
 tname,tids=TAIL_GROUP
 groups=[]
 for n in ORDER:
     cs=[c for c in B[n]['categories'] if c['category_id'] not in tids]
     if cs: groups.append((n,cs))
 groups.append((tname,[C[x] for x in tids]))
+groups.append((NEWCAT_GROUP,[NEWCAT]))
 assert sum(len(cs) for _,cs in groups)==len(C)
 assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']
 
-def pkgrid(ids,extra=''):
-    return '<div class="pks">'+''.join(
+def pkgrid(ids,extra='',cls=''):
+    return f'<div class="pks{cls}">'+''.join(
      f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener" style="--th:url({V[i]["thumbnail_url"]})">'
      f'<img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
      f'<p>{html.escape(V[i]["title"])}</p><span class="pop" aria-hidden="true"></span></a>' for i in ids)+extra+'</div>'
@@ -82,6 +114,10 @@ def pkcard(href,thumb,title,cls=''):
 
 def ilink(href,vid,text):
     return (f'<a class="ilink" href="{href}" target="_blank" rel="noopener" style="--th:url({tnhq(vid)})">'
+            f'{text}<span class="pop" aria-hidden="true"></span></a>')
+
+def vlink(vid,text):
+    return (f'<a class="ilink vlink" href="{wu(vid)}" target="_blank" rel="noopener" style="--th:url({tnhq(vid)})">'
             f'{text}<span class="pop" aria-hidden="true"></span></a>')
 
 def rows(vids):
@@ -96,12 +132,10 @@ def rows(vids):
 
 KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos'] if v['kamikai']]
 
-CHIKO=('<img class="stk chiko" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async">')
-first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+pkgrid(i) for c,i in FIRST)
+CHIKO=('<img class="stk masc" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async">')
+first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+pkgrid(i+MORE,cls=' pksfirst') for c,i in FIRST)
 
 TOTAL_CATS=sum(len(cats) for name,cats in groups if name!=tname)
-_banner_raw=sum(len(cats) for gi,(name,cats) in enumerate(groups) if gi<BANNER_AT and name!=tname)
-BANNER_N=-(-_banner_raw//4)*4  # 4列の行の途中で割れないよう、行の切れ目（4の倍数）まで繰り下げる
 NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
@@ -116,25 +150,22 @@ def catbox(name,c,desc=True):
      f'{d}</summary>'
      f'<div class="catbody">{rows(c["videos"])}</div></details>')
 
-HARMONICA_BOXES=''.join(catbox(tname,C[x],desc=False) for x in tids)
+HARMONICA_MERGED={'category_id':'harmonica','name':'ハーモニカ演奏とその歴史・調律',
+ 'videos':[v for x in tids for v in C[x]['videos']]}
+HARMONICA_BOXES=catbox(tname,HARMONICA_MERGED,desc=False)
+NEWCAT_BOX=catbox(NEWCAT_GROUP,NEWCAT,desc=False)
 
 gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>']
 n=0
 for gi,(name,cats) in enumerate(groups):
-    if name==tname:
+    if name in (tname,NEWCAT_GROUP):
         continue
     for c in cats:
         gitems.append(catbox(name,c))
         n+=1
-        if n==BANNER_N:
-            gitems.append(
-                  '<div class="bannerrow full">'
-                  f'<a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" '
-                  f'style="--th:url({tnhq(ID_ICHIMI)})">'
-                  f'<span class="lbl"><em>＞</em>{html.escape(TXT_ICHIMI)}<i>click</i></span>'
-                  f'<span class="pop" aria-hidden="true"></span></a>'
-                  f'<img class="nori" src="{IMGS['nori']}" alt="" width="270" height="254" loading="lazy" decoding="async">'
-                  '</div>')
+        if c['category_id']==NORI_AT_CAT:
+            gitems.append(f'<img class="stk masc noridex" src="{IMGS["nori"]}" alt="" decoding="async">')
+            n+=1
         if n in THR:
             k=THR[n]
             gitems.append(f'<p class="say{" l" if k%2 else ""} full">{html.escape(PHRASES[k])}</p>')
@@ -154,6 +185,7 @@ font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",s
 .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
 a{color:inherit}
 a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+a[target="_blank"]::after{content:'🔗';display:inline-block;font-size:.55em;margin-left:3px;vertical-align:middle;opacity:.7;text-decoration:none}
 .hero{padding:28px 0 4px}
 .url{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border:1px solid var(--line);border-radius:6px;
 background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font-variant-numeric:tabular-nums}
@@ -163,12 +195,11 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .thanks{margin:0;font-size:19px;color:var(--dim)}
 .thanks a,.note a{color:var(--sub);text-underline-offset:3px}
 .aha{margin:22px 0 0;font-size:clamp(34px,10vw,54px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
-.ahawrap{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin:16px 0 0}
+.ahawrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px;margin:16px 0 0}
+.leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
-.arigcol{display:flex;flex-direction:column;align-items:flex-start;gap:10px;flex:0 0 auto}
 .arig{width:64px;margin-right:-4px}
-.gamestart{width:clamp(160px,44vw,220px)}
-.chiko{width:clamp(120px,32vw,170px)}
+.masc{width:clamp(120px,32vw,170px)}
 .qrbox{display:flex;align-items:flex-end;gap:8px;flex:0 0 auto}
 .red{color:#B02E24;font-weight:700}
 .hl{color:var(--blue);font-size:24px;font-weight:800;letter-spacing:.04em}
@@ -176,10 +207,11 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .qr img{display:block;width:115px;height:auto;padding:5px;background:#fff;
 border:1px solid var(--line);border-radius:5px;image-rendering:pixelated}
 .aha small{display:block;font-size:18px;font-weight:600;color:var(--dim);letter-spacing:.06em;margin-bottom:3px}
-.lead{margin:0;font-size:17px;line-height:1.7;flex:1 1 150px;min-width:140px;text-align:center;color:var(--dim)}
+.lead{margin:0;font-size:17px;line-height:1.7;text-align:left;color:var(--dim)}
 .note{margin:26px 0 0;padding:20px 18px;background:var(--green);border-radius:8px;font-size:18px;line-height:1.95}
 .note h3{margin:0 0 8px;font-size:17px;letter-spacing:.1em;color:var(--sub);font-weight:700}
 .note .sep{margin:14px 0 0;padding-top:14px;border-top:1px solid var(--greenline)}
+@media(min-width:940px){.note .sep.pccenter{text-align:center}}
 .note .ff{font-weight:700}
 /* 口ぐせの帯 */
 .say{margin:36px 0;padding:30px 22px;background:var(--deep);color:#fff;border-radius:6px;
@@ -192,9 +224,10 @@ font-style:italic;font-style:oblique 12deg}
 .pkwrap{margin:32px 0 0}
 .pkwrap h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
 .item.solo .t{color:var(--blue)}
+.noridex{justify-self:center;align-self:center}
 .stkitem{display:flex;align-items:center;justify-content:flex-end;padding:4px}
-.stkitem img{width:clamp(160px,44vw,220px);height:auto}
 .pks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px;margin-bottom:16px}
+.pks.pksfirst{grid-template-columns:repeat(3,1fr)}
 .pk{text-decoration:none;display:block;min-height:44px;position:relative}
 .pk img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block;
 border:1px solid var(--line2);border-radius:6px;background:var(--face)}
@@ -205,12 +238,9 @@ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hi
 color:var(--blue);letter-spacing:.02em;line-height:1.5}
 /* 一気見バナー */
 .bannerrow{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;margin:32px 0}
+.bannerrow.top{justify-content:flex-start;margin:14px 0 0}
 .banner{display:inline-flex;align-items:center;min-height:44px;margin:0;padding:14px 20px;
 background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-decoration:none;position:relative}
-.nori{display:block;height:auto;flex:0 0 auto;width:clamp(160px,44vw,220px)}
-@media(min-width:480px){
- .bannerrow .nori{position:absolute;right:0;top:50%;transform:translateY(-50%)}
-}
 .banner .pop{display:none}
 .banner .lbl{font-size:24px;font-weight:800;letter-spacing:.04em;line-height:1.4;color:var(--blue)}
 .banner em{font-style:normal;color:var(--blue);margin-right:6px;text-decoration:none;display:inline-block}
@@ -262,15 +292,19 @@ border-radius:6px;border:1px solid var(--line2);background:var(--face);flex:0 0 
 .row .ttl{font-size:21px;line-height:1.5;min-width:0;font-weight:600;
 display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
 .row .pop{display:none}
-.row b{display:inline-block;margin-right:6px;padding:3px 8px;border-radius:3px;
-background:var(--tint);border:1px solid var(--accent);color:var(--accent);
+.row b{display:inline-block;margin-right:6px;padding:3px 9px;border-radius:3px;
+background:#1B5E3A;border:1px solid #1B5E3A;color:#fff;
 font-size:14px;font-weight:700;vertical-align:1px}
 .row:active{background:var(--tint)}
 .endwrap{margin:48px 0 32px}
 .endgrid{margin-top:18px;gap:28px 14px}
 .endgrid .endkome{grid-column:1/-1}
 .endgrid details.item[open]{grid-column:1/-1;background:#FFF}
-.owariend{margin:20px 0 0;text-align:right;font-size:19px;color:var(--sub)}
+.selfline{margin:20px 0 0;font-size:19px;color:var(--sub)}
+.techdesc{margin:12px 0 0;font-size:12px;line-height:1.8;color:var(--dim)}
+.techdesc span{display:block}
+@media(min-width:600px){.techdesc{display:grid;grid-template-columns:repeat(3,1fr);gap:0 18px}}
+.owariend{margin:14px 0 0;text-align:right;font-size:19px;color:var(--sub)}
 .tail{margin:40px 0 28px;height:1px;background:var(--line)}
 @media(min-width:600px){
  .wrap{padding:0 24px}
@@ -278,10 +312,7 @@ font-size:14px;font-weight:700;vertical-align:1px}
  .pks{grid-template-columns:repeat(3,1fr);gap:20px 16px}
  .qr img{width:140px}
  .arig{width:80px}
- .gamestart{width:240px}
- .chiko{width:200px}
- .stkitem img{width:200px}
- .nori{width:190px}
+ .masc{width:200px}
  .endgrid .endkome{grid-column:auto}
 }
 @media(min-width:940px){
@@ -293,15 +324,13 @@ font-size:14px;font-weight:700;vertical-align:1px}
  .pk:hover img{border-color:var(--accent)}
  .back:hover{background:var(--tint);border-color:var(--accent)}
  .banner:hover{background:var(--ltblue2)}
- .gamestart{width:300px}
- .chiko{width:250px}
- .stkitem img{width:250px}
- .nori{width:210px}
+ .masc{width:250px}
 }
 @media(min-width:1280px){
  .wrap{max-width:1320px}
  .items{grid-template-columns:repeat(4,1fr)}
  .pks{grid-template-columns:repeat(5,1fr)}
+ .pks.pksfirst{grid-template-columns:repeat(6,1fr)}
 }
 /* PC（マウスがある画面）：文字だけ並べて、乗せるとフワッと出す（画面中央に固定し、絶対にはみ出さない） */
 @media (hover:hover) and (pointer:fine) and (min-width:700px){
@@ -343,25 +372,30 @@ HTML=f'''<!DOCTYPE html>
 <p class="mins">1つ視聴に25分。🥴</p>
 <div class="thankswrap"><p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async"></div>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
-<div class="ahawrap"><div class="arigcol"><img class="stk gamestart" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async"></div><p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p><div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="data:image/png;base64,{QR}" alt="" width="216" height="216" decoding="async"></a>{CHIKO}</div></div>
+<div class="ahawrap">
+<img class="stk masc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async">
+<div class="leadcol">
+<p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
+<div class="bannerrow top">
+<a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" style="--th:url({tnhq(ID_ICHIMI)})">
+<span class="lbl"><em>＞</em>{html.escape(TXT_ICHIMI)}<i>click</i></span>
+<span class="pop" aria-hidden="true"></span></a>
+</div>
+</div>
+<div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="data:image/png;base64,{QR}" alt="" width="216" height="216" decoding="async"></a>{CHIKO}</div>
+</div>
 </div>
 <div class="note">
 <h3>［ あらかじめ ］</h3>
 ＡＩは音読み・訓読みが苦手です。{ilink(LINK_IKKI,'hpo7e3-MewI','五木寛之氏')}を「ごきかんゆき」<span class="red">(失礼！)</span>、と読んだりします。<br>
-人もAIも人名や地名は難しいですね。<span class="hl">「温かく」聞き流しを。</span>
-<div class="sep">
-動画「前／中／後」３回の、耳痛いハーモニカ演奏は、{ilink(LINK_INTENT,'HvdUHeEzltA','意図があって')}挿入しています。<br>
+人もAIも、人名・地名は難しいですね。<span class="hl">「温かく」聞き流しを。</span>
+<div class="sep pccenter">
+動画「前／中／後」３回の、耳痛いハーモニカ演奏は、<a class="ilink" href="#c{NEWCAT_ID}">意図があって</a>挿入しています。<br>
 <span class="red">倍速や早送りなど推奨</span>(⇒<a href="{LINK_STAR}" target="_blank" rel="noopener">★</a>)　<span class="red">どうぞ！早送りくださいませ。</span>
 </div>
 </div>
 <div class="pkwrap"><h2>まずはこのあたりから</h2>{first}
 <div class="items"><details class="item solo">
-<summary><span class="row1"><span class="pm" aria-hidden="true">＋</span>
-<span class="t">次のオススメ</span>
-<span class="closelbl" aria-hidden="true">↑ とじる</span></span>
-<span class="d">名作名作・・</span></summary>
-<div class="catbody">{pkgrid(MORE)}</div></details>
-<details class="item solo">
 <summary><span class="row1"><span class="pm" aria-hidden="true">＋</span>
 <span class="t">神回★</span>
 <span class="closelbl" aria-hidden="true">↑ とじる</span></span>
@@ -373,9 +407,16 @@ HTML=f'''<!DOCTYPE html>
 <p class="pkcap">{html.escape(CAP_WAR)}</p>
 <div class="pks endgrid">
 {pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}
+<div class="stkitem endkome"><img class="stk masc" src="{IMGS['kome']}" alt="" width="266" height="254" loading="lazy" decoding="async"></div>
 {pkcard(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}
-<div class="stkitem endkome"><img src="{IMGS['kome']}" alt="" width="266" height="254" loading="lazy" decoding="async"></div>
+{NEWCAT_BOX}
 {HARMONICA_BOXES}
+</div>
+<p class="selfline">{ilink(wu(ID_SELFINTRO),ID_SELFINTRO,html.escape(TXT_SELFINTRO))}</p>
+<div class="techdesc">
+<span>{vlink(ID_KEITORA,'軽トラ４ナンバー')}ダイハツハイゼットのような「{vlink(ID_CFRZ6,'CF-RZ6')}（{vlink(ID_XUBUNTU,'xubuntu')}）」と、</span>
+<span>スズキ{vlink(ID_SWIFT,'2020スイフト')}（{vlink(ID_M1,'M1')}；{vlink(ID_A2337,'A2337')}；</span>
+<span>{vlink(ID_ASAHI,'AsahiLinuxFedoraKDEplasma')}）M1MacbookAirを使ってます。</span>
 </div>
 <p class="owariend">{ilink(wu(ID_OWARI),ID_OWARI,html.escape(TXT_OWARI))}</p>
 </div>
