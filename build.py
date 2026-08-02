@@ -209,7 +209,7 @@ for gi,(name,cats) in enumerate(groups):
     if name in (tname,NEWCAT_GROUP):
         continue
     for c in cats:
-        gitems.append(catbox(name,c))
+        gitems.append(catbox(name,c,grid=True))
         n+=1
         if c['category_id']==NORI_AT_CAT:
             gitems.append(f'<img class="stk masc noridex" src="{IMGS["nori"]}" alt="" width="270" height="254" loading="lazy" decoding="async">')
@@ -499,7 +499,7 @@ HTML=f'''<!DOCTYPE html>
 <span class="t">神回★</span>
 <span class="closelbl" aria-hidden="true">↑ とじる</span></span>
 <span class="d">名作お気に入り</span></summary>
-<div class="catbody">{pkgrid(KAMI)}</div></details></div>
+<div class="catbody">{pkgrid(KAMI,cls=f' g{best_cols(len(KAMI),(2,3))}')}</div></details></div>
 </div>
 {idx}
 <div class="endwrap">
