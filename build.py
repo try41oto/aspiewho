@@ -122,12 +122,12 @@ assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']
 
 def pkgrid(ids,extra='',cls=''):
     return f'<div class="pks{cls}">'+''.join(
-     f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener" style="--th:url({V[i]["thumbnail_url"]})">'
+     f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
      f'<img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}'
      f'<p>{html.escape(V[i]["title"])}</p><span class="pop" aria-hidden="true"></span></a>' for i in ids)+extra+'</div>'
 
 def pkcard(href,thumb,title,cls='',vid=None):
-    return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener" style="--th:url({thumb})">'
+    return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener">'
             f'<img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(vid) if vid else ""}'
             f'<p>{html.escape(title)}</p><span class="pop" aria-hidden="true"></span></a>')
 
@@ -143,8 +143,7 @@ def rows(vids):
     out=''
     for v in vids:
         t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])+reflink(v['video_id'])
-        out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener" '
-              f'style="--th:url({v["thumbnail_url"]})">'
+        out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener">'
               f'<img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
               f'<span class="ttl">{t}</span><span class="pop" aria-hidden="true"></span></a>')
     return f'<div class="rows">{out}</div>'
@@ -505,6 +504,10 @@ document.addEventListener('toggle',function(e){{
   var now=Date.now();
   if(el._hiddenAt&&now-el._hiddenAt<COOLDOWN)return;
   if(el.classList.contains('popshow'))return;
+  if(!el.style.getPropertyValue('--th')){{
+   var img=el.querySelector('img');
+   if(img)el.style.setProperty('--th','url("'+img.src+'")');
+  }}
   el.classList.add('popshow');
   clearTimeout(el._popTimer);
   el._popTimer=setTimeout(function(){{release(el);}},SHOW);
