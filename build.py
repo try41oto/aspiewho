@@ -82,6 +82,8 @@ def refbadge(vid):
     r=REF.get(vid)
     if not r: return ''
     return f'<span class="reflink refbadge" data-url="{html.escape(r["url"])}">{r["symbol"]}</span>'
+
+CLIPICON='<span class="clipicon" aria-hidden="true">🔗</span>'
 ZERO_CATS={'029'}          # 冒頭から再生するカテゴリ
 tn=lambda i:f'https://img.youtube.com/vi/{i}/mqdefault.jpg'
 tnhq=lambda i:f'https://img.youtube.com/vi/{i}/hqdefault.jpg'
@@ -123,12 +125,12 @@ assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']
 def pkgrid(ids,extra='',cls=''):
     return f'<div class="pks{cls}">'+''.join(
      f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
-     f'<img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}'
+     f'<span class="thumb"><img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}{CLIPICON}</span>'
      f'<p>{html.escape(V[i]["title"])}</p><span class="pop" aria-hidden="true"></span></a>' for i in ids)+extra+'</div>'
 
 def pkcard(href,thumb,title,cls='',vid=None):
     return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener">'
-            f'<img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(vid) if vid else ""}'
+            f'<span class="thumb"><img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(vid) if vid else ""}{CLIPICON}</span>'
             f'<p>{html.escape(title)}</p><span class="pop" aria-hidden="true"></span></a>')
 
 def ilink(href,vid,text):
@@ -144,7 +146,7 @@ def rows(vids):
     for v in vids:
         t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])
         out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener">'
-              f'<img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
+              f'<span class="thumb"><img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{CLIPICON}</span>'
               f'<span class="ttl"><span class="ttlx">{t}</span>{reflink(v["video_id"])}</span>'
               f'<span class="pop" aria-hidden="true"></span></a>')
     return f'<div class="rows">{out}</div>'
@@ -266,8 +268,9 @@ font-style:italic;font-style:oblique 12deg}
 .stkitem{display:flex;align-items:center;justify-content:flex-end;padding:4px}
 .pks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px;margin-bottom:16px}
 .pks.pksfirst{grid-template-columns:repeat(3,1fr)}
-.pk{text-decoration:none;display:block;min-height:44px;position:relative}
-.pk img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block;
+.pk{text-decoration:none;display:block;min-height:44px}
+.thumb{position:relative;display:block}
+.pk .thumb img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;display:block;
 border:1px solid var(--line2);border-radius:6px;background:var(--face)}
 .pk p{margin:8px 0 0;font-size:17px;line-height:1.6;
 display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -326,13 +329,14 @@ padding:6px 14px;border-radius:20px;white-space:nowrap}
 .row{display:flex;align-items:stretch;min-height:48px;padding:0;
 border-bottom:2px solid var(--line);text-decoration:none;position:relative}
 .row:nth-child(even){background:var(--rowalt)}
-.row .mini{width:50%;flex:0 0 auto;height:auto;object-fit:cover;
+.row .thumb{width:50%;flex:0 0 auto}
+.row .thumb img{width:100%;height:100%;object-fit:cover;
 border-radius:6px;border:1px solid var(--line2);background:var(--face)}
 .row .ttl{width:50%;flex:0 0 auto;box-sizing:border-box;padding:12px 12px 12px 14px;font-size:21px;line-height:1.5;min-width:0;font-weight:600;
 align-self:center}
 .row .ttl .ttlx{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 @media(max-width:359px){
- .row .mini{width:45%}
+ .row .thumb{width:45%}
  .row .ttl{width:55%}
 }
 .row .pop{display:none}
@@ -345,6 +349,9 @@ font-size:14px;font-weight:700;vertical-align:1px}
 .refbadge{position:absolute;top:6px;right:6px;min-width:24px;height:24px;padding:0 5px;
 display:flex;align-items:center;justify-content:center;border-radius:12px;
 background:#FF0000;color:#fff;font-size:14px;line-height:1;z-index:2}
+.clipicon{position:absolute;bottom:3px;right:3px;font-size:8px;line-height:1;
+padding:2px 3px;border-radius:3px;background:rgba(15,25,35,.6);pointer-events:none;z-index:2}
+a.pk::after,a.row::after{content:none}
 .endwrap{margin:48px 0 32px}
 .endgrid{margin-top:18px;gap:28px 14px}
 .endgrid .endkome{grid-column:1/-1}
@@ -390,7 +397,7 @@ background:#FF0000;color:#fff;font-size:14px;line-height:1;z-index:2}
  .ilink:hover{text-decoration:underline;text-underline-offset:3px}
  .rows{display:grid;grid-template-columns:repeat(2,1fr);column-gap:36px;row-gap:4px}
  .row{padding:18px 4px}
- .row .mini{display:none}
+ .row .thumb{display:none}
  .row .ttl{width:100%;font-size:34px;line-height:1.45;font-weight:700}
  .row .ttl .ttlx{-webkit-line-clamp:6}
  .row .reflink{margin-top:8px}
