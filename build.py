@@ -388,7 +388,7 @@ background:#FF0000;color:#fff;font-size:14px;line-height:1;z-index:2}
  .rows{display:grid;grid-template-columns:repeat(2,1fr);column-gap:36px;row-gap:4px}
  .row{padding:18px 4px}
  .row .mini{display:none}
- .row .ttl{display:block;-webkit-line-clamp:unset;overflow:visible;
+ .row .ttl{display:block;-webkit-line-clamp:unset;overflow:visible;width:100%;
   font-size:34px;line-height:1.45;font-weight:700}
  .row .pop{display:block;position:fixed;left:50%;top:50%;
   width:min(720px,66vw,116vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
