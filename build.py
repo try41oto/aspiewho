@@ -21,12 +21,8 @@ ID_WAR='cEkx8UrBpAU'
 CAP_WAR='量産のきっかけは、戦争の話。'
 ID_HAIBOKU='NjBJJ3JSqag'
 TXT_HAIBOKU='技術的敗北と再生の物語'
-import base64
-def _b64(n):
-    p=os.path.join(os.path.dirname(os.path.abspath(__file__)),'img',n)
-    return 'data:image/webp;base64,'+base64.b64encode(open(p,'rb').read()).decode()
-IMGS={n:_b64(n+'.webp') for n in ('norikome','chiko','nori','kome','haiboku')}
-IMGS['arigatou']=_b64('arigatou_anim.webp')
+IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
+IMGS['arigatou']='img/arigatou_anim.webp'
 MORE=['TCe2SvES2x4','2Zky_cifOmw','w3dKDFOc-8I','GNnv5kXhJJs','y7VptpwGrX0',
       '3D6P6cqT1X8','WRWJdmNTj8U','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','2GwZJScpJeA',
       'TfRZv5DW3Es']
@@ -56,7 +52,6 @@ NORI_AT_CAT='073'   # のり画像を差し込むカテゴリ（発達障害の�
 SHORT_URL_HREF='https://sites.google.com/view/aspiewho'
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
-QR=base64.b64encode(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'QR_586356.png'),'rb').read()).decode()
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
 # ================= 設定ここまで =================
 
@@ -156,7 +151,7 @@ def rows(vids):
 
 KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos'] if v['kamikai']]
 
-CHIKO=('<img class="stk masc" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async">')
+CHIKO=('<img class="stk masc" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async" fetchpriority="high">')
 first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+pkgrid(i+MORE,cls=' pksfirst') for c,i in FIRST)
 
 TOTAL_CATS=sum(len(cats) for name,cats in groups if name!=tname)
@@ -188,7 +183,7 @@ for gi,(name,cats) in enumerate(groups):
         gitems.append(catbox(name,c))
         n+=1
         if c['category_id']==NORI_AT_CAT:
-            gitems.append(f'<img class="stk masc noridex" src="{IMGS["nori"]}" alt="" decoding="async">')
+            gitems.append(f'<img class="stk masc noridex" src="{IMGS["nori"]}" alt="" width="270" height="254" loading="lazy" decoding="async">')
             n+=1
         if n in THR:
             k=THR[n]
@@ -418,10 +413,10 @@ HTML=f'''<!DOCTYPE html>
 <div class="wrap" id="top">
 <div class="hero">
 <p class="mins">1つ視聴に25分。🥴</p>
-<div class="thankswrap"><p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async"></div>
+<div class="thankswrap"><p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"></div>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <div class="ahawrap">
-<img class="stk masc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async">
+<img class="stk masc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 <div class="leadcol">
 <p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
 <div class="bannerrow top">
@@ -432,7 +427,7 @@ HTML=f'''<!DOCTYPE html>
 </div>
 <div class="qrbox"><div class="qrcol">
 <button type="button" class="addhome" id="addhomeBtn">🔖 ブックマーク</button>
-<a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="data:image/png;base64,{QR}" alt="" width="216" height="216" decoding="async"></a>
+<a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="QR_586356.png" alt="" width="216" height="216" decoding="async" fetchpriority="high"></a>
 <button type="button" class="sharebtn" id="shareBtn">
 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L7.04 9.81C6.5 9.31 5.79 9 5 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91s-1.31-2.92-2.92-2.92z"/></svg>
 共有
