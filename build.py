@@ -202,6 +202,25 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .arig{width:64px;margin-right:-4px}
 .masc{width:clamp(120px,32vw,170px)}
 .qrbox{display:flex;align-items:flex-end;gap:8px;flex:0 0 auto}
+.qrcol{display:flex;flex-direction:column;align-items:center;gap:8px}
+.addhome{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;
+padding:10px 16px;background:#fff;color:var(--blue);border:1px solid var(--blue);border-radius:8px;
+font-size:15px;font-weight:700;letter-spacing:.03em;cursor:pointer;font-family:inherit;
+white-space:nowrap}
+.addhome:hover{background:var(--ltblue)}
+.sharebtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;
+padding:8px 16px;background:#fff;color:var(--blue);border:1px solid var(--blue);border-radius:8px;
+font-size:14px;font-weight:700;letter-spacing:.03em;cursor:pointer;font-family:inherit}
+.sharebtn:hover{background:var(--ltblue)}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,18,28,.55);display:flex;
+align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal-overlay[hidden]{display:none}
+.modal-box{background:#fff;border-radius:10px;padding:24px 22px;max-width:340px;width:100%;
+box-shadow:0 20px 60px rgba(10,18,28,.35)}
+.modal-box p{margin:0 0 18px;font-size:17px;line-height:1.8;color:var(--fg)}
+.modal-close{display:inline-flex;min-height:44px;padding:10px 22px;background:var(--accent);
+color:#fff;border:none;border-radius:20px;font-size:15px;font-weight:700;cursor:pointer;
+font-family:inherit}
 .red{color:#B02E24;font-weight:700}
 .hl{color:var(--blue);font-size:24px;font-weight:800;letter-spacing:.04em}
 .qr{flex:0 0 auto;text-align:left;text-decoration:none;color:var(--fg);display:block;min-height:44px}
@@ -365,6 +384,9 @@ HTML=f'''<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>脳アハ！｜ aspiewho</title>
 <meta name="description" content="必ずみつかる、脳アハ！ 新たな気づきに出会えますように。">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#125A93">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <style>{CSS}</style></head><body>
 <div class="wrap" id="top">
 <div class="hero">
@@ -381,7 +403,20 @@ HTML=f'''<!DOCTYPE html>
 <span class="pop" aria-hidden="true"></span></a>
 </div>
 </div>
-<div class="qrbox"><a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="data:image/png;base64,{QR}" alt="" width="216" height="216" decoding="async"></a>{CHIKO}</div>
+<div class="qrbox"><div class="qrcol">
+<button type="button" class="addhome" id="addhomeBtn">🔖 ブックマーク</button>
+<a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="data:image/png;base64,{QR}" alt="" width="216" height="216" decoding="async"></a>
+<button type="button" class="sharebtn" id="shareBtn">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L7.04 9.81C6.5 9.31 5.79 9 5 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91s-1.31-2.92-2.92-2.92z"/></svg>
+共有
+</button>
+</div>{CHIKO}</div>
+</div>
+</div>
+<div class="modal-overlay" id="addhomeModal" hidden>
+<div class="modal-box">
+<p id="addhomeModalText"></p>
+<button type="button" class="modal-close" id="addhomeModalClose">閉じる</button>
 </div>
 </div>
 <div class="note">
@@ -457,6 +492,58 @@ document.addEventListener('toggle',function(e){{
   el.addEventListener('mouseleave',function(){{release(el);}});
   el.addEventListener('focus',function(){{trigger(el);}});
   el.addEventListener('blur',function(){{release(el);}});
+ }});
+}})();
+if('serviceWorker' in navigator){{
+ window.addEventListener('load',function(){{navigator.serviceWorker.register('sw.js');}});
+}}
+(function(){{
+ var modal=document.getElementById('addhomeModal');
+ var modalText=document.getElementById('addhomeModalText');
+ var modalClose=document.getElementById('addhomeModalClose');
+ function showModal(html){{modalText.innerHTML=html;modal.hidden=false;}}
+ function hideModal(){{modal.hidden=true;}}
+ modalClose.addEventListener('click',hideModal);
+ modal.addEventListener('click',function(e){{if(e.target===modal)hideModal();}});
+
+ var deferredPrompt=null;
+ var btn=document.getElementById('addhomeBtn');
+ window.addEventListener('beforeinstallprompt',function(e){{
+  e.preventDefault();
+  deferredPrompt=e;
+ }});
+ window.addEventListener('appinstalled',function(){{deferredPrompt=null;}});
+ btn.addEventListener('click',function(){{
+  if(deferredPrompt){{
+   deferredPrompt.prompt();
+   deferredPrompt.userChoice.finally(function(){{deferredPrompt=null;}});
+   return;
+  }}
+  var ua=navigator.userAgent;
+  var isIOS=/iPad|iPhone|iPod/.test(ua)&&!window.MSStream;
+  if(isIOS){{
+   showModal('Safariの共有ボタン<b>（□に↑）</b>をタップして、<br>「ホーム画面に追加」を選んでください。');
+  }}else{{
+   var isMac=/Mac/.test(navigator.platform)&&!isIOS;
+   showModal((isMac?'<b>Cmd + D</b>':'<b>Ctrl + D</b>')+' でブックマークできます。');
+  }}
+ }});
+
+ var shareBtn=document.getElementById('shareBtn');
+ shareBtn.addEventListener('click',function(){{
+  if(navigator.share){{
+   navigator.share({{title:document.title,url:location.href}}).catch(function(){{}});
+   return;
+  }}
+  if(navigator.clipboard&&navigator.clipboard.writeText){{
+   navigator.clipboard.writeText(location.href).then(function(){{
+    showModal('リンクをコピーしました。');
+   }}).catch(function(){{
+    showModal('コピーできませんでした。<br>アドレスバーのURLをコピーしてください。');
+   }});
+  }}else{{
+   showModal('コピーできませんでした。<br>アドレスバーのURLをコピーしてください。');
+  }}
  }});
 }})();
 </script>
