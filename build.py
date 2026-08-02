@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # aspiewho 動画目次サイト ジェネレーター v7
-import json, html, os, gzip, sys
+import json, html, os, gzip, sys, re
 SRC = sys.argv[1] if len(sys.argv)>1 else '/mnt/user-data/outputs/aspiewho_1502_classified.json'
 OUT = sys.argv[2] if len(sys.argv)>2 else '/mnt/user-data/outputs/index.html'
 
@@ -580,6 +580,33 @@ if('serviceWorker' in navigator){{
 }})();
 </script>
 </body></html>'''
+def _minify_css(css):
+    css=re.sub(r'/\*.*?\*/','',css,flags=re.S)
+    css=re.sub(r'\s+',' ',css)
+    css=re.sub(r'\s*([{}:;,])\s*',r'\1',css)
+    css=re.sub(r';}','}',css)
+    return css.strip()
+
+def _minify_js(js):
+    lines=[l.strip() for l in js.split('\n')]
+    return ' '.join(l for l in lines if l)
+
+def _minify_html(html_str):
+    def sub(m):
+        tag=m.group(1)
+        body=m.group(2)
+        fn=_minify_css if tag=='style' else _minify_js
+        return f'<{tag}>{fn(body)}</{tag}>'
+    parts=re.split(r'(<style>.*?</style>|<script>.*?</script>)',html_str,flags=re.S)
+    out=[]
+    for p in parts:
+        if p.startswith('<style>') or p.startswith('<script>'):
+            out.append(re.sub(r'<(style|script)>(.*)</\1>',sub,p,flags=re.S))
+        else:
+            out.append(re.sub(r'>\s+<','><',p))
+    return ''.join(out)
+
+HTML=_minify_html(HTML)
 open(OUT,'w').write(HTML)
 print(f'{OUT} {os.path.getsize(OUT)/1024:.1f}KB / gzip {len(gzip.compress(HTML.encode()))/1024:.1f}KB')
 print(f'カテゴリ{len(C)} 動画{d["total_videos"]} 先頭{sum(len(i) for _,i in FIRST)}本 / オススメ{len(MORE)}本 / 神回{len(KAMI)}本 / 口ぐせ{len(PHRASES)}')
