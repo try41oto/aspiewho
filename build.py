@@ -323,7 +323,7 @@ padding:6px 14px;border-radius:20px;white-space:nowrap}
 /* 動画1本ぶん（スマホ：左右2カラム、サムネは行の高さいっぱいに表示） */
 .rows{display:flex;flex-direction:column}
 .row{display:flex;align-items:stretch;min-height:48px;padding:0;
-border-bottom:1px dashed var(--line2);text-decoration:none;position:relative}
+border-bottom:2px solid var(--line);text-decoration:none;position:relative}
 .row:nth-child(even){background:var(--rowalt)}
 .row .mini{width:50%;flex:0 0 auto;height:auto;object-fit:cover;
 border-radius:6px;border:1px solid var(--line2);background:var(--face)}
