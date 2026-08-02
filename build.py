@@ -142,10 +142,11 @@ def vlink(vid,text):
 def rows(vids):
     out=''
     for v in vids:
-        t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])+reflink(v['video_id'])
+        t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])
         out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener">'
               f'<img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
-              f'<span class="ttl">{t}</span><span class="pop" aria-hidden="true"></span></a>')
+              f'<span class="ttl"><span class="ttlx">{t}</span>{reflink(v["video_id"])}</span>'
+              f'<span class="pop" aria-hidden="true"></span></a>')
     return f'<div class="rows">{out}</div>'
 
 KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos'] if v['kamikai']]
@@ -328,7 +329,8 @@ border-bottom:2px solid var(--line);text-decoration:none;position:relative}
 .row .mini{width:50%;flex:0 0 auto;height:auto;object-fit:cover;
 border-radius:6px;border:1px solid var(--line2);background:var(--face)}
 .row .ttl{width:50%;flex:0 0 auto;box-sizing:border-box;padding:12px 12px 12px 14px;font-size:21px;line-height:1.5;min-width:0;font-weight:600;
-display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;align-self:center}
+align-self:center}
+.row .ttl .ttlx{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 @media(max-width:359px){
  .row .mini{width:45%}
  .row .ttl{width:55%}
@@ -337,6 +339,7 @@ display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hi
 .row b{display:inline-block;margin-right:6px;padding:3px 9px;border-radius:3px;
 background:#1B5E3A;border:1px solid #1B5E3A;color:#fff;
 font-size:14px;font-weight:700;vertical-align:1px}
+.row .reflink{display:inline-block;margin-top:4px}
 .row:active{background:var(--tint)}
 .reflink{color:#FF0000;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none}
 .refbadge{position:absolute;top:6px;right:6px;min-width:24px;height:24px;padding:0 5px;
@@ -388,8 +391,9 @@ background:#FF0000;color:#fff;font-size:14px;line-height:1;z-index:2}
  .rows{display:grid;grid-template-columns:repeat(2,1fr);column-gap:36px;row-gap:4px}
  .row{padding:18px 4px}
  .row .mini{display:none}
- .row .ttl{display:block;-webkit-line-clamp:unset;overflow:visible;width:100%;
-  font-size:34px;line-height:1.45;font-weight:700}
+ .row .ttl{width:100%;font-size:34px;line-height:1.45;font-weight:700}
+ .row .ttl .ttlx{-webkit-line-clamp:6}
+ .row .reflink{margin-top:8px}
  .row .pop{display:block;position:fixed;left:50%;top:50%;
   width:min(720px,66vw,116vh);aspect-ratio:16/9;border-radius:6px;border:1px solid var(--line);
   background:#fff center/cover no-repeat;box-shadow:0 20px 60px rgba(10,18,28,.45);
