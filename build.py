@@ -28,7 +28,8 @@ def _b64(n):
 IMGS={n:_b64(n+'.webp') for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']=_b64('arigatou_anim.webp')
 MORE=['TCe2SvES2x4','2Zky_cifOmw','w3dKDFOc-8I','GNnv5kXhJJs','y7VptpwGrX0',
-      '3D6P6cqT1X8','WRWJdmNTj8U','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','2GwZJScpJeA']
+      '3D6P6cqT1X8','WRWJdmNTj8U','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','2GwZJScpJeA',
+      'TfRZv5DW3Es']
 
 # NotebookLM の口ぐせ（この順に、ページ全体へ均等に差し込む）
 PHRASES=['学ぶことがだいすきなアナタ、本日もようこそ、このディープライブへ',
@@ -176,7 +177,7 @@ idx=f'<div class="items">{"".join(gitems)}</div>'
 CSS='''
 :root{--bg:#FFF;--face:#FAFBFC;--line:#C4CFD9;--line2:#E2E7EC;--fg:#16212D;--dim:#4B5A6B;
 --accent:#8A5F0F;--sub:#245670;--tint:#FFF8E9;--soft:#F3F7F9;--deep:#1D6483;
---green:#F8FCF8;--greenline:#CFE3CF;--alt:#FFFCF0;--blue:#125A93;--ltblue:#E7F2FA;--ltblue2:#D6EAF7}
+--green:#F8FCF8;--greenline:#CFE3CF;--alt:#FFFCF0;--blue:#125A93;--ltblue:#E7F2FA;--ltblue2:#D6EAF7;--rowalt:#F6FAFD}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--fg);font-size:19px;line-height:1.85;
@@ -286,7 +287,8 @@ padding:6px 14px;border-radius:20px;white-space:nowrap}
 /* 動画1本ぶん（スマホ：左サムネ＋右タイトル） */
 .rows{display:flex;flex-direction:column}
 .row{display:flex;gap:12px;align-items:center;min-height:48px;padding:16px 4px;
-border-bottom:1px solid var(--line2);text-decoration:none;position:relative}
+border-bottom:1px dashed var(--line2);text-decoration:none;position:relative}
+.row:nth-child(even){background:var(--rowalt)}
 .row .mini{width:55%;max-width:220px;height:auto;aspect-ratio:16/9;object-fit:cover;
 border-radius:6px;border:1px solid var(--line2);background:var(--face);flex:0 0 auto}
 .row .ttl{font-size:21px;line-height:1.5;min-width:0;font-weight:600;
@@ -302,8 +304,6 @@ font-size:14px;font-weight:700;vertical-align:1px}
 .endgrid details.item[open]{grid-column:1/-1;background:#FFF}
 .selfline{margin:20px 0 0;font-size:19px;color:var(--sub)}
 .techdesc{margin:12px 0 0;font-size:12px;line-height:1.8;color:var(--dim)}
-.techdesc span{display:block}
-@media(min-width:600px){.techdesc{display:grid;grid-template-columns:repeat(3,1fr);gap:0 18px}}
 .owariend{margin:14px 0 0;text-align:right;font-size:19px;color:var(--sub)}
 .tail{margin:40px 0 28px;height:1px;background:var(--line)}
 @media(min-width:600px){
@@ -353,7 +353,6 @@ font-size:14px;font-weight:700;vertical-align:1px}
   transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
  .row.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
  .row:hover .ttl{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--accent)}
- .row:hover{background:transparent}
 }
 @media(min-width:1600px) and (hover:hover) and (pointer:fine){
  .rows{grid-template-columns:repeat(3,1fr)}
@@ -413,11 +412,7 @@ HTML=f'''<!DOCTYPE html>
 {HARMONICA_BOXES}
 </div>
 <p class="selfline">{ilink(wu(ID_SELFINTRO),ID_SELFINTRO,html.escape(TXT_SELFINTRO))}</p>
-<div class="techdesc">
-<span>{vlink(ID_KEITORA,'軽トラ４ナンバー')}ダイハツハイゼットのような「{vlink(ID_CFRZ6,'CF-RZ6')}（{vlink(ID_XUBUNTU,'xubuntu')}）」と、</span>
-<span>スズキ{vlink(ID_SWIFT,'2020スイフト')}（{vlink(ID_M1,'M1')}；{vlink(ID_A2337,'A2337')}；</span>
-<span>{vlink(ID_ASAHI,'AsahiLinuxFedoraKDEplasma')}）M1MacbookAirを使ってます。</span>
-</div>
+<p class="techdesc">{vlink(ID_KEITORA,'軽トラ４ナンバー')}ダイハツハイゼットのような「{vlink(ID_CFRZ6,'CF-RZ6')}（{vlink(ID_XUBUNTU,'xubuntu')}）」と、スズキ{vlink(ID_SWIFT,'2020スイフト')}（{vlink(ID_M1,'M1')}；{vlink(ID_A2337,'A2337')}；{vlink(ID_ASAHI,'AsahiLinuxFedoraKDEplasma')}）M1MacbookAirを使ってます。</p>
 <p class="owariend">{ilink(wu(ID_OWARI),ID_OWARI,html.escape(TXT_OWARI))}</p>
 </div>
 <div class="tail"></div>
