@@ -382,7 +382,7 @@ font-size:14px;font-weight:700;vertical-align:1px}
 HTML=f'''<!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>脳アハ！｜ aspiewho</title>
+<title>脳アハ！</title>
 <meta name="description" content="必ずみつかる、脳アハ！ 新たな気づきに出会えますように。">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#125A93">
