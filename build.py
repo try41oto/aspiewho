@@ -327,7 +327,7 @@ padding:6px 14px;border-radius:20px;white-space:nowrap}
 /* 動画1本ぶん（スマホ：左右2カラム、サムネは行の高さいっぱいに表示） */
 .rows{display:flex;flex-direction:column}
 .row{display:flex;align-items:stretch;min-height:48px;padding:0;
-border-bottom:2px solid var(--line);text-decoration:none;position:relative}
+border-bottom:6px double var(--line);text-decoration:none;position:relative}
 .row:nth-child(even){background:var(--rowalt)}
 .row .thumb{width:50%;flex:0 0 auto}
 .row .thumb img{width:100%;height:100%;object-fit:cover;
@@ -396,7 +396,7 @@ a.pk::after,a.row::after{content:none}
  .banner.popshow .pop,.ilink.popshow .pop,.pk.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
  .ilink:hover{text-decoration:underline;text-underline-offset:3px}
  .rows{display:grid;grid-template-columns:repeat(2,1fr);column-gap:36px;row-gap:4px}
- .row{padding:18px 4px}
+ .row{padding:18px 4px;border-bottom:2px solid var(--line)}
  .row .thumb{display:none}
  .row .ttl{width:100%;font-size:34px;line-height:1.45;font-weight:700}
  .row .ttl .ttlx{-webkit-line-clamp:6}
