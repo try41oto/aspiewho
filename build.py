@@ -64,6 +64,29 @@ d=json.load(open(SRC))
 B={b['block']:b for b in d['blocks']}
 C={c['category_id']:c for b in d['blocks'] for c in b['categories']}
 V={v['video_id']:v for b in d['blocks'] for c in b['categories'] for v in c['videos']}
+
+import csv as _csv
+MUSIC_CATS={'複音ハーモニカの演奏','楽曲の歌詞を深掘りする','童謡・唱歌と日本の歌','世界の音楽とクラシック',
+ '楽器と音響のしくみ','ハーモニカの歴史・道具・名演奏家','昭和歌謡・演歌のつくり手'}
+MUSIC_OVERRIDE_IDS={'lmnI2SvWfM0','ymbaX87ij0M'}  # B'z LOVE PHANTOM / 尾崎豊 15の夜（非音楽カテゴリだが実際は楽曲）
+REF={}
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'work','out-todo_368_all.csv'),encoding='utf-8') as _f:
+    for _row in _csv.DictReader(_f):
+        _url=_row['found_url'].strip()
+        if not _url.startswith('http'):
+            continue
+        _is_music=_row['category_name'] in MUSIC_CATS or _row['video_id'] in MUSIC_OVERRIDE_IDS
+        REF[_row['video_id']]={'symbol':'♫' if _is_music else '＠','url':_url}
+
+def reflink(vid):
+    r=REF.get(vid)
+    if not r: return ''
+    return f' <span class="reflink" data-url="{html.escape(r["url"])}">[ {r["symbol"]} ]</span>'
+
+def refbadge(vid):
+    r=REF.get(vid)
+    if not r: return ''
+    return f'<span class="reflink refbadge" data-url="{html.escape(r["url"])}">{r["symbol"]}</span>'
 ZERO_CATS={'029'}          # 冒頭から再生するカテゴリ
 tn=lambda i:f'https://img.youtube.com/vi/{i}/mqdefault.jpg'
 tnhq=lambda i:f'https://img.youtube.com/vi/{i}/hqdefault.jpg'
@@ -105,12 +128,12 @@ assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']
 def pkgrid(ids,extra='',cls=''):
     return f'<div class="pks{cls}">'+''.join(
      f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener" style="--th:url({V[i]["thumbnail_url"]})">'
-     f'<img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
+     f'<img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}'
      f'<p>{html.escape(V[i]["title"])}</p><span class="pop" aria-hidden="true"></span></a>' for i in ids)+extra+'</div>'
 
-def pkcard(href,thumb,title,cls=''):
+def pkcard(href,thumb,title,cls='',vid=None):
     return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener" style="--th:url({thumb})">'
-            f'<img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">'
+            f'<img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(vid) if vid else ""}'
             f'<p>{html.escape(title)}</p><span class="pop" aria-hidden="true"></span></a>')
 
 def ilink(href,vid,text):
@@ -124,7 +147,7 @@ def vlink(vid,text):
 def rows(vids):
     out=''
     for v in vids:
-        t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])
+        t=('<b>神回</b>' if v['kamikai'] else '')+html.escape(v['title'])+reflink(v['video_id'])
         out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener" '
               f'style="--th:url({v["thumbnail_url"]})">'
               f'<img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">'
@@ -317,6 +340,10 @@ display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hi
 background:#1B5E3A;border:1px solid #1B5E3A;color:#fff;
 font-size:14px;font-weight:700;vertical-align:1px}
 .row:active{background:var(--tint)}
+.reflink{color:#FF0000;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none}
+.refbadge{position:absolute;top:6px;right:6px;min-width:24px;height:24px;padding:0 5px;
+display:flex;align-items:center;justify-content:center;border-radius:12px;
+background:#FF0000;color:#fff;font-size:14px;line-height:1;z-index:2}
 .endwrap{margin:48px 0 32px}
 .endgrid{margin-top:18px;gap:28px 14px}
 .endgrid .endkome{grid-column:1/-1}
@@ -494,6 +521,13 @@ document.addEventListener('toggle',function(e){{
   el.addEventListener('blur',function(){{release(el);}});
  }});
 }})();
+document.addEventListener('click',function(e){{
+ var t=e.target.closest('.reflink');
+ if(!t)return;
+ e.preventDefault();
+ e.stopPropagation();
+ window.open(t.dataset.url,'_blank','noopener');
+}});
 if('serviceWorker' in navigator){{
  window.addEventListener('load',function(){{navigator.serviceWorker.register('sw.js');}});
 }}
