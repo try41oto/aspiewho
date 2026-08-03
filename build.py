@@ -497,7 +497,7 @@ details.item[open] .closelbl{background:#276B3B}
 /* 修正4 上位カテゴリ 連続先頭の強調：スマホのみ。PCには一切効かせない */
 @media(max-width:939.98px){
  .item .blklabel.grouptop,.item:nth-of-type(even) .blklabel.grouptop{
-  background:#1E5E34;color:#fff;font-size:21px;letter-spacing:.08em;
+  background:#2563EB;color:#fff;font-size:21px;letter-spacing:.08em;
   padding:3px 12px;border-radius:6px;top:-18px;left:10px}
 }
 '''
