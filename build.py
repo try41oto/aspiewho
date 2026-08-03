@@ -49,7 +49,7 @@ ID_A2337='yw2PKdR2I3A'      # 神回★】MacPCでLinuxを動かすためAppleSi
 ID_ASAHI='Og-FD63kuxk'      # MacbookをハックしてるAsahiLinuxって、どうして日本語っぽい朝日Asahiと命名されているのですか？
 NORI_AT_CAT='073'   # のり画像を差し込むカテゴリ（発達障害の特性とライフハック）
 
-SHORT_URL_HREF='https://sites.google.com/view/aspiewho'
+SHORT_URL_HREF='https://try41oto.github.io/aspiewho/'
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
@@ -181,7 +181,7 @@ NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
 
-def catbox(name,c,desc=True,grid=False):
+def catbox(name,c,desc=True,grid=False,firstlabel=False):
     d=f'<span class="d">{html.escape(c["description"])}</span>' if desc else ''
     if grid:
         n=c['count']
@@ -191,7 +191,7 @@ def catbox(name,c,desc=True,grid=False):
     else:
         body=rows(c['videos'])
     return (f'<details class="item" id="c{c["category_id"]}">'
-     f'<summary><span class="blklabel">{html.escape(name)}</span>'
+     f'<summary><span class="blklabel{" grouptop" if firstlabel else ""}">{html.escape(name)}</span>'
      f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
      f'<span class="t">{html.escape(c["name"])}</span>'
      f'<span class="closelbl" aria-hidden="true">↑ とじる</span></span>'
@@ -208,8 +208,8 @@ n=0
 for gi,(name,cats) in enumerate(groups):
     if name in (tname,NEWCAT_GROUP):
         continue
-    for c in cats:
-        gitems.append(catbox(name,c,grid=True))
+    for ci,c in enumerate(cats):
+        gitems.append(catbox(name,c,grid=True,firstlabel=(ci==0)))
         n+=1
         if c['category_id']==NORI_AT_CAT:
             gitems.append(f'<img class="stk masc noridex" src="{IMGS["nori"]}" alt="" width="270" height="254" loading="lazy" decoding="async">')
@@ -288,7 +288,6 @@ border:1px solid var(--line);border-radius:5px;image-rendering:pixelated}
  .addhome{grid-area:book}
  .sharebtn{grid-area:share}
  .qr{grid-area:qr}
- .qr::after{content:none}
  .chikoimg{grid-area:chiko}
 }
 .aha small{display:block;font-size:18px;font-weight:600;color:var(--dim);letter-spacing:.06em;margin-bottom:3px}
@@ -314,7 +313,7 @@ font-style:italic;font-style:oblique 12deg}
 .pks{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 14px;margin-bottom:16px}
 .pks.pksfirst{grid-template-columns:repeat(3,1fr)}
 @media(max-width:939.98px){
- .pks.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .pks.g2{grid-template-columns:repeat(3,minmax(0,1fr))}
  .pks.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(min-width:940px){
@@ -407,7 +406,7 @@ padding:2px 3px;border-radius:3px;background:rgba(15,25,35,.6);pointer-events:no
 a.pk::after,a.row::after{content:none}
 .endwrap{margin:48px 0 32px}
 .endgrid{margin-top:18px;gap:28px 14px}
-.endgrid .endkome{grid-column:1/-1}
+.endgrid .endkome{grid-column:auto}
 .endgrid details.item[open]{grid-column:1/-1;background:#FFF}
 .selfline{margin:20px 0 0;font-size:19px;color:var(--sub)}
 .techdesc{margin:12px 0 0;font-size:12px;line-height:1.8;color:var(--dim)}
@@ -466,6 +465,41 @@ a.pk::after,a.row::after{content:none}
  .rows{grid-template-columns:repeat(3,1fr)}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* ===== 以下、index.html に直接入れていた修正を build.py に移植 ===== */
+/* QR下の🔗を消す。a[target="_blank"]::after と詳細度が同値のため後ろに置いて後勝ちさせる */
+a.qr::after{content:none}
+/* スマホのカードタイトルは最大4行 */
+@media(max-width:939.98px){.pk p{-webkit-line-clamp:4;text-overflow:ellipsis}}
+/* 末尾4ブロック：スマホ2x2 / PC1x4 */
+@media(max-width:699.98px){.pks.endgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:700px){.pks.endgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,1.4fr)}.pks.endgrid .masc{width:100%;max-width:250px}}
+@media(max-width:939.98px){.pks.endgrid .item{padding:20px 10px 12px}.pks.endgrid .item .t{font-size:17px}.pks.endgrid .item .pm{font-size:17px}.pks.endgrid .item .blklabel{font-size:14px;left:10px;top:-11px}.pks.endgrid .row1{gap:6px}}
+/* 神回★エリア：スマホ左右2列＋説明文 / PC3列 */
+.shinkai-description{display:none}
+@media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr 1fr;gap:12px}.shinkai-description{display:block;grid-area:1/1;font-size:16px;line-height:1.5;color:#333;margin:0;padding:12px;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;word-break:break-word}.shinkai-description strong{color:var(--blue);font-weight:700}.items.shinkai-wrapper>.item.solo{grid-area:2/1;background:#E9F5EA;border-color:var(--greenline)}.items.shinkai-wrapper>.item.solo:active{background:var(--tint)}.items.shinkai-wrapper>.item.solo[open]{grid-column:1/-1;background:#FFF;border-color:var(--line)}.items.shinkai-wrapper>.pkcap{grid-area:1/2;margin:0;align-self:end}.items.shinkai-wrapper>.pk{grid-area:2/2}.items.shinkai-wrapper:has(>.item.solo[open]){grid-template-columns:1fr}.items.shinkai-wrapper:has(>.item.solo[open])>*{grid-area:auto}}
+@media(min-width:940px){.items.shinkai-wrapper{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* 青帯：スマホのみ上下余白を半分・文字を拡大 */
+@media(max-width:939.98px){.say{padding:15px 22px;font-size:clamp(25px,6.4vw,34px);line-height:1.4}}
+/* 自己紹介・終わりリンクの下線を消す */
+.selfline>a,.owariend>a{text-decoration:none}
+
+/* ===== 今回の4点 ===== */
+/* 修正1 カテゴリ説明文：スマホのみ .thanks と同じ19pxで黒。神回★(.solo)は対象外 */
+@media(max-width:939.98px){.item:not(.solo) .d{font-size:19px;color:#000}}
+/* 修正2 ＋記号：カテゴリ名26pxに対しスマホは同寸、PCはやや大きく。行高は .t が決めるため変化しない */
+@media(max-width:939.98px){.item .pm{font-size:26px}}
+@media(min-width:940px){.item .pm{font-size:30px}}
+/* 修正3 展開中ヘッダー：薄緑。閉じると[open]が外れて元のベージュへ自動で戻る */
+details.item[open]>summary{background:#E9F5EA;border-bottom-color:#276B3B}
+details.item[open]>summary .t{color:#276B3B}
+details.item[open] .closelbl{background:#276B3B}
+/* 修正4 上位カテゴリ 連続先頭の強調：スマホのみ。PCには一切効かせない */
+@media(max-width:939.98px){
+ .item .blklabel.grouptop,.item:nth-of-type(even) .blklabel.grouptop{
+  background:#1E5E34;color:#fff;font-size:21px;letter-spacing:.08em;
+  padding:3px 12px;border-radius:6px;top:-18px;left:10px}
+}
 '''
 
 HTML=f'''<!DOCTYPE html>
@@ -497,7 +531,7 @@ HTML=f'''<!DOCTYPE html>
 </div>
 <div class="qrbox"><div class="qrcol">
 <button type="button" class="addhome" id="addhomeBtn">🔖 ブックマーク</button>
-<a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="QR_586356.png" alt="" width="216" height="216" decoding="async" fetchpriority="high"></a>
+<a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="img/qr_github.webp" alt="" width="296" height="296" decoding="async" fetchpriority="high"></a>
 <button type="button" class="sharebtn" id="shareBtn">
 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L7.04 9.81C6.5 9.31 5.79 9 5 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91s-1.31-2.92-2.92-2.92z"/></svg>
 共有
@@ -521,20 +555,18 @@ HTML=f'''<!DOCTYPE html>
 </div>
 </div>
 <div class="pkwrap"><h2>まずはこのあたりから</h2>{first}
-<div class="items"><details class="item solo">
+<div class="items shinkai-wrapper"><div class="shinkai-description"><strong>左『＋』ボタンを押すと、その下側にズラット</strong>タイトル表示されます。</div><details class="item solo">
 <summary><span class="row1"><span class="pm" aria-hidden="true">＋</span>
 <span class="t">神回★</span>
 <span class="closelbl" aria-hidden="true">↑ とじる</span></span>
-<span class="d">名作お気に入り</span></summary>
-<div class="catbody">{pkgrid(KAMI,cls=f' g{best_cols(len(KAMI),(2,3))}')}</div></details></div>
+<span class="d">お気に入り</span></summary>
+<div class="catbody">{pkgrid(KAMI,cls=f' g{best_cols(len(KAMI),(2,3))}')}</div></details><p class="pkcap">{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 {idx}
 <div class="endwrap">
-<p class="pkcap">{html.escape(CAP_WAR)}</p>
 <div class="pks endgrid">
-{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}
-<div class="stkitem endkome"><img class="stk masc" src="{IMGS['kome']}" alt="" width="266" height="254" loading="lazy" decoding="async"></div>
 {pkcard(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}
+<div class="stkitem endkome"><img class="stk masc" src="{IMGS['kome']}" alt="" width="266" height="254" loading="lazy" decoding="async"></div>
 {NEWCAT_BOX}
 {HARMONICA_BOXES}
 </div>
