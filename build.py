@@ -271,7 +271,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
 .arig{width:64px;margin-right:-4px}
-.nana{width:64px}
+.nana{width:64px;margin-left:auto}
 .masc{width:clamp(120px,32vw,170px)}
 .qrbox{display:flex;align-items:flex-end;gap:8px;flex:0 0 auto}
 .qrcol{display:flex;flex-direction:column;align-items:center;gap:8px}
