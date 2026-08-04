@@ -491,7 +491,7 @@ a.qr::after{content:none}
 @media(max-width:939.98px){.pks.endgrid .item{padding:20px 10px 12px}.pks.endgrid .item .t{font-size:17px}.pks.endgrid .item .pm{font-size:17px}.pks.endgrid .item .blklabel{font-size:14px;left:10px;top:-11px}.pks.endgrid .row1{gap:6px}}
 /* 神回★エリア：スマホ左右2列＋説明文 / PC3列 */
 .shinkai-description{display:none}
-@media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr 1fr;gap:12px}.shinkai-description{display:block;grid-area:1/1;font-size:16px;line-height:1.5;color:#333;margin:0;padding:12px;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;word-break:break-word}.shinkai-description strong{color:var(--blue);font-weight:700}.items.shinkai-wrapper>.item.solo{grid-area:2/1;background:#E9F5EA;border-color:var(--greenline)}.items.shinkai-wrapper>.item.solo:active{background:var(--tint)}.items.shinkai-wrapper>.item.solo[open]{grid-column:1/-1;background:#FFF;border-color:var(--line)}.items.shinkai-wrapper>.pkcap{grid-area:1/2;margin:0;align-self:end}.items.shinkai-wrapper>.pk{grid-area:2/2}.items.shinkai-wrapper:has(>.item.solo[open]){grid-template-columns:1fr}.items.shinkai-wrapper:has(>.item.solo[open])>*{grid-area:auto}}
+@media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr 1fr;gap:12px}.shinkai-description{display:block;grid-area:1/1;font-size:16px;line-height:1.5;color:#333;margin:0;padding:12px;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;word-break:break-word}.shinkai-description strong{color:var(--blue);font-weight:700}.items.shinkai-wrapper>.item.solo{grid-area:2/1}.items.shinkai-wrapper>.item.solo[open]{grid-column:1/-1}.items.shinkai-wrapper>.pkcap{grid-area:1/2;margin:0;align-self:end}.items.shinkai-wrapper>.pk{grid-area:2/2}.items.shinkai-wrapper:has(>.item.solo[open]){grid-template-columns:1fr}.items.shinkai-wrapper:has(>.item.solo[open])>*{grid-area:auto}}
 @media(min-width:940px){.items.shinkai-wrapper{grid-template-columns:repeat(3,minmax(0,1fr))}}
 /* 青帯：スマホのみ上下余白を半分・文字を拡大 */
 @media(max-width:939.98px){.say{padding:15px 22px;font-size:clamp(25px,6.4vw,34px);line-height:1.4}}
@@ -500,7 +500,7 @@ a.qr::after{content:none}
 
 /* ===== 今回の4点 ===== */
 /* 修正1 カテゴリ説明文：スマホのみ .thanks と同じ19pxで黒。神回★(.solo)は対象外 */
-@media(max-width:939.98px){.item:not(.solo) .d{font-size:19px;color:#000}}
+@media(max-width:939.98px){.item:not(.solo) .d{font-size:19px;color:#000}.item.solo .d{font-size:17px}}
 /* 修正2 ＋記号：カテゴリ名26pxに対しスマホは同寸、PCはやや大きく。行高は .t が決めるため変化しない */
 @media(max-width:939.98px){.item .pm{font-size:26px}}
 @media(min-width:940px){.item .pm{font-size:30px}}
@@ -528,6 +528,11 @@ details.item[open] .closelbl{background:#276B3B}
  .music-item .backlink::after{content:none}
  .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
 }
+/* 神回★ボックスの薄緑：PC・スマホで同色にする */
+.items.shinkai-wrapper>.item.solo{background:#E9F5EA;border-color:var(--greenline)}
+.items.shinkai-wrapper>.item.solo:active{background:var(--tint)}
+.items.shinkai-wrapper>.item.solo:hover{background:var(--tint);border-color:var(--accent)}
+.items.shinkai-wrapper>.item.solo[open]{background:#FFF;border-color:var(--line)}
 /* PC版「量産のきっかけ」：あらかじめセクションの右側へ。スマホでは出さない */
 .warpc{display:none}
 @media(min-width:940px){
@@ -595,9 +600,9 @@ HTML=f'''<!DOCTYPE html>
 </div>
 </div>
 <div class="note">
-<h3>［ あらかじめ ］</h3>
 <div class="noterow">
 <div class="notecol">
+<h3>［ あらかじめ ］</h3>
 ＡＩは音読み・訓読みが苦手です。{ilink(LINK_IKKI,'hpo7e3-MewI','五木寛之氏')}を「ごきかんゆき」<span class="red">(失礼！)</span>、と読んだりします。<br>
 人もAIも、人名・地名は難しいですね。<span class="hl">「温かく」聞き流しを。</span>
 <div class="sep pccenter">
