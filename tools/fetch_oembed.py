@@ -7,17 +7,17 @@ work/oembed_titles_cache.json にキャッシュする。
 「読むだけ」で、ネットワークには一切アクセスしない。
 （ビルドをオフラインかつ決定論的に保つため）
 
-使い方（リポジトリのルートで実行）:
-    python3 fetch_oembed.py            # キャッシュに無いものだけ取得
-    python3 fetch_oembed.py --refresh  # 全件を取り直す
-    python3 fetch_oembed.py --older-than 90   # 90日より古いものだけ取り直す
-    python3 fetch_oembed.py --retry-failed    # 前回失敗したものだけ再試行
+使い方（どこから実行してもよい）:
+    python3 tools/fetch_oembed.py            # キャッシュに無いものだけ取得
+    python3 tools/fetch_oembed.py --refresh  # 全件を取り直す
+    python3 tools/fetch_oembed.py --older-than 90   # 90日より古いものだけ取り直す
+    python3 tools/fetch_oembed.py --retry-failed    # 前回失敗したものだけ再試行
 """
 import json, os, re, sys, time, html as H
 import urllib.parse, urllib.request, urllib.error
 from datetime import datetime, timezone, timedelta
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # リポジトリのルート
 INDEX = os.path.join(ROOT, 'index.html')
 CACHE = os.path.join(ROOT, 'work', 'oembed_titles_cache.json')
 DELAY = 0.25          # 連続アクセスの間隔（秒）
@@ -33,7 +33,8 @@ def targets():
         s = m.end()
         e = h.find('</a>', s)
         inner = h[s:e]
-        b = re.search(r'<span class="reflink refbadge" data-url="([^"]+)">(.)</span>', inner)
+        # data-anchor="music-N" が注入されている場合があるので属性順に依存しない
+        b = re.search(r'<span class="reflink refbadge"[^>]*\sdata-url="([^"]+)"[^>]*>(.)</span>', inner)
         if not b or b.group(2) != '♫':
             continue
         url = H.unescape(b.group(1))

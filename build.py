@@ -93,6 +93,11 @@ def reflink(vid):
     if not r: return ''
     return f' <span class="reflink" data-url="{html.escape(r["url"])}">[ {r["symbol"]} ]</span>'
 
+OEMBED_CACHE={}
+_oc=os.path.join(os.path.dirname(os.path.abspath(__file__)),'work','oembed_titles_cache.json')
+if os.path.exists(_oc):
+    OEMBED_CACHE=json.load(open(_oc,encoding='utf-8'))
+
 CLIPICON='<span class="clipicon" aria-hidden="true">🔗</span>'
 ZERO_CATS={'029'}          # 冒頭から再生するカテゴリ
 tn=lambda i:f'https://img.youtube.com/vi/{i}/mqdefault.jpg'
@@ -236,7 +241,6 @@ CSS='''
 --accent:#8A5F0F;--sub:#245670;--tint:#FFF8E9;--soft:#F3F7F9;--deep:#1D6483;
 --green:#F8FCF8;--greenline:#CFE3CF;--alt:#FFFCF0;--blue:#125A93;--ltblue:#E7F2FA;--ltblue2:#D6EAF7;--rowalt:#F6FAFD}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
 body{margin:0;background:var(--bg);color:var(--fg);font-size:19px;line-height:1.85;
 font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
 -webkit-font-smoothing:antialiased}
@@ -504,6 +508,18 @@ a.qr::after{content:none}
 details.item[open]>summary{background:#E9F5EA;border-bottom-color:#276B3B}
 details.item[open]>summary .t{color:#276B3B}
 details.item[open] .closelbl{background:#276B3B}
+/* 外部リンクの音源一覧：スマホのみ表示。PCでは見出しごと出さない */
+.musiclist{display:none}
+@media(max-width:939.98px){
+ .musiclist{display:block;margin:56px 0 0}
+ .musiclist h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
+ .musiclist ol{margin:0;padding:0 0 0 1.4em;list-style:decimal}
+ .musiclist li{margin:0 0 14px;font-size:16px;line-height:1.6;overflow-wrap:anywhere}
+ .musiclist li a{color:var(--sub);text-underline-offset:3px}
+ .musiclist .backlink{display:inline-block;margin-top:2px;font-size:13px;color:var(--dim);white-space:nowrap}
+ .musiclist .backlink::after{content:none}
+ .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
+}
 .haibokuwrap{display:block}
 .hblink.top{margin:0 0 6px}
 .hblink{display:block;margin:6px 0 0;font-size:15px;line-height:1.5;color:var(--sub);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
@@ -587,6 +603,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="techdesc">{vlink(ID_KEITORA,'軽トラ４ナンバー')}ダイハツハイゼットのような「{vlink(ID_CFRZ6,'CF-RZ6')}（{vlink(ID_XUBUNTU,'xubuntu')}）」と、スズキ{vlink(ID_SWIFT,'2020スイフト')}（{vlink(ID_M1,'M1')}；{vlink(ID_A2337,'A2337')}；{vlink(ID_ASAHI,'AsahiLinuxFedoraKDEplasma')}）M1MacbookAirを使ってます。</p>
 <p class="owariend">{ilink(wu(ID_OWARI),ID_OWARI,html.escape(TXT_OWARI))}</p>
 </div>
+<!--MUSICLIST-->
 <div class="tail"></div>
 </div>
 <script>
@@ -640,6 +657,10 @@ document.addEventListener('click',function(e){{
  if(!t)return;
  e.preventDefault();
  e.stopPropagation();
+ if(t.dataset.anchor&&window.matchMedia('(max-width:939.98px)').matches){{
+  location.hash=t.dataset.anchor;
+  return;
+ }}
  window.open(t.dataset.url,'_blank','noopener');
 }});
 if('serviceWorker' in navigator){{
@@ -722,7 +743,46 @@ def _minify_html(html_str):
             out.append(re.sub(r'>\s+<','><',p))
     return ''.join(out)
 
+
+def build_music_list(doc):
+    """組み上がったHTMLを文書順に走査し、.pk内の♫バッジへ music-N / thumb-N を
+    1対1で採番する。採番は必ず最終的な文書順で行うため、ここで後処理している
+    （テンプレート内の各パーツは文書順とは異なる順で組み立てられているため）。"""
+    out=[]; items=[]; pos=0; n=0
+    for m in re.finditer(r'<a class="pk[^"]*" href="[^"]*"[^>]*>', doc):
+        end=doc.find('</a>', m.end())
+        inner=doc[m.end():end]
+        b=re.search(r'<span class="reflink refbadge" data-url="([^"]+)">(.)</span>', inner)
+        if not b or b.group(2)!='♫':
+            continue
+        n+=1
+        url=html.unescape(b.group(1))
+        vid=re.search(r'(?:v=|youtu\.be/)([A-Za-z0-9_\-]{11})', url)
+        vid=vid.group(1) if vid else ''
+        lt=re.search(r'<p>(.*?)</p>', inner, re.S)
+        local=html.unescape(lt.group(1)) if lt else ''
+        title=(OEMBED_CACHE.get(vid) or {}).get('title') or local   # 取得失敗時はローカル題名へ
+        items.append({'n':n,'url':b.group(1),'title':title})
+        # 開始タグに id="thumb-N"、バッジに data-anchor="music-N" を注入
+        tag=m.group(0)[:-1]+f' id="thumb-{n}">'
+        newinner=inner[:b.start()]+b.group(0).replace('<span class="reflink refbadge"',
+                 f'<span class="reflink refbadge" data-anchor="music-{n}"',1)+inner[b.end():]
+        out.append(doc[pos:m.start()]); out.append(tag); out.append(newinner)
+        pos=end
+    out.append(doc[pos:])
+    doc=''.join(out)
+    lis=''.join(
+        f'<li id="music-{i["n"]}">'
+        f'<a href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
+        f'<br><a class="backlink" href="#thumb-{i["n"]}">↑ 元の場所へ戻る</a></li>' for i in items)
+    sec=(f'<section class="musiclist"><h2>当ページ外部リンクの音源「🎵」</h2>'
+         f'<ol>{lis}</ol></section>')
+    return doc.replace('<!--MUSICLIST-->', sec), len(items)
+
+HTML,_MUSIC_N=build_music_list(HTML)
+
 HTML=_minify_html(HTML)
 open(OUT,'w').write(HTML)
 print(f'{OUT} {os.path.getsize(OUT)/1024:.1f}KB / gzip {len(gzip.compress(HTML.encode()))/1024:.1f}KB')
+print(f'音源一覧{_MUSIC_N}件')
 print(f'カテゴリ{len(C)} 動画{d["total_videos"]} 先頭{sum(len(i) for _,i in FIRST)}本 / オススメ{len(MORE)}本 / 神回{len(KAMI)}本 / 口ぐせ{len(PHRASES)}')
