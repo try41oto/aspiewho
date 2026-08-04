@@ -85,6 +85,9 @@ for _v in V.values():
     if _v['title'].startswith('神回★】'):
         _v['title']=_v['title'].removeprefix('神回★】')
 
+# LMボタンの除外対象：ハーモニカ演奏系カテゴリ（029 複音ハーモニカの演奏 / 033 ハーモニカの歴史・道具・名演奏家）
+HARMONICA_IDS={v['video_id'] for cid in TAIL_GROUP[1] for v in C[cid]['videos']}
+
 import csv as _csv
 MUSIC_CATS={'複音ハーモニカの演奏','楽曲の歌詞を深掘りする','童謡・唱歌と日本の歌','世界の音楽とクラシック',
  '楽器と音響のしくみ','ハーモニカの歴史・道具・名演奏家','昭和歌謡・演歌のつくり手'}
@@ -543,17 +546,23 @@ details.item[open] .closelbl{background:#276B3B}
 .musiclist .mlbadge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;
  height:32px;padding:0 7px;border-radius:16px;background:#FF0000;color:#fff;font-size:22px;
  font-weight:700;line-height:1;vertical-align:-7px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
-.music-item{display:flex;align-items:center;gap:10px}
-.music-item .ml-title{flex:1 1 auto;min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
+/* 1行を 戻る 1/8 ｜ タイトル 6/8 ｜ LM 1/8 の3分割にする（♫一覧・＠一覧で共通） */
+.music-item{display:grid;grid-template-columns:1fr 6fr 1fr;align-items:center;gap:10px}
+.music-item .ml-title{min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
 .music-item .ml-title::after{content:none}
-.music-item .backlink{flex:0 0 12.5%;min-width:0;max-width:96px;text-align:center;background:var(--blue);
- color:#fff;font-size:12px;font-weight:700;padding:6px 4px;border-radius:5px;text-decoration:none;white-space:nowrap}
-.music-item .backlink::after{content:none}
-.musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
-/* ＠一覧：逆戻を左8分の1、タイトルを右8分の7に。色や寸法は♫一覧と共通 */
-.videolist .music-item .backlink{order:0;background:#276B3B}   /* 白文字とのコントラスト比6.46:1 */
-.videolist .music-item .ml-title{order:1}
+/* 左右のボタンは同じ見た目。色は一覧ごとに（♫＝ダーク青／＠＝濃い緑） */
+.music-item .backlink,.music-item .lmlink{min-width:0;text-align:center;background:var(--blue);
+ color:#fff;font-size:12px;font-weight:700;padding:6px 2px;border-radius:5px;text-decoration:none;
+ white-space:nowrap;overflow:hidden}
+.music-item .backlink::after,.music-item .lmlink::after{content:none}
+/* アンカー到達時のハイライト：黒背景＋ごく薄いピンク文字 */
+.musiclist li:target{background:#000;color:#FFF0F5;border-radius:6px;padding:4px 6px;margin-left:-6px}
+.musiclist li:target .ml-title{color:#FFF0F5}
+/* 番号（::marker）は li の背景の外＝白地に描かれるため、薄ピンクだと読めなくなる */
+.musiclist li:target::marker{color:#000;font-weight:700}
+/* ＠一覧は左右のボタンとも濃い緑。並びは♫一覧と共通でDOM順どおり */
+.videolist .music-item .backlink,.videolist .music-item .lmlink{background:#276B3B}   /* 白文字とのコントラスト比6.46:1 */
 /* 一覧の最後は十分な余白をあけてから区切り線へ。
    50vh（画面の半分）確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
 .videolist{margin-bottom:50vh}
@@ -561,6 +570,7 @@ details.item[open] .closelbl{background:#276B3B}
 @media(min-width:940px){
  .musiclist ol{max-width:760px}
  .music-item .ml-title{font-size:16px}
+ .music-item .backlink,.music-item .lmlink{font-size:13px;padding:7px 4px}
 }
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 .items.shinkai-wrapper>.item.solo{background:#E9F5EA;border-color:var(--greenline)}
@@ -671,9 +681,11 @@ HTML=f'''<!DOCTYPE html>
 <div class="tail"></div>
 </div>
 <script>
+var SKIP_TOGGLE_SCROLL_UNTIL=0;
 document.addEventListener('toggle',function(e){{
  var d=e.target;
  if(d.tagName!=='DETAILS')return;
+ if(Date.now()<SKIP_TOGGLE_SCROLL_UNTIL)return;   /* 「戻る」からの展開時は自前でスクロールする */
  if(d.open){{
   requestAnimationFrame(function(){{d.scrollIntoView({{behavior:'smooth',block:'start'}});}});
   return;
@@ -717,6 +729,23 @@ document.addEventListener('toggle',function(e){{
  }});
 }})();
 document.addEventListener('click',function(e){{
+ /* 「戻る」：対象が閉じた details の中にあると、ブラウザ既定のハッシュ移動では
+    自動展開で高さが変わり、着地位置が大きくずれる。開いてから自前で移動する */
+ var bk=e.target.closest('.backlink');
+ if(bk){{
+  var id=bk.getAttribute('href').slice(1);
+  var el=document.getElementById(id);
+  if(el){{
+   e.preventDefault();
+   var d=el.closest('details');
+   if(d&&!d.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+600;d.open=true;}}
+   requestAnimationFrame(function(){{
+    location.hash=id;
+    el.scrollIntoView({{block:'center'}});
+   }});
+  }}
+  return;
+ }}
  var t=e.target.closest('.reflink');
  if(!t)return;
  e.preventDefault();
@@ -843,6 +872,11 @@ def build_ref_lists(doc):
             card=doc[te:doc.find('</a>', te)]
             lt=re.search(r'<p>(.*?)</p>', card, re.S)
             local=html.unescape(lt.group(1)) if lt else ''
+            # カードのhrefがその動画の自チャンネルURL。外部音源リンク(data-url)とは別物
+            own=html.unescape(re.search(r'href="([^"]*)"', doc[ts:te]).group(1))
+            ovid=re.search(r'v=([A-Za-z0-9_\-]{11})', own)
+            if ovid and ovid.group(1) in HARMONICA_IDS:
+                own=''   # ハーモニカ演奏系はNotebookLM制作ではないため対象外
             # 開始タグに id="thumb-N"、バッジに data-anchor="music-N" を注入
             out.append(doc[pos:ts])
             out.append(doc[ts:te-1]+f' id="{sp["th"]}-{n}">')
@@ -852,21 +886,28 @@ def build_ref_lists(doc):
         else:
             # カード外（バナー内）のバッジ。戻り先はバッジ自身に置く
             local=TOPREF_LOCAL.get(vid,'')
+            own=''   # バナーのバッジは1502本のいずれにも対応しないためLMボタンなし
             out.append(doc[pos:b.start()])
             out.append(b.group(0).replace(' data-url=',
                        f' id="{sp["th"]}-{n}" data-anchor="{sp["li"]}-{n}" data-url=', 1))
         pos=b.end()
         title=(OEMBED_CACHE.get(vid) or {}).get('title') or local   # 取得失敗時はローカル題名へ
-        items[sym].append({'n':n,'url':b.group(2),'title':title})
+        items[sym].append({'n':n,'url':b.group(2),'title':title,'own':own})
     out.append(doc[pos:])
     doc=''.join(out)
 
     secs=''
     for sym,sp in SPEC.items():
-        lis=''.join(
-            f'<li id="{sp["li"]}-{i["n"]}"><div class="music-item">'
-            f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
-            f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u9006\u623b</a></div></li>' for i in items[sym])
+        lis=''
+        for i in items[sym]:
+            # 右の枠：自チャンネル動画へのLMボタン。対応動画が無い行（バナー由来）と
+            # ハーモニカ演奏系の行は枠だけ残して空欄にする
+            lm=(f'<a class="lmlink" href="{html.escape(i["own"])}" target="_blank" rel="noopener">'
+                f'LM\u00a0\u203a</a>') if i['own'] else '<span class="lmnone"></span>'
+            lis+=(f'<li id="{sp["li"]}-{i["n"]}"><div class="music-item">'
+                  f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u2039\u00a0\u623b\u308b</a>'
+                  f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
+                  f'{lm}</li>')
         secs+=(f'<section class="{sp["cls"]}">'
                f'<h2><span class="mlbadge">{sym}</span>{sp["head"]}</h2>'
                f'<ol>{lis}</ol></section>')
