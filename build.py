@@ -523,7 +523,7 @@ details.item[open] .closelbl{background:#276B3B}
  .music-item .ml-title{flex:1 1 auto;min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
  .music-item .ml-title::after{content:none}
- .music-item .backlink{flex:0 0 30%;min-width:0;text-align:center;background:var(--blue);color:#fff;
+ .music-item .backlink{flex:0 0 25%;min-width:0;text-align:center;background:var(--blue);color:#fff;
   font-size:12px;font-weight:700;padding:6px 12px;border-radius:5px;text-decoration:none;white-space:nowrap}
  .music-item .backlink::after{content:none}
  .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
@@ -800,8 +800,8 @@ def build_music_list(doc):
         f'<li id="music-{i["n"]}"><div class="music-item">'
         f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
         f'<a class="backlink" href="#thumb-{i["n"]}">元へ戻る</a></div></li>' for i in items)
-    sec=(f'<section class="musiclist"><h2>当ページ外部リンク　・・・　'
-         f'<span class="mlbadge">♫</span>で示した外部リンク</h2>'
+    sec=(f'<section class="musiclist">'
+         f'<h2><span class="mlbadge">♫</span>で示した外部リンク</h2>'
          f'<ol>{lis}</ol></section>')
     return doc.replace('<!--MUSICLIST-->', sec), len(items)
 
