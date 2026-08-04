@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🎵バッジ対象の動画タイトルを YouTube oEmbed から取得し、
+♫ / ＠ バッジ対象の動画タイトルを YouTube oEmbed から取得し、
 work/oembed_titles_cache.json にキャッシュする。
 
 このスクリプトはビルドとは分離されている。build.py はキャッシュを
@@ -12,6 +12,7 @@ work/oembed_titles_cache.json にキャッシュする。
     python3 tools/fetch_oembed.py --refresh  # 全件を取り直す
     python3 tools/fetch_oembed.py --older-than 90   # 90日より古いものだけ取り直す
     python3 tools/fetch_oembed.py --retry-failed    # 前回失敗したものだけ再試行
+    python3 tools/fetch_oembed.py --only ＠  # ＠だけ／♫だけに絞る
 """
 import json, os, re, sys, time, html as H
 import urllib.parse, urllib.request, urllib.error
@@ -25,8 +26,12 @@ TIMEOUT = 20
 RETRIES = 2
 
 
-def targets():
-    """index.html から .pk カード内の ♫ バッジを拾い、(video_id, 外部URL, ローカル題名) を返す"""
+SYMBOLS = ('♫', '＠')
+
+
+def targets(only=None):
+    """index.html から .pk カード内の ♫ / ＠ バッジを拾い、
+    (video_id, 外部URL, ローカル題名, 記号) を返す"""
     h = open(INDEX, encoding='utf-8').read()
     out = []
     for m in re.finditer(r'<a class="pk[^"]*" href="([^"]+)"[^>]*>', h):
@@ -35,15 +40,17 @@ def targets():
         inner = h[s:e]
         # data-anchor="music-N" が注入されている場合があるので属性順に依存しない
         b = re.search(r'<span class="reflink refbadge"[^>]*\sdata-url="([^"]+)"[^>]*>(.)</span>', inner)
-        if not b or b.group(2) != '♫':
+        if not b or b.group(2) not in SYMBOLS:
+            continue
+        if only and b.group(2) != only:
             continue
         url = H.unescape(b.group(1))
-        vid = re.search(r'(?:v=|youtu\.be/)([A-Za-z0-9_\-]{11})', url)
+        vid = re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_\-]{11})', url)
         if not vid:
             print(f'  [skip] 動画IDを抽出できません: {url}', file=sys.stderr)
             continue
         t = re.search(r'<p>(.*?)</p>', inner, re.S)
-        out.append((vid.group(1), url, H.unescape(t.group(1)) if t else ''))
+        out.append((vid.group(1), url, H.unescape(t.group(1)) if t else '', b.group(2)))
     return out
 
 
@@ -77,17 +84,24 @@ def main():
     older = None
     if '--older-than' in args:
         older = int(args[args.index('--older-than') + 1])
+    only = None
+    if '--only' in args:
+        only = args[args.index('--only') + 1]
+        if only not in SYMBOLS:
+            raise SystemExit(f'--only は {" か ".join(SYMBOLS)} を指定してください')
 
     cache = {}
     if os.path.exists(CACHE):
         cache = json.load(open(CACHE, encoding='utf-8'))
 
-    tg = targets()
-    print(f'対象: {len(tg)}件 / キャッシュ済み: {len(cache)}件')
+    tg = targets(only)
+    per = {s: sum(1 for t in tg if t[3] == s) for s in SYMBOLS}
+    print(f'対象: {len(tg)}件（' + ' / '.join(f'{s} {per[s]}件' for s in SYMBOLS) +
+          f'） / キャッシュ済み: {len(cache)}件')
 
     now = datetime.now(timezone.utc)
     todo = []
-    for vid, url, local in tg:
+    for vid, url, local, sym in tg:
         e = cache.get(vid)
         if refresh or not e:
             todo.append((vid, url, local)); continue
@@ -100,7 +114,9 @@ def main():
                     todo.append((vid, url, local))
             except Exception:
                 todo.append((vid, url, local))
-    print(f'今回取得する件数: {len(todo)}\n')
+    print(f'今回取得する件数: {len(todo)}')
+    if todo:
+        print(f'所要見込み: 約{int(len(todo) * (DELAY + 0.35) / 60) + 1}分\n')
 
     ok = ng = 0
     for i, (vid, url, local) in enumerate(todo, 1):

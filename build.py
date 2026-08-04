@@ -790,7 +790,7 @@ def build_music_list(doc):
             continue
         n+=1
         url=html.unescape(b.group(1))
-        vid=re.search(r'(?:v=|youtu\.be/)([A-Za-z0-9_\-]{11})', url)
+        vid=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_\-]{11})', url)
         vid=vid.group(1) if vid else ''
         lt=re.search(r'<p>(.*?)</p>', inner, re.S)
         local=html.unescape(lt.group(1)) if lt else ''
