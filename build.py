@@ -523,8 +523,8 @@ details.item[open] .closelbl{background:#276B3B}
  .music-item .ml-title{flex:1 1 auto;min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
  .music-item .ml-title::after{content:none}
- .music-item .backlink{flex:0 0 25%;min-width:0;text-align:center;background:var(--blue);color:#fff;
-  font-size:12px;font-weight:700;padding:6px 12px;border-radius:5px;text-decoration:none;white-space:nowrap}
+ .music-item .backlink{flex:0 0 12.5%;min-width:0;text-align:center;background:var(--blue);color:#fff;
+  font-size:12px;font-weight:700;padding:6px 4px;border-radius:5px;text-decoration:none;white-space:nowrap}
  .music-item .backlink::after{content:none}
  .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
 }
@@ -568,7 +568,7 @@ HTML=f'''<!DOCTYPE html>
 <div class="wrap" id="top">
 <div class="hero">
 <p class="mins">1つ視聴に25分。🥴</p>
-<div class="thankswrap"><p class="thanks">大切な<a href="{LINK_TIME}" target="_blank" rel="noopener">お時間</a>をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"></div>
+<div class="thankswrap"><p class="thanks">大切なお時間をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"></div>
 <div class="ahatop">
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
@@ -804,7 +804,7 @@ def build_music_list(doc):
     lis=''.join(
         f'<li id="music-{i["n"]}"><div class="music-item">'
         f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
-        f'<a class="backlink" href="#thumb-{i["n"]}">元へ戻る</a></div></li>' for i in items)
+        f'<a class="backlink" href="#thumb-{i["n"]}">戻る</a></div></li>' for i in items)
     sec=(f'<section class="musiclist">'
          f'<h2><span class="mlbadge">♫</span>で示した外部リンク</h2>'
          f'<ol>{lis}</ol></section>')
