@@ -57,6 +57,20 @@ ID_ASAHI='Og-FD63kuxk'      # MacbookをハックしてるAsahiLinuxって、ど
 NORI_AT_CAT='073'   # のり画像を差し込むカテゴリ（発達障害の特性とライフハック）
 
 SHORT_URL_HREF='https://try41oto.github.io/aspiewho/'
+# 一気見バナー内に並べる♫バッジ（左から順）。ローカル題名は取得失敗時のフォールバック用
+TOPREF=[
+ ('https://www.youtube.com/watch?v=v6xUXCclN04&list=RDv6xUXCclN04&start_radio=1&pp=ygUV5qW96IiI44Gu5pmC44CA5Lit5bedoAcB','\u697d\u8208\u306e\u6642\u3000\u4e2d\u5ddd'),
+ ('https://www.youtube.com/watch?v=mNSDWf2EX3Q&list=RDmNSDWf2EX3Q&start_radio=1&pp=ygUt5YiH5omL44Gu44Gq44GE44GK44GP44KK44KC44Gu44CA6L-R6Jek44KG44GNoAcB','\u5207\u624b\u306e\u306a\u3044\u304a\u304f\u308a\u3082\u306e\u3000\u8fd1\u85e4\u3086\u304d'),
+ ('https://www.youtube.com/watch?v=R5zxnw5NMxU&list=RDR5zxnw5NMxU&start_radio=1&pp=ygUW5oSb44Gu5oyo5ou244CAVGVtaXJrYaAHAQ%3D%3D','\u611b\u306e\u6328\u62f6\u3000Temirka'),
+ ('https://www.youtube.com/watch?v=xrfu574p1Y4&list=RDxrfu574p1Y4&start_radio=1&pp=ygUb44OR44Oq44Gu56m644Gu5LiL44CA6KeS6LC3oAcB','\u30d1\u30ea\u306e\u7a7a\u306e\u4e0b\u3000\u89d2\u8c37'),
+ ('https://www.youtube.com/watch?v=slesVH8wERU&list=RDslesVH8wERU&start_radio=1&pp=ygUf44G844GP44Gf44Gh44Gu5aSx5pWX44CANzM3Z3VhbaAHAdIHCQnFCwGHKiGM7w%3D%3D','\u307c\u304f\u305f\u3061\u306e\u5931\u6557\u3000737guam'),
+ ('https://www.youtube.com/watch?v=Zq1cqWIRLAc&list=RDZq1cqWIRLAc&start_radio=1&pp=ygUQ44GT44Gu6YGTIOi_keiXpKAHAQ%3D%3D','\u3053\u306e\u9053\u3000\u8fd1\u85e4'),
+ ('https://www.youtube.com/watch?v=J02j_bjTO7k&list=RDJ02j_bjTO7k&start_radio=1&pp=ygUi44OV44Kj44Ks44Ot44Gu57WQ5ama44CAUGVsdG9rb3NraaAHAQ%3D%3D','\u30d5\u30a3\u30ac\u30ed\u306e\u7d50\u5a5a\u3000Peltokoski'),
+ ('https://www.youtube.com/watch?v=GUBh7HOBXBg&list=RDGUBh7HOBXBg&start_radio=1&pp=ygUW5Lq655Sf44Gu5omJ44CANzM3Z3VhbaAHAQ%3D%3D','\u4eba\u751f\u306e\u6249\u3000737guam'),
+]
+TOPREF_LOCAL={re.search(r'v=([A-Za-z0-9_\-]{11})',u).group(1):t for u,t in TOPREF}
+TOPBADGES=''.join(
+ f'<span class="reflink refbadge tb" data-url="{html.escape(u)}">\u266b</span>' for u,_ in TOPREF)
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
@@ -348,15 +362,16 @@ color:var(--blue);letter-spacing:.02em;line-height:1.5}
 /* 一気見バナー */
 .bannerrow{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;margin:32px 0}
 .bannerrow.top{justify-content:flex-start;margin:14px 0 0}
-.banner{display:inline-flex;align-items:center;min-height:44px;margin:0;padding:14px 20px;
+.banner{display:inline-flex;flex-wrap:wrap;align-items:center;min-height:44px;margin:0;padding:14px 20px;
 background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-decoration:none;position:relative}
+/* バナー内の♫バッジ：8列固定。幅が足りないときは各バッジが縮んで対応するので、
+   どの画面幅でも必ず1行に収まり、バナー全体はタイトル＋♫の2行になる */
+.tbrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;
+flex:1 0 100%;width:100%;max-width:330px;margin:8px 0 0}
+.refbadge.tb{position:static;top:auto;right:auto;width:100%;min-width:0;height:auto;
+aspect-ratio:1;padding:0;font-size:clamp(15px,4.4vw,20px)}
 .banner .pop{display:none}
 .banner .lbl{font-size:24px;font-weight:800;letter-spacing:.04em;line-height:1.4;color:var(--blue)}
-.banner i{display:block;font-style:normal;font-size:15px;font-weight:600;color:var(--blue);
-letter-spacing:.12em;text-decoration:none;margin-top:4px}
-@media(max-width:939.98px){
- .banner i{display:inline;margin-top:0;margin-left:6px}
-}
 /* 文中リンクのフワッとプレビュー */
 .ilink{position:relative}
 .ilink .pop{display:none}
@@ -533,7 +548,7 @@ details.item[open] .closelbl{background:#276B3B}
  .music-item .backlink::after{content:none}
  .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
  /* ＠一覧：逆戻を左8分の1、タイトルを右8分の7に。色や寸法は♫一覧と共通 */
- .videolist .music-item .backlink{order:0}
+ .videolist .music-item .backlink{order:0;background:#276B3B}   /* 白文字とのコントラスト比6.46:1 */
  .videolist .music-item .ml-title{order:1}
  /* 一覧の最後は十分な余白をあけてから区切り線へ */
  /* 50vh（画面の半分）確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
@@ -590,7 +605,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
 <div class="bannerrow top">
 <a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" style="--th:url({tnhq(ID_ICHIMI)})">
-<span class="lbl">{html.escape(TXT_ICHIMI)}<i>click</i></span>
+<span class="lbl">{html.escape(TXT_ICHIMI)}</span><span class="tbrow">{TOPBADGES}</span>
 <span class="pop" aria-hidden="true"></span></a>
 </div>
 </div>
@@ -790,8 +805,9 @@ def _minify_html(html_str):
 
 
 def build_ref_lists(doc):
-    """組み上がったHTMLを文書順に1回だけ走査し、.pk内の♫/＠バッジへ
+    """組み上がったHTMLを文書順に1回だけ走査し、♫/＠バッジへ
     music-N / thumb-N（♫）と video-N / vthumb-N（＠）を1対1で採番する。
+    バッジは .pk カード内のほか、一気見バナー内にも置かれる。
     採番は必ず最終的な文書順で行うため、ここで後処理している
     （テンプレート内の各パーツは文書順とは異なる順で組み立てられているため）。"""
     SPEC={
@@ -799,27 +815,41 @@ def build_ref_lists(doc):
      '\uff20':{'cls':'musiclist videolist','head':'\u95a2\u9023\u306e\u52d5\u753b','li':'video','th':'vthumb'},
     }
     out=[]; items={k:[] for k in SPEC}; cnt={k:0 for k in SPEC}; pos=0
-    for m in re.finditer(r'<a class="pk[^"]*" href="[^"]*"[^>]*>', doc):
-        end=doc.find('</a>', m.end())
-        inner=doc[m.end():end]
-        b=re.search(r'<span class="reflink refbadge" data-url="([^"]+)">(.)</span>', inner)
-        if not b or b.group(2) not in SPEC:
+    for b in re.finditer(r'<span class="reflink refbadge([^"]*)" data-url="([^"]+)">(.)</span>', doc):
+        sym=b.group(3)
+        if sym not in SPEC:
             continue
-        sym=b.group(2); sp=SPEC[sym]
-        cnt[sym]+=1; n=cnt[sym]
-        url=html.unescape(b.group(1))
+        # バッジを囲む .pk カードがあるか。.row 内（ハーモニカ等）は一覧の対象外で、
+        # バナー内のバッジだけは tb クラスで明示的に見分ける
+        ts=doc.rfind('<a class="pk', 0, b.start())
+        te=doc.find('>', ts)+1 if ts!=-1 else -1
+        inside = ts!=-1 and doc.find('</a>', te) > b.start()
+        is_tb = 'tb' in b.group(1).split()
+        if not inside and not is_tb:
+            continue
+        sp=SPEC[sym]; cnt[sym]+=1; n=cnt[sym]
+        url=html.unescape(b.group(2))
         vid=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_\-]{11})', url)
         vid=vid.group(1) if vid else ''
-        lt=re.search(r'<p>(.*?)</p>', inner, re.S)
-        local=html.unescape(lt.group(1)) if lt else ''
+        if inside:
+            card=doc[te:doc.find('</a>', te)]
+            lt=re.search(r'<p>(.*?)</p>', card, re.S)
+            local=html.unescape(lt.group(1)) if lt else ''
+            # 開始タグに id="thumb-N"、バッジに data-anchor="music-N" を注入
+            out.append(doc[pos:ts])
+            out.append(doc[ts:te-1]+f' id="{sp["th"]}-{n}">')
+            out.append(doc[te:b.start()])
+            out.append(b.group(0).replace(' data-url=',
+                       f' data-anchor="{sp["li"]}-{n}" data-url=', 1))
+        else:
+            # カード外（バナー内）のバッジ。戻り先はバッジ自身に置く
+            local=TOPREF_LOCAL.get(vid,'')
+            out.append(doc[pos:b.start()])
+            out.append(b.group(0).replace(' data-url=',
+                       f' id="{sp["th"]}-{n}" data-anchor="{sp["li"]}-{n}" data-url=', 1))
+        pos=b.end()
         title=(OEMBED_CACHE.get(vid) or {}).get('title') or local   # 取得失敗時はローカル題名へ
-        items[sym].append({'n':n,'url':b.group(1),'title':title})
-        # 開始タグに id="thumb-N" / "vthumb-N"、バッジに data-anchor="music-N" / "video-N" を注入
-        tag=m.group(0)[:-1]+f' id="{sp["th"]}-{n}">'
-        newinner=inner[:b.start()]+b.group(0).replace('<span class="reflink refbadge"',
-                 f'<span class="reflink refbadge" data-anchor="{sp["li"]}-{n}"',1)+inner[b.end():]
-        out.append(doc[pos:m.start()]); out.append(tag); out.append(newinner)
-        pos=end
+        items[sym].append({'n':n,'url':b.group(2),'title':title})
     out.append(doc[pos:])
     doc=''.join(out)
 

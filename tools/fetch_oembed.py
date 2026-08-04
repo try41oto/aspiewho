@@ -34,13 +34,10 @@ def targets(only=None):
     (video_id, 外部URL, ローカル題名, 記号) を返す"""
     h = open(INDEX, encoding='utf-8').read()
     out = []
-    for m in re.finditer(r'<a class="pk[^"]*" href="([^"]+)"[^>]*>', h):
-        s = m.end()
-        e = h.find('</a>', s)
-        inner = h[s:e]
-        # data-anchor="music-N" が注入されている場合があるので属性順に依存しない
-        b = re.search(r'<span class="reflink refbadge"[^>]*\sdata-url="([^"]+)"[^>]*>(.)</span>', inner)
-        if not b or b.group(2) not in SYMBOLS:
+    # バッジは .pk カード内のほか、一気見バナー内にも置かれるため、
+    # カードではなくバッジそのものを文書順に走査する
+    for b in re.finditer(r'<span class="reflink refbadge[^"]*"[^>]*\sdata-url="([^"]+)"[^>]*>(.)</span>', h):
+        if b.group(2) not in SYMBOLS:
             continue
         if only and b.group(2) != only:
             continue
@@ -49,8 +46,21 @@ def targets(only=None):
         if not vid:
             print(f'  [skip] 動画IDを抽出できません: {url}', file=sys.stderr)
             continue
-        t = re.search(r'<p>(.*?)</p>', inner, re.S)
-        out.append((vid.group(1), url, H.unescape(t.group(1)) if t else '', b.group(2)))
+        # .pk カード内か、バナー内（tbクラス）だけを対象にする。
+        # .row 内のバッジ（ハーモニカ等）は一覧に載せないので取得もしない
+        ts = h.rfind('<a class="pk', 0, b.start())
+        inside = False
+        local = ''
+        if ts != -1:
+            te = h.find('>', ts) + 1
+            ce = h.find('</a>', te)
+            if ce > b.start():
+                inside = True
+                lt = re.search(r'<p>(.*?)</p>', h[te:ce], re.S)
+                local = H.unescape(lt.group(1)) if lt else ''
+        if not inside and 'tb' not in (b.group(0).split('class="')[1].split('"')[0].split()):
+            continue
+        out.append((vid.group(1), url, local, b.group(2)))
     return out
 
 
