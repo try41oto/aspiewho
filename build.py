@@ -516,7 +516,9 @@ details.item[open] .closelbl{background:#276B3B}
 @media(max-width:939.98px){
  .musiclist{display:block;margin:56px 0 0}
  .musiclist h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
- .musiclist ol{margin:0;padding:0 0 0 1.4em;list-style:decimal}
+ /* 番号の領域：＠一覧は3桁（267.=42.3px）まで出るため、1.4emでは画面外へはみ出す。
+    ♫一覧と左端を揃えるため両方に同じ値を与える */
+ .musiclist ol{margin:0;padding:0 0 0 2.5em;list-style:decimal}
  .musiclist li{margin:0 0 10px}
  /* 見出しの♫は .refbadge と同じ #FF0000 / #fff。絵文字ではCSSのcolorが効かないため記号+丸で再現 */
  .musiclist .mlbadge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;
@@ -530,6 +532,12 @@ details.item[open] .closelbl{background:#276B3B}
   font-size:12px;font-weight:700;padding:6px 4px;border-radius:5px;text-decoration:none;white-space:nowrap}
  .music-item .backlink::after{content:none}
  .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
+ /* ＠一覧：逆戻を左8分の1、タイトルを右8分の7に。色や寸法は♫一覧と共通 */
+ .videolist .music-item .backlink{order:0}
+ .videolist .music-item .ml-title{order:1}
+ /* 一覧の最後は十分な余白をあけてから区切り線へ */
+ /* 50vh（画面の半分）確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
+ .videolist{margin-bottom:50vh}
 }
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 .items.shinkai-wrapper>.item.solo{background:#E9F5EA;border-color:var(--greenline)}
@@ -541,7 +549,7 @@ details.item[open] .closelbl{background:#276B3B}
 @media(min-width:940px){
  .note .noterow{display:flex;gap:24px;align-items:flex-start}
  .noterow .notecol{flex:1.5;min-width:0}
- .warpc{display:block;flex:1;min-width:0}
+ .warpc{display:block;flex:1;min-width:0;background:var(--bg);border-radius:8px;padding:14px;margin:-14px}
  .warpc .pkcap{margin:0 0 8px;font-size:22px;line-height:1.4}
  .warpc .pk p{font-size:15px;line-height:1.5;-webkit-line-clamp:3}
  /* スマホ版はPCでは非表示にし、神回★ブロックの上下余白も詰める */
@@ -691,7 +699,11 @@ document.addEventListener('click',function(e){{
  e.preventDefault();
  e.stopPropagation();
  if(t.dataset.anchor&&window.matchMedia('(max-width:939.98px)').matches){{
-  location.hash=t.dataset.anchor;
+  var el=document.getElementById(t.dataset.anchor);
+  if(el){{
+   location.hash=t.dataset.anchor;      /* :target のハイライトを効かせる */
+   el.scrollIntoView({{block:'center'}});  /* 既定は瞬間移動。画面の上下中央へ */
+  }}
   return;
  }}
  window.open(t.dataset.url,'_blank','noopener');
@@ -777,46 +789,55 @@ def _minify_html(html_str):
     return ''.join(out)
 
 
-def build_music_list(doc):
-    """組み上がったHTMLを文書順に走査し、.pk内の♫バッジへ music-N / thumb-N を
-    1対1で採番する。採番は必ず最終的な文書順で行うため、ここで後処理している
+def build_ref_lists(doc):
+    """組み上がったHTMLを文書順に1回だけ走査し、.pk内の♫/＠バッジへ
+    music-N / thumb-N（♫）と video-N / vthumb-N（＠）を1対1で採番する。
+    採番は必ず最終的な文書順で行うため、ここで後処理している
     （テンプレート内の各パーツは文書順とは異なる順で組み立てられているため）。"""
-    out=[]; items=[]; pos=0; n=0
+    SPEC={
+     '\u266b':{'cls':'musiclist','head':'\u95a2\u9023\u306e\u97f3\u697d','li':'music','th':'thumb'},
+     '\uff20':{'cls':'musiclist videolist','head':'\u95a2\u9023\u306e\u52d5\u753b','li':'video','th':'vthumb'},
+    }
+    out=[]; items={k:[] for k in SPEC}; cnt={k:0 for k in SPEC}; pos=0
     for m in re.finditer(r'<a class="pk[^"]*" href="[^"]*"[^>]*>', doc):
         end=doc.find('</a>', m.end())
         inner=doc[m.end():end]
         b=re.search(r'<span class="reflink refbadge" data-url="([^"]+)">(.)</span>', inner)
-        if not b or b.group(2)!='♫':
+        if not b or b.group(2) not in SPEC:
             continue
-        n+=1
+        sym=b.group(2); sp=SPEC[sym]
+        cnt[sym]+=1; n=cnt[sym]
         url=html.unescape(b.group(1))
         vid=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_\-]{11})', url)
         vid=vid.group(1) if vid else ''
         lt=re.search(r'<p>(.*?)</p>', inner, re.S)
         local=html.unescape(lt.group(1)) if lt else ''
         title=(OEMBED_CACHE.get(vid) or {}).get('title') or local   # 取得失敗時はローカル題名へ
-        items.append({'n':n,'url':b.group(1),'title':title})
-        # 開始タグに id="thumb-N"、バッジに data-anchor="music-N" を注入
-        tag=m.group(0)[:-1]+f' id="thumb-{n}">'
+        items[sym].append({'n':n,'url':b.group(1),'title':title})
+        # 開始タグに id="thumb-N" / "vthumb-N"、バッジに data-anchor="music-N" / "video-N" を注入
+        tag=m.group(0)[:-1]+f' id="{sp["th"]}-{n}">'
         newinner=inner[:b.start()]+b.group(0).replace('<span class="reflink refbadge"',
-                 f'<span class="reflink refbadge" data-anchor="music-{n}"',1)+inner[b.end():]
+                 f'<span class="reflink refbadge" data-anchor="{sp["li"]}-{n}"',1)+inner[b.end():]
         out.append(doc[pos:m.start()]); out.append(tag); out.append(newinner)
         pos=end
     out.append(doc[pos:])
     doc=''.join(out)
-    lis=''.join(
-        f'<li id="music-{i["n"]}"><div class="music-item">'
-        f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
-        f'<a class="backlink" href="#thumb-{i["n"]}">戻る</a></div></li>' for i in items)
-    sec=(f'<section class="musiclist">'
-         f'<h2><span class="mlbadge">♫</span>で示した外部リンク</h2>'
-         f'<ol>{lis}</ol></section>')
-    return doc.replace('<!--MUSICLIST-->', sec), len(items)
 
-HTML,_MUSIC_N=build_music_list(HTML)
+    secs=''
+    for sym,sp in SPEC.items():
+        lis=''.join(
+            f'<li id="{sp["li"]}-{i["n"]}"><div class="music-item">'
+            f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
+            f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u9006\u623b</a></div></li>' for i in items[sym])
+        secs+=(f'<section class="{sp["cls"]}">'
+               f'<h2><span class="mlbadge">{sym}</span>{sp["head"]}</h2>'
+               f'<ol>{lis}</ol></section>')
+    return doc.replace('<!--MUSICLIST-->', secs), {k:len(v) for k,v in items.items()}
+
+HTML,_REF_N=build_ref_lists(HTML)
 
 HTML=_minify_html(HTML)
 open(OUT,'w').write(HTML)
 print(f'{OUT} {os.path.getsize(OUT)/1024:.1f}KB / gzip {len(gzip.compress(HTML.encode()))/1024:.1f}KB')
-print(f'音源一覧{_MUSIC_N}件')
+print('一覧 '+' / '.join(f'{k}{v}件' for k,v in _REF_N.items()))
 print(f'カテゴリ{len(C)} 動画{d["total_videos"]} 先頭{sum(len(i) for _,i in FIRST)}本 / オススメ{len(MORE)}本 / 神回{len(KAMI)}本 / 口ぐせ{len(PHRASES)}')
