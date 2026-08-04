@@ -43,7 +43,7 @@ PHRASES=['学ぶことがだいすきなアナタ、本日もようこそ、こ�
 ID_ICHIMI='uBtnbr0gu80'   # 1500タイトルを24分で一気見！
 ID_OWARI ='76XZgkPmg2s'   # 終わり☆AI能力把握実験、脳内発散訓練、遺言】動画量産1500本
 TXT_ICHIMI='1500タイトルを24分で一気見！'
-TXT_OWARI='終わり☆AI能力把握実験、脳内発散訓練、遺言】動画量産1500本'
+TXT_OWARI='終わり☆AI能力把握実験、脳内発散訓練、ポートフォリオ、遺言】動画量産1500本'
 ID_SELFINTRO='zQP6i3wEvPY'   # 自己紹介】積極奇異型アスペルガー(ASD)症候群、ワタシはココに居ます！(自慢)
 TXT_SELFINTRO='自己紹介'
 ID_KEITORA='hZIE2BqHt6c'    # 軽自動車 as a Japanese Service
@@ -514,11 +514,31 @@ details.item[open] .closelbl{background:#276B3B}
  .musiclist{display:block;margin:56px 0 0}
  .musiclist h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
  .musiclist ol{margin:0;padding:0 0 0 1.4em;list-style:decimal}
- .musiclist li{margin:0 0 14px;font-size:16px;line-height:1.6;overflow-wrap:anywhere}
- .musiclist li a{color:var(--sub);text-underline-offset:3px}
- .musiclist .backlink{display:inline-block;margin-top:2px;font-size:13px;color:var(--dim);white-space:nowrap}
- .musiclist .backlink::after{content:none}
+ .musiclist li{margin:0 0 10px}
+ /* 見出しの♫は .refbadge と同じ #FF0000 / #fff。絵文字ではCSSのcolorが効かないため記号+丸で再現 */
+ .musiclist .mlbadge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;
+  height:32px;padding:0 7px;border-radius:16px;background:#FF0000;color:#fff;font-size:22px;
+  font-weight:700;line-height:1;vertical-align:-7px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+ .music-item{display:flex;align-items:center;gap:10px}
+ .music-item .ml-title{flex:1 1 auto;min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
+ .music-item .ml-title::after{content:none}
+ .music-item .backlink{flex:0 0 30%;min-width:0;text-align:center;background:var(--blue);color:#fff;
+  font-size:12px;font-weight:700;padding:6px 12px;border-radius:5px;text-decoration:none;white-space:nowrap}
+ .music-item .backlink::after{content:none}
  .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
+}
+/* PC版「量産のきっかけ」：あらかじめセクションの右側へ。スマホでは出さない */
+.warpc{display:none}
+@media(min-width:940px){
+ .note .noterow{display:flex;gap:24px;align-items:flex-start}
+ .noterow .notecol{flex:1.5;min-width:0}
+ .warpc{display:block;flex:1;min-width:0}
+ .warpc .pkcap{margin:0 0 8px;font-size:22px;line-height:1.4}
+ .warpc .pk p{font-size:15px;line-height:1.5;-webkit-line-clamp:3}
+ /* スマホ版はPCでは非表示にし、神回★ブロックの上下余白も詰める */
+ .items.shinkai-wrapper>.pkcap,.items.shinkai-wrapper>.pk{display:none}
+ .items.shinkai-wrapper{margin:0 0 8px;gap:0}
 }
 .haibokuwrap{display:block}
 .hblink.top{margin:0 0 6px}
@@ -576,8 +596,13 @@ HTML=f'''<!DOCTYPE html>
 </div>
 <div class="note">
 <h3>［ あらかじめ ］</h3>
+<div class="noterow">
+<div class="notecol">
 ＡＩは音読み・訓読みが苦手です。{ilink(LINK_IKKI,'hpo7e3-MewI','五木寛之氏')}を「ごきかんゆき」<span class="red">(失礼！)</span>、と読んだりします。<br>
 人もAIも、人名・地名は難しいですね。<span class="hl">「温かく」聞き流しを。</span>
+</div>
+<div class="warpc"><p class="pkcap">{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
+</div>
 <div class="sep pccenter">
 動画「前／中／後」３回の、耳痛いハーモニカ演奏は、<a class="ilink" href="#techdefeat-top"><strong>意図があって</strong></a>挿入しています。<br>
 <span class="red">倍速や早送りなど推奨</span>(⇒<a href="{LINK_STAR}" target="_blank" rel="noopener">★</a>)　<span class="red">どうぞ！早送りくださいませ。</span>
@@ -772,10 +797,11 @@ def build_music_list(doc):
     out.append(doc[pos:])
     doc=''.join(out)
     lis=''.join(
-        f'<li id="music-{i["n"]}">'
-        f'<a href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
-        f'<br><a class="backlink" href="#thumb-{i["n"]}">↑ 元の場所へ戻る</a></li>' for i in items)
-    sec=(f'<section class="musiclist"><h2>当ページ外部リンクの音源「🎵」</h2>'
+        f'<li id="music-{i["n"]}"><div class="music-item">'
+        f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
+        f'<a class="backlink" href="#thumb-{i["n"]}">元へ戻る</a></div></li>' for i in items)
+    sec=(f'<section class="musiclist"><h2>当ページ外部リンク　・・・　'
+         f'<span class="mlbadge">♫</span>で示した外部リンク</h2>'
          f'<ol>{lis}</ol></section>')
     return doc.replace('<!--MUSICLIST-->', sec), len(items)
 
