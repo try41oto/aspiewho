@@ -20,11 +20,12 @@ FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','1fg64F4OBnU','QrSTV7drbUo','KxMbR6po5
 ID_WAR='cEkx8UrBpAU'
 CAP_WAR='量産のきっかけは、戦争の話。'
 ID_HAIBOKU='NjBJJ3JSqag'
+ID_INTENT='uG0WFwTonJw'  # ★当初オンプレmp4生成思想…（追加2／「意図があって」のアンカー先）
 ID_FINAL='ddjkcRM3H4s'    # ★スマホだけで1日15本以上…（この動画生成／追加3のリンク先）
 TXT_FINAL='最終形はこうなった'
 # カテゴリ一覧の表示からのみ除外するID（データ自体は残すので神回★グリッドには載る）
 KAMI_ONLY_IDS={'CKOHd9PrqeE','1v_H2rHfhQw','cE6IhFUDq4A'}  # 神回★とカテゴリの二重掲載を解消
-HIDE_FROM_CAT=KAMI_ONLY_IDS|{ID_FINAL}
+HIDE_FROM_CAT=KAMI_ONLY_IDS|{ID_FINAL,ID_INTENT}
 TXT_HAIBOKU='技術的敗北と再生の物語'
 IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
@@ -135,6 +136,9 @@ groups.append((tname,[C[x] for x in tids]))
 groups.append((NEWCAT_GROUP,[NEWCAT]))
 assert sum(len(cs) for _,cs in groups)==len(C)
 assert sum(c['count'] for _,cs in groups for c in cs)==d['total_videos']-len(SOLO_IDS)
+
+def cut(t,n=26):
+    return t if len(t)<=n else t[:n]+'…'
 
 def best_cols(n,options):
     # 最終行の空きマスが最小の列数を選ぶ。同数なら列数が多い方を優先
@@ -501,6 +505,7 @@ details.item[open]>summary{background:#E9F5EA;border-bottom-color:#276B3B}
 details.item[open]>summary .t{color:#276B3B}
 details.item[open] .closelbl{background:#276B3B}
 .haibokuwrap{display:block}
+.hblink.top{margin:0 0 6px}
 .hblink{display:block;margin:6px 0 0;font-size:15px;line-height:1.5;color:var(--sub);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
 /* 修正4 上位カテゴリ 連続先頭の強調：スマホのみ。PCには一切効かせない */
 @media(max-width:939.98px){
@@ -573,7 +578,7 @@ HTML=f'''<!DOCTYPE html>
 {idx}
 <div class="endwrap">
 <div class="pks endgrid">
-<div class="haibokuwrap" id="techdefeat-top">{pkcard(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}<a class="hblink" href="{wu(ID_FINAL)}" target="_blank" rel="noopener">{html.escape(TXT_FINAL)}</a></div>
+<div class="haibokuwrap"><a class="hblink top" id="techdefeat-top" href="{wu(ID_INTENT)}" target="_blank" rel="noopener">{html.escape(cut(V[ID_INTENT]["title"]))}</a>{pkcard(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}<a class="hblink" href="{wu(ID_FINAL)}" target="_blank" rel="noopener">{html.escape(TXT_FINAL)}</a></div>
 <div class="stkitem endkome"><img class="stk masc" src="{IMGS['kome']}" alt="" width="266" height="254" loading="lazy" decoding="async"></div>
 {NEWCAT_BOX}
 {HARMONICA_BOXES}
