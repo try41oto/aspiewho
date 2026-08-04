@@ -29,6 +29,7 @@ HIDE_FROM_CAT=KAMI_ONLY_IDS|{ID_FINAL,ID_INTENT}
 TXT_HAIBOKU='技術的敗北と再生の物語'
 IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
+IMGS['nanananana']='img/nanananana_anim.webp'
 MORE=['TCe2SvES2x4','2Zky_cifOmw','w3dKDFOc-8I','GNnv5kXhJJs','y7VptpwGrX0',
       '3D6P6cqT1X8','WRWJdmNTj8U','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','2GwZJScpJeA',
       'TfRZv5DW3Es']
@@ -270,6 +271,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
 .arig{width:64px;margin-right:-4px}
+.nana{width:64px}
 .masc{width:clamp(120px,32vw,170px)}
 .qrbox{display:flex;align-items:flex-end;gap:8px;flex:0 0 auto}
 .qrcol{display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -432,6 +434,7 @@ a.pk::after,a.row::after{content:none}
  .pks{grid-template-columns:repeat(3,1fr);gap:20px 16px}
  .qr img{width:140px}
  .arig{width:80px}
+ .nana{width:80px}
  .masc{width:200px}
  .endgrid .endkome{grid-column:auto}
 }
@@ -568,7 +571,7 @@ HTML=f'''<!DOCTYPE html>
 <div class="wrap" id="top">
 <div class="hero">
 <p class="mins">1つ視聴に25分。🥴</p>
-<div class="thankswrap"><p class="thanks">大切なお時間をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"></div>
+<div class="thankswrap"><p class="thanks">大切なお時間をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"><img class="stk nana" src="{IMGS['nanananana']}" alt="" width="180" height="150" decoding="async"></div>
 <div class="ahatop">
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
