@@ -362,16 +362,20 @@ color:var(--blue);letter-spacing:.02em;line-height:1.5}
 /* 一気見バナー */
 .bannerrow{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;margin:32px 0}
 .bannerrow.top{justify-content:flex-start;margin:14px 0 0}
+/* バナーの幅は画面幅に比例しない（1024pxで276px、540pxで480px）ため、
+   タイトルの文字サイズは箱自身の幅に追従させる */
+.bannerrow{container-type:inline-size}
 .banner{display:inline-flex;flex-wrap:wrap;align-items:center;min-height:44px;margin:0;padding:14px 20px;
 background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-decoration:none;position:relative}
 /* バナー内の♫バッジ：8列固定。幅が足りないときは各バッジが縮んで対応するので、
    どの画面幅でも必ず1行に収まり、バナー全体はタイトル＋♫の2行になる */
 .tbrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;
-flex:1 0 100%;width:100%;max-width:330px;margin:8px 0 0}
+flex:1 0 100%;width:100%;max-width:280px;margin:8px 0 0}
 .refbadge.tb{position:static;top:auto;right:auto;width:100%;min-width:0;height:auto;
-aspect-ratio:1;padding:0;font-size:clamp(15px,4.4vw,20px)}
+aspect-ratio:1;padding:0;font-size:clamp(13px,4.4vw,20px)}
+
 .banner .pop{display:none}
-.banner .lbl{font-size:24px;font-weight:800;letter-spacing:.04em;line-height:1.4;color:var(--blue)}
+.banner .lbl{font-size:min(24px,5.1cqi);font-weight:800;letter-spacing:.04em;line-height:1.4;color:var(--blue);white-space:nowrap}
 /* 文中リンクのフワッとプレビュー */
 .ilink{position:relative}
 .ilink .pop{display:none}
@@ -526,33 +530,37 @@ a.qr::after{content:none}
 details.item[open]>summary{background:#E9F5EA;border-bottom-color:#276B3B}
 details.item[open]>summary .t{color:#276B3B}
 details.item[open] .closelbl{background:#276B3B}
-/* 外部リンクの音源一覧：スマホのみ表示。PCでは見出しごと出さない */
-.musiclist{display:none}
-@media(max-width:939.98px){
- .musiclist{display:block;margin:56px 0 0}
- .musiclist h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
- /* 番号の領域：＠一覧は3桁（267.=42.3px）まで出るため、1.4emでは画面外へはみ出す。
-    ♫一覧と左端を揃えるため両方に同じ値を与える */
- .musiclist ol{margin:0;padding:0 0 0 2.5em;list-style:decimal}
- .musiclist li{margin:0 0 10px}
- /* 見出しの♫は .refbadge と同じ #FF0000 / #fff。絵文字ではCSSのcolorが効かないため記号+丸で再現 */
- .musiclist .mlbadge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;
-  height:32px;padding:0 7px;border-radius:16px;background:#FF0000;color:#fff;font-size:22px;
-  font-weight:700;line-height:1;vertical-align:-7px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
- .music-item{display:flex;align-items:center;gap:10px}
- .music-item .ml-title{flex:1 1 auto;min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
- .music-item .ml-title::after{content:none}
- .music-item .backlink{flex:0 0 12.5%;min-width:0;text-align:center;background:var(--blue);color:#fff;
-  font-size:12px;font-weight:700;padding:6px 4px;border-radius:5px;text-decoration:none;white-space:nowrap}
- .music-item .backlink::after{content:none}
- .musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
- /* ＠一覧：逆戻を左8分の1、タイトルを右8分の7に。色や寸法は♫一覧と共通 */
- .videolist .music-item .backlink{order:0;background:#276B3B}   /* 白文字とのコントラスト比6.46:1 */
- .videolist .music-item .ml-title{order:1}
- /* 一覧の最後は十分な余白をあけてから区切り線へ */
- /* 50vh（画面の半分）確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
- .videolist{margin-bottom:50vh}
+/* 外部リンクの一覧：スマホ・パソコンとも最下部に出す。
+   バッジを押したときの挙動だけが端末で異なる（スマホ＝一覧へ移動／PC＝外部リンクを開く）。
+   「逆戻」ボタンはどちらの端末でもサムネイルへ戻すアンカー元。 */
+.musiclist{display:block;margin:56px 0 0}
+.musiclist h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
+/* 番号の領域：＠一覧は3桁（267.=42.3px）まで出るため、1.4emでは画面外へはみ出す。
+   ♫一覧と左端を揃えるため両方に同じ値を与える */
+.musiclist ol{margin:0;padding:0 0 0 2.5em;list-style:decimal}
+.musiclist li{margin:0 0 10px}
+/* 見出しの♫は .refbadge と同じ #FF0000 / #fff。絵文字ではCSSのcolorが効かないため記号+丸で再現 */
+.musiclist .mlbadge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;
+ height:32px;padding:0 7px;border-radius:16px;background:#FF0000;color:#fff;font-size:22px;
+ font-weight:700;line-height:1;vertical-align:-7px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.music-item{display:flex;align-items:center;gap:10px}
+.music-item .ml-title{flex:1 1 auto;min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
+.music-item .ml-title::after{content:none}
+.music-item .backlink{flex:0 0 12.5%;min-width:0;max-width:96px;text-align:center;background:var(--blue);
+ color:#fff;font-size:12px;font-weight:700;padding:6px 4px;border-radius:5px;text-decoration:none;white-space:nowrap}
+.music-item .backlink::after{content:none}
+.musiclist li:target{background:var(--tint);border-radius:6px;padding:4px 6px;margin-left:-6px}
+/* ＠一覧：逆戻を左8分の1、タイトルを右8分の7に。色や寸法は♫一覧と共通 */
+.videolist .music-item .backlink{order:0;background:#276B3B}   /* 白文字とのコントラスト比6.46:1 */
+.videolist .music-item .ml-title{order:1}
+/* 一覧の最後は十分な余白をあけてから区切り線へ。
+   50vh（画面の半分）確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
+.videolist{margin-bottom:50vh}
+/* パソコンは1行が長くなりすぎるので、読める幅で止める */
+@media(min-width:940px){
+ .musiclist ol{max-width:760px}
+ .music-item .ml-title{font-size:16px}
 }
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 .items.shinkai-wrapper>.item.solo{background:#E9F5EA;border-color:var(--greenline)}
