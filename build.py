@@ -551,10 +551,14 @@ details.item[open] .closelbl{background:#276B3B}
 .music-item .ml-title{min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
 .music-item .ml-title::after{content:none}
-/* 左右のボタンは同じ見た目。色は一覧ごとに（♫＝ダーク青／＠＝濃い緑） */
-.music-item .backlink,.music-item .lmlink{min-width:0;text-align:center;background:var(--blue);
- color:#fff;font-size:12px;font-weight:700;padding:6px 2px;border-radius:5px;text-decoration:none;
- white-space:nowrap;overflow:hidden}
+/* 左右のボタンは矢羽根型。色は一覧ごとに（♫＝ダーク青／＠＝濃い緑） */
+.music-item .backlink,.music-item .lmlink{min-width:0;display:flex;align-items:center;
+ justify-content:center;background:var(--blue);color:#fff;font-size:12px;font-weight:700;
+ line-height:1;padding:8px 1px;text-decoration:none;white-space:nowrap}
+/* 左向き矢羽根：左端が尖り、右端がV字に凹む */
+.music-item .backlink{clip-path:polygon(22% 0,100% 0,78% 50%,100% 100%,22% 100%,0 50%)}
+/* 右向き矢羽根：左端がV字に凹み、右端が尖る */
+.music-item .lmlink{clip-path:polygon(0 0,78% 0,100% 50%,78% 100%,0 100%,22% 50%)}
 .music-item .backlink::after,.music-item .lmlink::after{content:none}
 /* アンカー到達時のハイライト：黒背景＋ごく薄いピンク文字 */
 .musiclist li:target{background:#000;color:#FFF0F5;border-radius:6px;padding:4px 6px;margin-left:-6px}
@@ -903,9 +907,9 @@ def build_ref_lists(doc):
             # 右の枠：自チャンネル動画へのLMボタン。対応動画が無い行（バナー由来）と
             # ハーモニカ演奏系の行は枠だけ残して空欄にする
             lm=(f'<a class="lmlink" href="{html.escape(i["own"])}" target="_blank" rel="noopener">'
-                f'LM\u00a0\u203a</a>') if i['own'] else '<span class="lmnone"></span>'
+                f'LM</a>') if i['own'] else '<span class="lmnone"></span>'
             lis+=(f'<li id="{sp["li"]}-{i["n"]}"><div class="music-item">'
-                  f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u2039\u00a0\u623b\u308b</a>'
+                  f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u623b</a>'
                   f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
                   f'{lm}</li>')
         secs+=(f'<section class="{sp["cls"]}">'
