@@ -20,6 +20,11 @@ FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','1fg64F4OBnU','QrSTV7drbUo','KxMbR6po5
 ID_WAR='cEkx8UrBpAU'
 CAP_WAR='量産のきっかけは、戦争の話。'
 ID_HAIBOKU='NjBJJ3JSqag'
+ID_FINAL='ddjkcRM3H4s'    # ★スマホだけで1日15本以上…（この動画生成／追加3のリンク先）
+TXT_FINAL='最終形はこうなった'
+# カテゴリ一覧の表示からのみ除外するID（データ自体は残すので神回★グリッドには載る）
+KAMI_ONLY_IDS={'CKOHd9PrqeE','1v_H2rHfhQw','cE6IhFUDq4A'}  # 神回★とカテゴリの二重掲載を解消
+HIDE_FROM_CAT=KAMI_ONLY_IDS|{ID_FINAL}
 TXT_HAIBOKU='技術的敗北と再生の物語'
 IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
@@ -183,13 +188,14 @@ THR={SEG*i:i for i in range(1,NPHR-1)}
 
 def catbox(name,c,desc=True,grid=False,firstlabel=False):
     d=f'<span class="d">{html.escape(c["description"])}</span>' if desc else ''
+    vids=[v for v in c['videos'] if v['video_id'] not in HIDE_FROM_CAT]
     if grid:
-        n=c['count']
+        n=len(vids)
         g=best_cols(n,(2,3)); pc=best_cols(n,(5,6))
-        ids=[v['video_id'] for v in c['videos']]
+        ids=[v['video_id'] for v in vids]
         body=pkgrid(ids,cls=f' g{g} pc{pc}')
     else:
-        body=rows(c['videos'])
+        body=rows(vids)
     return (f'<details class="item" id="c{c["category_id"]}">'
      f'<summary><span class="blklabel{" grouptop" if firstlabel else ""}">{html.escape(name)}</span>'
      f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
@@ -494,6 +500,8 @@ a.qr::after{content:none}
 details.item[open]>summary{background:#E9F5EA;border-bottom-color:#276B3B}
 details.item[open]>summary .t{color:#276B3B}
 details.item[open] .closelbl{background:#276B3B}
+.haibokuwrap{display:block}
+.hblink{display:block;margin:6px 0 0;font-size:15px;line-height:1.5;color:var(--sub);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
 /* 修正4 上位カテゴリ 連続先頭の強調：スマホのみ。PCには一切効かせない */
 @media(max-width:939.98px){
  .item .blklabel.grouptop,.item:nth-of-type(even) .blklabel.grouptop{
@@ -550,7 +558,7 @@ HTML=f'''<!DOCTYPE html>
 ＡＩは音読み・訓読みが苦手です。{ilink(LINK_IKKI,'hpo7e3-MewI','五木寛之氏')}を「ごきかんゆき」<span class="red">(失礼！)</span>、と読んだりします。<br>
 人もAIも、人名・地名は難しいですね。<span class="hl">「温かく」聞き流しを。</span>
 <div class="sep pccenter">
-動画「前／中／後」３回の、耳痛いハーモニカ演奏は、<a class="ilink" href="#c{NEWCAT_ID}">意図があって</a>挿入しています。<br>
+動画「前／中／後」３回の、耳痛いハーモニカ演奏は、<a class="ilink" href="#techdefeat-top"><strong>意図があって</strong></a>挿入しています。<br>
 <span class="red">倍速や早送りなど推奨</span>(⇒<a href="{LINK_STAR}" target="_blank" rel="noopener">★</a>)　<span class="red">どうぞ！早送りくださいませ。</span>
 </div>
 </div>
@@ -565,7 +573,7 @@ HTML=f'''<!DOCTYPE html>
 {idx}
 <div class="endwrap">
 <div class="pks endgrid">
-{pkcard(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}
+<div class="haibokuwrap" id="techdefeat-top">{pkcard(wu(ID_HAIBOKU),IMGS['haiboku'],TXT_HAIBOKU)}<a class="hblink" href="{wu(ID_FINAL)}" target="_blank" rel="noopener">{html.escape(TXT_FINAL)}</a></div>
 <div class="stkitem endkome"><img class="stk masc" src="{IMGS['kome']}" alt="" width="266" height="254" loading="lazy" decoding="async"></div>
 {NEWCAT_BOX}
 {HARMONICA_BOXES}
