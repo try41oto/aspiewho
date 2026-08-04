@@ -600,12 +600,12 @@ HTML=f'''<!DOCTYPE html>
 <div class="notecol">
 ＡＩは音読み・訓読みが苦手です。{ilink(LINK_IKKI,'hpo7e3-MewI','五木寛之氏')}を「ごきかんゆき」<span class="red">(失礼！)</span>、と読んだりします。<br>
 人もAIも、人名・地名は難しいですね。<span class="hl">「温かく」聞き流しを。</span>
-</div>
-<div class="warpc"><p class="pkcap">{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
-</div>
 <div class="sep pccenter">
 動画「前／中／後」３回の、耳痛いハーモニカ演奏は、<a class="ilink" href="#techdefeat-top"><strong>意図があって</strong></a>挿入しています。<br>
 <span class="red">倍速や早送りなど推奨</span>(⇒<a href="{LINK_STAR}" target="_blank" rel="noopener">★</a>)　<span class="red">どうぞ！早送りくださいませ。</span>
+</div>
+</div>
+<div class="warpc"><p class="pkcap">{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 </div>
 <div class="pkwrap"><h2>まずはこのあたりから</h2>{first}
