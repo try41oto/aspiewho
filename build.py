@@ -34,7 +34,7 @@ IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
 IMGS['nanananana']='img/nanananana_anim.webp'
 MORE=['TCe2SvES2x4','2Zky_cifOmw','w3dKDFOc-8I','GNnv5kXhJJs','bsVYxPsVdCQ',
-      '3D6P6cqT1X8','WRWJdmNTj8U','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','I4Mx8zksrh0',
+      '3D6P6cqT1X8','nEayqs5K8x8','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','I4Mx8zksrh0',
       'TfRZv5DW3Es']
 
 # NotebookLM の口ぐせ（この順に、ページ全体へ均等に差し込む）
@@ -380,6 +380,30 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 .banner::after{position:absolute;right:5px;bottom:2px;margin:0}
 /* 3等分になり1枠が狭いので、箱の幅に追従させつつ折り返しも許す */
 .banner .lbl{font-size:min(19px,4.2cqi);font-weight:800;letter-spacing:.02em;line-height:1.35;color:var(--blue);text-align:center}
+/* ページ内検索：3等分のすぐ下。1502本の題名から絞り込み、押すとその場所へ飛ぶ */
+.findbox{margin:8px 0 0}
+.findlbl{display:block;font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.findeg{margin-left:6px;font-weight:500;color:var(--dim)}
+.findrow{display:flex;gap:6px;margin:4px 0 0}
+.findinput{flex:1;min-width:0;min-height:40px;padding:6px 10px;font-size:16px;font-family:inherit;
+ color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:6px}
+.findinput:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.findbtn{flex:0 0 auto;min-height:40px;padding:6px 14px;font-size:14px;font-weight:700;
+ font-family:inherit;color:#fff;background:var(--blue);border:1px solid var(--blue);
+ border-radius:6px;cursor:pointer;white-space:nowrap}
+.findbtn:hover{background:var(--deep)}
+.findmsg{margin:4px 0 0;min-height:1.2em;font-size:13px;color:var(--dim)}
+.findlist{max-height:46vh;overflow-y:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
+.findlist[hidden]{display:none}
+.findhitbtn{display:block;width:100%;padding:8px 10px;font-size:14px;line-height:1.45;
+ font-family:inherit;color:var(--fg);text-align:left;background:none;border:0;
+ border-bottom:1px solid var(--line2);cursor:pointer}
+.findhitbtn:last-child{border-bottom:0}
+.findhitbtn:hover,.findhitbtn:focus-visible{background:var(--ltblue)}
+.findhitbtn mark{background:#FFE58A;color:inherit;font-weight:700;padding:0 1px;border-radius:2px}
+.findhitbtn .findcat{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+/* 検索から飛んだ先を一時的に光らせる */
+.findhit{outline:4px solid #B02E24;outline-offset:3px;border-radius:6px}
 /* 文中リンクのフワッとプレビュー */
 .ilink{position:relative}
 .ilink .pop{display:none}
@@ -666,6 +690,15 @@ HTML=f'''<!DOCTYPE html>
 <span class="pop" aria-hidden="true"></span></a>
 <!--MUSICLIST-->
 </div>
+<div class="findbox">
+<label class="findlbl" for="findq">ページ内をさがす<span class="findeg">たとえば「ハットリくん」</span></label>
+<div class="findrow">
+<input type="search" id="findq" class="findinput" placeholder="ハットリくん" autocomplete="off" enterkeyhint="search">
+<button type="button" class="findbtn" id="findbtn">さがす</button>
+</div>
+<p class="findmsg" id="findmsg" role="status" aria-live="polite"></p>
+<div class="findlist" id="findlist" hidden></div>
+</div>
 </div>
 <div class="qrbox"><div class="qrcol">
 <button type="button" class="addhome" id="addhomeBtn">🔖 ブックマーク</button>
@@ -807,6 +840,79 @@ document.addEventListener('click',function(e){{
  }}
  window.open(t.dataset.url,'_blank','noopener');
 }});
+(function(){{
+ /* ページ内検索。1502本の題名（カード .pk p ／ 行 .row .ttlx）から部分一致で絞り込む。
+    カタカナ・ひらがな・全角英数の違いを吸収するため、双方を正規化してから照合する */
+ var q=document.getElementById('findq'),btn=document.getElementById('findbtn');
+ var msg=document.getElementById('findmsg'),list=document.getElementById('findlist');
+ var MAX=60,idx=null;
+ function norm(s){{
+  return s.toLowerCase()
+   .replace(/[\uff21-\uff3a\uff41-\uff5a\uff10-\uff19]/g,function(c){{
+     return String.fromCharCode(c.charCodeAt(0)-0xFEE0);}})
+   .replace(/[\u30a1-\u30f6]/g,function(c){{
+     return String.fromCharCode(c.charCodeAt(0)-0x60);}})   /* カタカナ→ひらがな */
+   .replace(/[\s\u3000\u30fb]/g,'');   /* \u7a7a\u767d\u30fb\u5168\u89d2\u7a7a\u767d\u30fb\u4e2d\u9ed2\u306f\u7121\u8996\u3059\u308b */
+ }}
+ function build(){{
+  idx=[];
+  document.querySelectorAll('.pk p,.row .ttlx').forEach(function(e){{
+   var card=e.closest('.pk')||e.closest('.row');
+   if(!card)return;
+   var d=card.closest('details.item');
+   var cat=d?(d.querySelector('summary .t')||{{}}).textContent||'':'';
+   idx.push({{el:card,t:e.textContent,k:norm(e.textContent),cat:cat}});
+  }});
+ }}
+ function esc(s){{return s.replace(/[&<>"]/g,function(c){{
+   return {{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[c];}});}}
+ function jump(card){{
+  var d=card.closest('details');
+  while(d){{
+   if(!d.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+600;d.open=true;}}
+   d=d.parentElement?d.parentElement.closest('details'):null;
+  }}
+  requestAnimationFrame(function(){{
+   card.scrollIntoView({{block:'center'}});
+   card.classList.add('findhit');
+   setTimeout(function(){{card.classList.remove('findhit');}},2600);
+  }});
+ }}
+ function run(){{
+  if(!idx)build();
+  var raw=q.value.trim(),k=norm(raw);
+  list.innerHTML='';
+  if(!k){{list.hidden=true;msg.textContent='';return;}}
+  var hits=[];
+  for(var i=0;i<idx.length&&hits.length<MAX;i++){{
+   if(idx[i].k.indexOf(k)>=0)hits.push(idx[i]);
+  }}
+  var total=0;
+  for(var j=0;j<idx.length;j++)if(idx[j].k.indexOf(k)>=0)total++;
+  if(!total){{
+   list.hidden=true;
+   msg.textContent='「'+raw+'」は見つかりませんでした。';
+   return;
+  }}
+  msg.textContent=total+'件'+(total>MAX?'（上位'+MAX+'件を表示）':'');
+  hits.forEach(function(h){{
+   var b=document.createElement('button');
+   b.type='button';b.className='findhitbtn';
+   /* 一致部分は正規化後の位置で数えるが、元の題名とは文字数が一致するため流用できる */
+   var p=h.k.indexOf(k);
+   b.innerHTML=esc(h.t.slice(0,p))+'<mark>'+esc(h.t.substr(p,k.length))+'</mark>'+
+               esc(h.t.slice(p+k.length))+
+               (h.cat?'<span class="findcat">'+esc(h.cat)+'</span>':'');
+   b.addEventListener('click',function(){{jump(h.el);}});
+   list.appendChild(b);
+  }});
+  list.hidden=false;
+ }}
+ var timer=null;
+ q.addEventListener('input',function(){{clearTimeout(timer);timer=setTimeout(run,180);}});
+ q.addEventListener('keydown',function(e){{if(e.key==='Enter'){{e.preventDefault();run();}}}});
+ btn.addEventListener('click',run);
+}})();
 if('serviceWorker' in navigator){{
  window.addEventListener('load',function(){{navigator.serviceWorker.register('sw.js');}});
 }}
