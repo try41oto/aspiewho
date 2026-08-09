@@ -215,9 +215,12 @@ NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
 
-def catbox(name,c,desc=True,grid=False,firstlabel=False):
+def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True):
+    """cls は details に足すクラス（神回★の ' solo' など）。
+    hide=False にすると HIDE_FROM_CAT の除外を行わない（神回★専用に載せる動画があるため）。
+    name が空ならブロック名のバッジを出さない。"""
     d=f'<span class="d">{html.escape(c["description"])}</span>' if desc else ''
-    vids=[v for v in c['videos'] if v['video_id'] not in HIDE_FROM_CAT]
+    vids=[v for v in c['videos'] if not hide or v['video_id'] not in HIDE_FROM_CAT]
     if grid:
         n=len(vids)
         g=best_cols(n,(2,3)); pc=best_cols(n,(5,6))
@@ -225,8 +228,10 @@ def catbox(name,c,desc=True,grid=False,firstlabel=False):
         body=pkgrid(ids,cls=f' g{g} pc{pc}')
     else:
         body=rows(vids)
-    return (f'<details class="item" id="c{c["category_id"]}">'
-     f'<summary><span class="blklabel{" grouptop" if firstlabel else ""}">{html.escape(name)}</span>'
+    lbl=(f'<span class="blklabel{" grouptop" if firstlabel else ""}">{html.escape(name)}</span>'
+         if name else '')
+    return (f'<details class="item{cls}" id="c{c["category_id"]}">'
+     f'<summary>{lbl}'
      f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
      f'<span class="t">{html.escape(c["name"])}</span>'
      f'<span class="closelbl" aria-hidden="true">↑ とじる</span></span>'
@@ -238,8 +243,13 @@ HARMONICA_MERGED={'category_id':'harmonica','name':'ハーモニカ演奏とそ�
 HARMONICA_BOXES=catbox(tname,HARMONICA_MERGED,desc=False)
 NEWCAT_BOX=catbox(NEWCAT_GROUP,NEWCAT,desc=False,grid=True)
 
-gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>']
-n=0
+# 神回★はカテゴリ一覧の先頭（ドラゴンボール考察の左隣）に、他のカテゴリと同じ大きさで置く。
+# KAMI_ONLY_IDS はカテゴリ側では隠すが神回★には載せるため hide=False にする
+KAMI_CAT={'category_id':'kamikai','name':'\u795e\u56de\u2605','description':'\u304a\u6c17\u306b\u5165\u308a',
+ 'videos':[V[i] for i in KAMI]}
+gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>',
+        catbox('',KAMI_CAT,grid=True,cls=' solo',hide=False)]
+n=1
 for gi,(name,cats) in enumerate(groups):
     if name in (tname,NEWCAT_GROUP):
         continue
@@ -428,7 +438,6 @@ details.item[open] .pm{transform:rotate(45deg)}
 .item .t{font-size:26px;font-weight:700;flex:1;min-width:0;text-decoration:underline;
 text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:var(--line)}
 .item .d{display:block;margin-top:8px;padding-left:29px;font-size:23px;color:var(--dim);line-height:1.7;font-weight:500}
-.item.solo .d{color:var(--dim)}
 .closelbl{display:none}
 .items details.item[open]{grid-column:1/-1;background:#FFF}
 .item .catbody{margin:16px 0 0;padding-top:16px;border-top:1px solid var(--line2)}
@@ -545,8 +554,7 @@ a.qr::after{content:none}
 @media(max-width:939.98px){.pks.endgrid .item{padding:20px 10px 12px}.pks.endgrid .item .t{font-size:17px}.pks.endgrid .item .pm{font-size:17px}.pks.endgrid .item .blklabel{font-size:14px;left:10px;top:-11px}.pks.endgrid .row1{gap:6px}}
 /* 神回★エリア：スマホ左右2列＋説明文 / PC3列 */
 .shinkai-description{display:none}
-@media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr 1fr;gap:12px}.shinkai-description{display:block;grid-area:1/1;font-size:16px;line-height:1.5;color:#333;margin:0;padding:12px;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;word-break:break-word}.shinkai-description strong{color:var(--blue);font-weight:700}.items.shinkai-wrapper>.item.solo{grid-area:2/1}.items.shinkai-wrapper>.item.solo[open]{grid-column:1/-1}.items.shinkai-wrapper>.pkcap{grid-area:1/2;margin:0;align-self:end}.items.shinkai-wrapper>.pk{grid-area:2/2}.items.shinkai-wrapper:has(>.item.solo[open]){grid-template-columns:1fr}.items.shinkai-wrapper:has(>.item.solo[open])>*{grid-area:auto}}
-@media(min-width:940px){.items.shinkai-wrapper{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr 1fr;gap:12px}.shinkai-description{display:block;grid-area:1/1/3/2;align-self:center;font-size:16px;line-height:1.5;color:#333;margin:0;padding:12px;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;word-break:break-word}.shinkai-description strong{color:var(--blue);font-weight:700}.items.shinkai-wrapper>.pkcap{grid-area:1/2;margin:0;align-self:end}.items.shinkai-wrapper>.pk{grid-area:2/2}}
 /* 「量産のきっかけは、戦争の話。」の真上に出すイチオシ表示。スマホ専用。
    ⭐️は絵文字なので朱色を継がせず、そのままの色で出す */
 .oshi{display:block;font-size:17px;font-weight:800;letter-spacing:.06em;line-height:1.3;
@@ -560,7 +568,7 @@ a.qr::after{content:none}
 
 /* ===== 今回の4点 ===== */
 /* 修正1 カテゴリ説明文：スマホのみ .thanks と同じ19pxで黒。神回★(.solo)は対象外 */
-@media(max-width:939.98px){.item:not(.solo) .d{font-size:19px;color:#000}.item.solo .d{font-size:17px}}
+@media(max-width:939.98px){.item .d{font-size:19px;color:#000}}
 /* 修正2 ＋記号：カテゴリ名26pxに対しスマホは同寸、PCはやや大きく。行高は .t が決めるため変化しない */
 @media(max-width:939.98px){.item .pm{font-size:26px}}
 @media(min-width:940px){.item .pm{font-size:30px}}
@@ -642,10 +650,12 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  .music-item .backlink,.music-item .lmlink{font-size:13px;padding:7px 4px}
 }
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
-.items.shinkai-wrapper>.item.solo{background:#E9F5EA;border-color:var(--greenline)}
-.items.shinkai-wrapper>.item.solo:active{background:var(--tint)}
-.items.shinkai-wrapper>.item.solo:hover{background:var(--tint);border-color:var(--accent)}
-.items.shinkai-wrapper>.item.solo[open]{background:#FFF;border-color:var(--line)}
+/* 神回★はカテゴリ一覧の一員だが、お気に入りとして薄緑で見分けられるようにする。
+   :nth-of-type(even) の縞より後に置き、詳細度も高いので確実に上書きされる */
+.items>.item.solo,.items>.item.solo:nth-of-type(even){background:#E9F5EA;border-color:var(--greenline)}
+.items>.item.solo:active{background:var(--tint)}
+.items>.item.solo:hover{background:var(--tint);border-color:var(--accent)}
+.items>.item.solo[open]{background:#FFF;border-color:var(--line)}
 /* PC版「量産のきっかけ」：あらかじめセクションの右側へ。スマホでは出さない */
 .warpc{display:none}
 @media(min-width:940px){
@@ -655,8 +665,8 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  .warpc .pkcap{margin:0 0 8px;font-size:22px;line-height:1.4}
  .warpc .pk p{font-size:15px;line-height:1.5;-webkit-line-clamp:3}
  /* スマホ版はPCでは非表示にし、神回★ブロックの上下余白も詰める */
- .items.shinkai-wrapper>.pkcap,.items.shinkai-wrapper>.pk{display:none}
- .items.shinkai-wrapper{margin:0 0 8px;gap:0}
+ /* 神回★を一覧へ移したので、この枠に残るのはスマホ専用の3点だけ。まとめて隠す */
+ .items.shinkai-wrapper{display:none}
 }
 .haibokuwrap{display:block}
 .hblink.top{margin:0 0 6px}
@@ -697,9 +707,9 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」など</p>
+<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
 <div class="findrow">
-<input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ハットリくん" autocomplete="off" enterkeyhint="search">
+<input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
 </div>
 <p class="findmsg" id="findmsg" role="status" aria-live="polite"></p>
@@ -737,12 +747,7 @@ HTML=f'''<!DOCTYPE html>
 </div>
 </div>
 <div class="pkwrap"><h2>まずはこのあたりから</h2>{first}
-<div class="items shinkai-wrapper"><div class="shinkai-description"><strong>左『＋』ボタンを押すと、その下側にズラット</strong>タイトル表示されます。</div><details class="item solo">
-<summary><span class="row1"><span class="pm" aria-hidden="true">＋</span>
-<span class="t">神回★</span>
-<span class="closelbl" aria-hidden="true">↑ とじる</span></span>
-<span class="d">お気に入り</span></summary>
-<div class="catbody">{pkgrid(KAMI,cls=f' g{best_cols(len(KAMI),(2,3))}')}</div></details><p class="pkcap"><span class="oshi">イチオシ<span class="oshistar">⭐️</span></span>{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
+<div class="items shinkai-wrapper"><div class="shinkai-description"><strong>左『＋』ボタンを押すと、その下側にズラット</strong>タイトル表示されます。</div><p class="pkcap"><span class="oshi">イチオシ<span class="oshistar">⭐️</span></span>{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 {idx}
 <div class="endwrap">
