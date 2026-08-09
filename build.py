@@ -60,6 +60,19 @@ ID_ASAHI='Og-FD63kuxk'      # MacbookをハックしてるAsahiLinuxって、ど
 NORI_AT_CAT='073'   # のり画像を差し込むカテゴリ（発達障害の特性とライフハック）
 
 SHORT_URL_HREF='https://try41oto.github.io/aspiewho/'
+# ♫一覧の先頭に置く8本（旧・一気見バナーの♫バッジ）。ページ内にサムネイルが無いので
+# 矢羽は付けず題名リンクだけを並べる。ローカル題名はoEmbed取得失敗時のフォールバック
+TOPREF=[
+ ('https://www.youtube.com/watch?v=v6xUXCclN04&list=RDv6xUXCclN04&start_radio=1&pp=ygUV5qW96IiI44Gu5pmC44CA5Lit5bedoAcB','\u697d\u8208\u306e\u6642\u3000\u4e2d\u5ddd'),
+ ('https://www.youtube.com/watch?v=mNSDWf2EX3Q&list=RDmNSDWf2EX3Q&start_radio=1&pp=ygUt5YiH5omL44Gu44Gq44GE44GK44GP44KK44KC44Gu44CA6L-R6Jek44KG44GNoAcB','\u5207\u624b\u306e\u306a\u3044\u304a\u304f\u308a\u3082\u306e\u3000\u8fd1\u85e4\u3086\u304d'),
+ ('https://www.youtube.com/watch?v=R5zxnw5NMxU&list=RDR5zxnw5NMxU&start_radio=1&pp=ygUW5oSb44Gu5oyo5ou244CAVGVtaXJrYaAHAQ%3D%3D','\u611b\u306e\u6328\u62f6\u3000Temirka'),
+ ('https://www.youtube.com/watch?v=xrfu574p1Y4&list=RDxrfu574p1Y4&start_radio=1&pp=ygUb44OR44Oq44Gu56m644Gu5LiL44CA6KeS6LC3oAcB','\u30d1\u30ea\u306e\u7a7a\u306e\u4e0b\u3000\u89d2\u8c37'),
+ ('https://www.youtube.com/watch?v=slesVH8wERU&list=RDslesVH8wERU&start_radio=1&pp=ygUf44G844GP44Gf44Gh44Gu5aSx5pWX44CANzM3Z3VhbaAHAdIHCQnFCwGHKiGM7w%3D%3D','\u307c\u304f\u305f\u3061\u306e\u5931\u6557\u3000737guam'),
+ ('https://www.youtube.com/watch?v=Zq1cqWIRLAc&list=RDZq1cqWIRLAc&start_radio=1&pp=ygUQ44GT44Gu6YGTIOi_keiXpKAHAQ%3D%3D','\u3053\u306e\u9053\u3000\u8fd1\u85e4'),
+ ('https://www.youtube.com/watch?v=J02j_bjTO7k&list=RDJ02j_bjTO7k&start_radio=1&pp=ygUi44OV44Kj44Ks44Ot44Gu57WQ5ama44CAUGVsdG9rb3NraaAHAQ%3D%3D','\u30d5\u30a3\u30ac\u30ed\u306e\u7d50\u5a5a\u3000Peltokoski'),
+ ('https://www.youtube.com/watch?v=GUBh7HOBXBg&list=RDGUBh7HOBXBg&start_radio=1&pp=ygUW5Lq655Sf44Gu5omJ44CANzM3Z3VhbaAHAQ%3D%3D','\u4eba\u751f\u306e\u6249\u3000737guam'),
+]
+TOPREF_LOCAL={re.search(r'v=([A-Za-z0-9_\-]{11})',u).group(1):t for u,t in TOPREF}
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
@@ -920,18 +933,35 @@ def build_ref_lists(doc):
     out.append(doc[pos:])
     doc=''.join(out)
 
+    # 旧・一気見バナーの♫8本を一覧の先頭へ。ページ内にサムネイル（戻り先）が無く、
+    # 1502本のいずれにも対応しないので、矢羽は左右とも空欄にして題名リンクだけ残す。
+    # 'n':None がその目印
+    topmusic=[]
+    for u,t in TOPREF:
+        v=re.search(r'v=([A-Za-z0-9_\-]{11})',u).group(1)
+        topmusic.append({'n':None,'url':html.escape(u),
+                         'title':(OEMBED_CACHE.get(v) or {}).get('title') or t,'own':''})
+    items['\u266b']=topmusic+items['\u266b']
+
     secs=''
     for sym,sp in SPEC.items():
         lis=''
         for i in items[sym]:
+            title=(f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">'
+                   f'{html.escape(cut(i["title"]))}</a>')
+            if i['n'] is None:
+                # 矢羽なしの行。3分割は保ったまま両端を空セルにして、題名の左端を他の行と揃える
+                lis+=(f'<li><div class="music-item">'
+                      f'<span class="lmnone"></span>{title}<span class="lmnone"></span>'
+                      f'</div></li>')
+                continue
             # 右の枠：自チャンネル動画へのLMボタン。ハーモニカ演奏系の行は
             # 枠だけ残して空欄にする
             lm=(f'<a class="lmlink" href="{html.escape(i["own"])}" target="_blank" rel="noopener">'
                 f'LM</a>') if i['own'] else '<span class="lmnone"></span>'
             lis+=(f'<li id="{sp["li"]}-{i["n"]}"><div class="music-item">'
                   f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u623b</a>'
-                  f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
-                  f'{lm}</div></li>')
+                  f'{title}{lm}</div></li>')
         # カテゴリと同じ details 開閉式。閉じている間は .bannerrow.top の3等分グリッドに並ぶ
         secs+=(f'<details class="{sp["cls"]}">'
                f'<summary><span class="pm" aria-hidden="true">\uff0b</span>'
