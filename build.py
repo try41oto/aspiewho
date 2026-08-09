@@ -547,6 +547,12 @@ a.qr::after{content:none}
 .shinkai-description{display:none}
 @media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr 1fr;gap:12px}.shinkai-description{display:block;grid-area:1/1;font-size:16px;line-height:1.5;color:#333;margin:0;padding:12px;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;word-break:break-word}.shinkai-description strong{color:var(--blue);font-weight:700}.items.shinkai-wrapper>.item.solo{grid-area:2/1}.items.shinkai-wrapper>.item.solo[open]{grid-column:1/-1}.items.shinkai-wrapper>.pkcap{grid-area:1/2;margin:0;align-self:end}.items.shinkai-wrapper>.pk{grid-area:2/2}.items.shinkai-wrapper:has(>.item.solo[open]){grid-template-columns:1fr}.items.shinkai-wrapper:has(>.item.solo[open])>*{grid-area:auto}}
 @media(min-width:940px){.items.shinkai-wrapper{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* 「量産のきっかけは、戦争の話。」の真上に出すイチオシ表示。スマホ専用。
+   ⭐️は絵文字なので朱色を継がせず、そのままの色で出す */
+.oshi{display:block;font-size:17px;font-weight:800;letter-spacing:.06em;line-height:1.3;
+ color:#D6350F}   /* 白地とのコントラスト比4.80:1 */
+.oshistar{color:initial}
+@media(min-width:940px){.oshi{display:none}}
 /* 青帯：スマホのみ上下余白を半分・文字を拡大 */
 @media(max-width:939.98px){.say{padding:15px 22px;font-size:clamp(25px,6.4vw,34px);line-height:1.4}}
 /* 自己紹介・終わりリンクの下線を消す */
@@ -691,7 +697,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">（例）「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「戦争」「ダジャレ」「Notebook」「数学」「マクドナルド」「トイレ」など</p>
+<p class="findeg">（例）「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「戦争」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「Notebook」「数学」「マクドナルド」「トイレ」「車」「クーラー」など</p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ハットリくん" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
@@ -736,7 +742,7 @@ HTML=f'''<!DOCTYPE html>
 <span class="t">神回★</span>
 <span class="closelbl" aria-hidden="true">↑ とじる</span></span>
 <span class="d">お気に入り</span></summary>
-<div class="catbody">{pkgrid(KAMI,cls=f' g{best_cols(len(KAMI),(2,3))}')}</div></details><p class="pkcap">{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
+<div class="catbody">{pkgrid(KAMI,cls=f' g{best_cols(len(KAMI),(2,3))}')}</div></details><p class="pkcap"><span class="oshi">イチオシ<span class="oshistar">⭐️</span></span>{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 {idx}
 <div class="endwrap">
