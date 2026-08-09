@@ -697,7 +697,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">（例）「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」など</p>
+<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」など</p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ハットリくん" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
