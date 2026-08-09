@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # aspiewho 動画目次サイト ジェネレーター v7
 import json, html, os, gzip, sys, re
-SRC = sys.argv[1] if len(sys.argv)>1 else '/mnt/user-data/outputs/aspiewho_1502_classified.json'
-OUT = sys.argv[2] if len(sys.argv)>2 else '/mnt/user-data/outputs/index.html'
+# 引数なしの `python3 build.py` だけで動くよう、既定の入出力は build.py と同じ場所にする
+# （どのディレクトリから実行しても、リポジトリ直下の index.html を作る）
+_HERE = os.path.dirname(os.path.abspath(__file__))
+SRC = sys.argv[1] if len(sys.argv)>1 else os.path.join(_HERE,'aspiewho_1502_classified.json')
+OUT = sys.argv[2] if len(sys.argv)>2 else os.path.join(_HERE,'index.html')
 
 # ================= 設定 =================
 ORDER=['サブカル','お笑い','生活・文化','言葉','音楽','スポーツ・遊び','地域','歴史','科学',
@@ -30,15 +33,15 @@ TXT_HAIBOKU='技術的敗北と再生の物語'
 IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
 IMGS['nanananana']='img/nanananana_anim.webp'
-MORE=['TCe2SvES2x4','2Zky_cifOmw','w3dKDFOc-8I','GNnv5kXhJJs','y7VptpwGrX0',
-      '3D6P6cqT1X8','WRWJdmNTj8U','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','2GwZJScpJeA',
+MORE=['TCe2SvES2x4','2Zky_cifOmw','w3dKDFOc-8I','GNnv5kXhJJs','bsVYxPsVdCQ',
+      '3D6P6cqT1X8','WRWJdmNTj8U','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','I4Mx8zksrh0',
       'TfRZv5DW3Es']
 
 # NotebookLM の口ぐせ（この順に、ページ全体へ均等に差し込む）
 PHRASES=['学ぶことがだいすきなアナタ、本日もようこそ、このディープライブへ',
  'あの〜、ちょっと想像してみてほしいんですけど．．','まさにそこなんですよ','パラダイムシフト',
  'よーし、これらを紐解いていきましょう',
- 'さいごあなたに、挑発的な思考のタネを投げかけて、この思考の旅を、、']
+ 'さいごあなたに、挑発的な思考のタネを投げかけて、この深掘りの旅を、、']
 
 # 1504本のうち外に出した2本（入れ替わっていたら下の2行を交換）
 ID_ICHIMI='uBtnbr0gu80'   # 1500タイトルを24分で一気見！
@@ -536,25 +539,62 @@ details.item[open] .closelbl{background:#276B3B}
 /* 外部リンクの一覧：スマホ・パソコンとも最下部に出す。
    バッジを押したときの挙動だけが端末で異なる（スマホ＝一覧へ移動／PC＝外部リンクを開く）。
    「逆戻」ボタンはどちらの端末でもサムネイルへ戻すアンカー元。 */
-.musiclist{display:block;margin:56px 0 0}
-.musiclist h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
+/* ♫／＠の2つはカテゴリと同じ「＋」開閉式。閉じている間は左右に横並び（スマホも同じ）、
+   開いた側だけが全幅になり、もう一方は次の行へ回る */
+.mlwrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;
+ margin:56px 0 0;padding-bottom:24px}
+/* 開いている間だけ末尾に画面半分の余白を足す。最終行のバッジから飛んでも上下中央に来られる。
+   閉じている間は小さな箱が2つ並ぶだけなので、空白は最小限にとどめる */
+.mlwrap:has(details[open]){padding-bottom:50vh}
+.musiclist{position:relative;min-width:0;padding:18px 16px;background:#FCE4EC;
+ border:1px solid #E6A3C0;border-radius:8px}
+details.musiclist[open]{grid-column:1/-1;background:#FFF;border-color:var(--line)}
+.musiclist>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;min-height:44px}
+.musiclist>summary::-webkit-details-marker{display:none}
+.musiclist>summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.musiclist .pm{flex:0 0 auto;font-size:26px;font-weight:700;line-height:1;color:#A32063;
+ transition:transform .15s ease}
+details.musiclist[open] .pm{transform:rotate(45deg)}
+.musiclist .mlh{flex:1;min-width:0;font-size:20px;font-weight:800;letter-spacing:.04em;color:#A32063}
+.musiclist .closelbl{display:none}
+details.musiclist[open] .closelbl{display:inline-block;flex:0 0 auto;margin-left:auto;
+ font-size:17px;font-weight:800;color:#fff;background:#A32063;padding:6px 14px;
+ border-radius:20px;white-space:nowrap}
+/* 開いている間、見出しを閉じるボタンとして画面上端に貼り付ける（一覧が長いため） */
+details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-18px -16px 0;
+ padding:14px 16px;background:#FCE4EC;border-bottom:2px solid #A32063;
+ box-shadow:0 3px 10px rgba(20,35,50,.14)}
+.musiclist .mlbody{margin:14px 0 0;padding-top:14px;border-top:1px solid var(--line2)}
+@media(max-width:939.98px){
+ .mlwrap{gap:10px}
+ .musiclist{padding:12px 10px}
+ details.musiclist[open]>summary{margin:-12px -10px 0;padding:10px 10px}
+ .musiclist>summary{gap:6px}
+ .musiclist .pm{font-size:20px}
+ .musiclist .mlh{font-size:15px;letter-spacing:0}
+ details.musiclist[open] .closelbl{font-size:14px;padding:5px 10px}
+}
 /* 番号の領域：＠一覧は3桁（267.=42.3px）まで出るため、1.4emでは画面外へはみ出す。
    ♫一覧と左端を揃えるため両方に同じ値を与える */
 .musiclist ol{margin:0;padding:0 0 0 2.5em;list-style:decimal}
 .musiclist li{margin:0 0 10px}
 /* 見出しの♫は .refbadge と同じ #FF0000 / #fff。絵文字ではCSSのcolorが効かないため記号+丸で再現 */
-.musiclist .mlbadge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;
+.musiclist .mlbadge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:32px;
  height:32px;padding:0 7px;border-radius:16px;background:#FF0000;color:#fff;font-size:22px;
- font-weight:700;line-height:1;vertical-align:-7px;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+ font-weight:700;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+@media(max-width:939.98px){.musiclist .mlbadge{min-width:26px;height:26px;padding:0 5px;font-size:18px}}
 /* 1行を 戻る 1/8 ｜ タイトル 6/8 ｜ LM 1/8 の3分割にする（♫一覧・＠一覧で共通） */
 .music-item{display:grid;grid-template-columns:1fr 6fr 1fr;align-items:center;gap:10px}
 .music-item .ml-title{min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-underline-offset:3px}
 .music-item .ml-title::after{content:none}
-/* 左右のボタンは矢羽根型。色は一覧ごとに（♫＝ダーク青／＠＝濃い緑） */
+/* 左右のボタンは矢羽根型。色は一覧ではなく「向き」で決まる（左＝ダーク青／右＝濃い緑）ので、
+   ♫一覧と＠一覧のどちらでも同じ配色になる */
 .music-item .backlink,.music-item .lmlink{min-width:0;display:flex;align-items:center;
- justify-content:center;background:var(--blue);color:#fff;font-size:12px;font-weight:700;
+ justify-content:center;color:#fff;font-size:12px;font-weight:700;
  line-height:1;padding:8px 1px;text-decoration:none;white-space:nowrap}
+.music-item .backlink{background:var(--blue)}
+.music-item .lmlink{background:#276B3B}   /* 白文字とのコントラスト比6.46:1 */
 /* 左向き矢羽根：左端が尖り、右端がV字に凹む */
 .music-item .backlink{clip-path:polygon(22% 0,100% 0,78% 50%,100% 100%,22% 100%,0 50%)}
 /* 右向き矢羽根：左端がV字に凹み、右端が尖る */
@@ -565,11 +605,8 @@ details.item[open] .closelbl{background:#276B3B}
 .musiclist li:target .ml-title{color:#FFF0F5}
 /* 番号（::marker）は li の背景の外＝白地に描かれるため、薄ピンクだと読めなくなる */
 .musiclist li:target::marker{color:#000;font-weight:700}
-/* ＠一覧は左右のボタンとも濃い緑。並びは♫一覧と共通でDOM順どおり */
-.videolist .music-item .backlink,.videolist .music-item .lmlink{background:#276B3B}   /* 白文字とのコントラスト比6.46:1 */
-/* 一覧の最後は十分な余白をあけてから区切り線へ。
-   50vh（画面の半分）確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
-.videolist{margin-bottom:50vh}
+/* 一覧の最後は十分な余白をあけてから区切り線へ（.mlwrap の padding-bottom:50vh）。
+   画面の半分を確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
 /* パソコンは1行が長くなりすぎるので、読める幅で止める */
 @media(min-width:940px){
  .musiclist ol{max-width:760px}
@@ -757,8 +794,16 @@ document.addEventListener('click',function(e){{
  if(t.dataset.anchor&&window.matchMedia('(max-width:939.98px)').matches){{
   var el=document.getElementById(t.dataset.anchor);
   if(el){{
-   location.hash=t.dataset.anchor;      /* :target のハイライトを効かせる */
-   el.scrollIntoView({{block:'center'}});  /* 既定は瞬間移動。画面の上下中央へ */
+   /* 飛び先の一覧は details で畳まれている。閉じたままだと高さ0で座標が取れないため先に開く */
+   var dd=el.parentElement?el.parentElement.closest('details'):null;
+   while(dd){{
+    if(!dd.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+600;dd.open=true;}}
+    dd=dd.parentElement?dd.parentElement.closest('details'):null;
+   }}
+   requestAnimationFrame(function(){{
+    location.hash=t.dataset.anchor;      /* :target のハイライトを効かせる */
+    el.scrollIntoView({{block:'center'}});  /* 既定は瞬間移動。画面の上下中央へ */
+   }});
   }}
   return;
  }}
@@ -911,11 +956,15 @@ def build_ref_lists(doc):
             lis+=(f'<li id="{sp["li"]}-{i["n"]}"><div class="music-item">'
                   f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u623b</a>'
                   f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
-                  f'{lm}</li>')
-        secs+=(f'<section class="{sp["cls"]}">'
-               f'<h2><span class="mlbadge">{sym}</span>{sp["head"]}</h2>'
-               f'<ol>{lis}</ol></section>')
-    return doc.replace('<!--MUSICLIST-->', secs), {k:len(v) for k,v in items.items()}
+                  f'{lm}</div></li>')
+        # \u30ab\u30c6\u30b4\u30ea\u3068\u540c\u3058 details \u958b\u9589\u5f0f\u3002\u9589\u3058\u3066\u3044\u308b\u9593\u306f .mlwrap \u306e\u30b0\u30ea\u30c3\u30c9\u3067\u5de6\u53f3\u306b\u4e26\u3076
+        secs+=(f'<details class="{sp["cls"]}">'
+               f'<summary><span class="pm" aria-hidden="true">\uff0b</span>'
+               f'<span class="mlbadge">{sym}</span>'
+               f'<span class="mlh">{sp["head"]}</span>'
+               f'<span class="closelbl" aria-hidden="true">\u2191 \u3068\u3058\u308b</span></summary>'
+               f'<div class="mlbody"><ol>{lis}</ol></div></details>')
+    return doc.replace('<!--MUSICLIST-->', f'<div class="mlwrap">{secs}</div>'), {k:len(v) for k,v in items.items()}
 
 HTML,_REF_N=build_ref_lists(HTML)
 
