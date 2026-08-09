@@ -19,7 +19,7 @@ MOVE_IDS=['8UFhGDi4YUg','4gZthMfSs2Y','bQJ4fE9GQSI','HvdUHeEzltA','o4HopqoW8ek',
  'H9-7-fHTvoY','ddjkcRM3H4s','nsl3lWw2ZEc','uG0WFwTonJw','DGjNEqHEIDQ','MpkyVKiV1pk',
  'pgQQI_ykxUI']
 
-FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','1fg64F4OBnU','QrSTV7drbUo','KxMbR6po5wA','ARyDkAJ4FBQ'])]
+FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','1fg64F4OBnU','dccoLUinYDQ','KxMbR6po5wA','ARyDkAJ4FBQ'])]
 ID_WAR='cEkx8UrBpAU'
 CAP_WAR='量産のきっかけは、戦争の話。'
 ID_HAIBOKU='NjBJJ3JSqag'
@@ -382,8 +382,9 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 .banner .lbl{font-size:min(19px,4.2cqi);font-weight:800;letter-spacing:.02em;line-height:1.35;color:var(--blue);text-align:center}
 /* ページ内検索：3等分のすぐ下。1502本の題名から絞り込み、押すとその場所へ飛ぶ */
 .findbox{margin:8px 0 0}
-.findlbl{display:block;font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
-.findeg{margin-left:6px;font-weight:500;color:var(--dim)}
+.findlbl{display:block;font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em;line-height:1.5}
+/* 例示は語数が多く2〜3行に折り返る。見出しと同じ行に続けず、改行して並べる */
+.findeg{display:block;font-weight:500;color:var(--dim)}
 .findrow{display:flex;gap:6px;margin:4px 0 0}
 .findinput{flex:1;min-width:0;min-height:40px;padding:6px 10px;font-size:16px;font-family:inherit;
  color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:6px}
@@ -691,7 +692,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<label class="findlbl" for="findq">ページ内をさがす<span class="findeg">たとえば「ハットリくん」</span></label>
+<label class="findlbl" for="findq">ページ内をさがす<span class="findeg">（例）「ドラえもん」「お笑い」「エガちゃん」「落語」「発達障害」「経済圏」「ネットワーク」</span></label>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" placeholder="ハットリくん" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
