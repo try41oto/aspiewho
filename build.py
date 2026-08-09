@@ -464,6 +464,10 @@ a.pk::after,a.row::after{content:none}
  .endgrid .endkome{grid-column:auto}
 }
 @media(min-width:940px){
+ /* パソコンのみQRを大きく。上下の8pxを詰めてブックマーク／共有ボタンと隙間ゼロで接する
+    正方形にする。スマホ側（〜939px）は現状のまま */
+ .qrcol{gap:0}
+ .qr img{width:200px}
  .wrap{max-width:1180px}
  .items{grid-template-columns:repeat(3,1fr)}
  .pks{grid-template-columns:repeat(4,1fr)}
@@ -670,7 +674,7 @@ HTML=f'''<!DOCTYPE html>
 </div>
 <div class="qrbox"><div class="qrcol">
 <button type="button" class="addhome" id="addhomeBtn">🔖 ブックマーク</button>
-<a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="img/qr_github.webp" alt="" width="296" height="296" decoding="async" fetchpriority="high"></a>
+<a class="qr" href="{SHORT_URL_HREF}" target="_blank" rel="noopener"><img src="img/qr_github.webp" alt="" width="396" height="396" decoding="async" fetchpriority="high"></a>
 <button type="button" class="sharebtn" id="shareBtn">
 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L7.04 9.81C6.5 9.31 5.79 9 5 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91s-1.31-2.92-2.92-2.92z"/></svg>
 共有
