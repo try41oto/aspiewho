@@ -382,9 +382,8 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 .banner .lbl{font-size:min(19px,4.2cqi);font-weight:800;letter-spacing:.02em;line-height:1.35;color:var(--blue);text-align:center}
 /* ページ内検索：3等分のすぐ下。1502本の題名から絞り込み、押すとその場所へ飛ぶ */
 .findbox{margin:8px 0 0}
-.findlbl{display:block;font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em;line-height:1.5}
-/* 例示は語数が多く2〜3行に折り返る。見出しと同じ行に続けず、改行して並べる */
-.findeg{display:block;font-weight:500;color:var(--dim)}
+/* 例示は語数が多く4〜5行に折り返る。見出し行は置かず、これだけを検索欄の上に出す */
+.findeg{margin:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--dim)}
 .findrow{display:flex;gap:6px;margin:4px 0 0}
 .findinput{flex:1;min-width:0;min-height:40px;padding:6px 10px;font-size:16px;font-family:inherit;
  color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:6px}
@@ -692,9 +691,9 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<label class="findlbl" for="findq">ページ内をさがす<span class="findeg">（例）「ドラえもん」「お笑い」「エガちゃん」「落語」「発達障害」「経済圏」「ネットワーク」</span></label>
+<p class="findeg">（例）「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「戦争」「ダジャレ」「Notebook」「数学」「マクドナルド」「トイレ」など</p>
 <div class="findrow">
-<input type="search" id="findq" class="findinput" placeholder="ハットリくん" autocomplete="off" enterkeyhint="search">
+<input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ハットリくん" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
 </div>
 <p class="findmsg" id="findmsg" role="status" aria-live="polite"></p>
