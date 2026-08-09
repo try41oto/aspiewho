@@ -46,7 +46,7 @@ PHRASES=['学ぶことがだいすきなアナタ、本日もようこそ、こ�
 # 1504本のうち外に出した2本（入れ替わっていたら下の2行を交換）
 ID_ICHIMI='uBtnbr0gu80'   # 1500タイトルを24分で一気見！
 ID_OWARI ='76XZgkPmg2s'   # 終わり☆AI能力把握実験、脳内発散訓練、遺言】動画量産1500本
-TXT_ICHIMI='1500タイトルを24分で一気見！'
+TXT_ICHIMI='全タイトルを24分で！'
 TXT_OWARI='終わり☆AI能力把握実験、脳内発散訓練、ポートフォリオ、遺言】動画量産1500本'
 ID_SELFINTRO='zQP6i3wEvPY'   # 自己紹介】積極奇異型アスペルガー(ASD)症候群、ワタシはココに居ます！(自慢)
 TXT_SELFINTRO='自己紹介'
@@ -60,20 +60,6 @@ ID_ASAHI='Og-FD63kuxk'      # MacbookをハックしてるAsahiLinuxって、ど
 NORI_AT_CAT='073'   # のり画像を差し込むカテゴリ（発達障害の特性とライフハック）
 
 SHORT_URL_HREF='https://try41oto.github.io/aspiewho/'
-# 一気見バナー内に並べる♫バッジ（左から順）。ローカル題名は取得失敗時のフォールバック用
-TOPREF=[
- ('https://www.youtube.com/watch?v=v6xUXCclN04&list=RDv6xUXCclN04&start_radio=1&pp=ygUV5qW96IiI44Gu5pmC44CA5Lit5bedoAcB','\u697d\u8208\u306e\u6642\u3000\u4e2d\u5ddd'),
- ('https://www.youtube.com/watch?v=mNSDWf2EX3Q&list=RDmNSDWf2EX3Q&start_radio=1&pp=ygUt5YiH5omL44Gu44Gq44GE44GK44GP44KK44KC44Gu44CA6L-R6Jek44KG44GNoAcB','\u5207\u624b\u306e\u306a\u3044\u304a\u304f\u308a\u3082\u306e\u3000\u8fd1\u85e4\u3086\u304d'),
- ('https://www.youtube.com/watch?v=R5zxnw5NMxU&list=RDR5zxnw5NMxU&start_radio=1&pp=ygUW5oSb44Gu5oyo5ou244CAVGVtaXJrYaAHAQ%3D%3D','\u611b\u306e\u6328\u62f6\u3000Temirka'),
- ('https://www.youtube.com/watch?v=xrfu574p1Y4&list=RDxrfu574p1Y4&start_radio=1&pp=ygUb44OR44Oq44Gu56m644Gu5LiL44CA6KeS6LC3oAcB','\u30d1\u30ea\u306e\u7a7a\u306e\u4e0b\u3000\u89d2\u8c37'),
- ('https://www.youtube.com/watch?v=slesVH8wERU&list=RDslesVH8wERU&start_radio=1&pp=ygUf44G844GP44Gf44Gh44Gu5aSx5pWX44CANzM3Z3VhbaAHAdIHCQnFCwGHKiGM7w%3D%3D','\u307c\u304f\u305f\u3061\u306e\u5931\u6557\u3000737guam'),
- ('https://www.youtube.com/watch?v=Zq1cqWIRLAc&list=RDZq1cqWIRLAc&start_radio=1&pp=ygUQ44GT44Gu6YGTIOi_keiXpKAHAQ%3D%3D','\u3053\u306e\u9053\u3000\u8fd1\u85e4'),
- ('https://www.youtube.com/watch?v=J02j_bjTO7k&list=RDJ02j_bjTO7k&start_radio=1&pp=ygUi44OV44Kj44Ks44Ot44Gu57WQ5ama44CAUGVsdG9rb3NraaAHAQ%3D%3D','\u30d5\u30a3\u30ac\u30ed\u306e\u7d50\u5a5a\u3000Peltokoski'),
- ('https://www.youtube.com/watch?v=GUBh7HOBXBg&list=RDGUBh7HOBXBg&start_radio=1&pp=ygUW5Lq655Sf44Gu5omJ44CANzM3Z3VhbaAHAQ%3D%3D','\u4eba\u751f\u306e\u6249\u3000737guam'),
-]
-TOPREF_LOCAL={re.search(r'v=([A-Za-z0-9_\-]{11})',u).group(1):t for u,t in TOPREF}
-TOPBADGES=''.join(
- f'<span class="reflink refbadge tb" data-url="{html.escape(u)}">\u266b</span>' for u,_ in TOPREF)
 LINK_TIME='https://www.youtube.com/watch?v=QMAloSCkHag&t=60s'
 LINK_IKKI='https://www.youtube.com/watch?v=hpo7e3-MewI&t=60s'
 LINK_STAR='https://www.youtube.com/watch?v=d774Mau6-aI&t=60s'
@@ -367,21 +353,20 @@ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hi
 color:var(--blue);letter-spacing:.02em;line-height:1.5}
 /* 一気見バナー */
 .bannerrow{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:16px;margin:32px 0}
-.bannerrow.top{justify-content:flex-start;margin:14px 0 0}
+/* 上段は「全タイトル」バナー／♫の音楽／＠の動画 の3等分（1x3）。
+   一覧を開いた側だけが grid-column:1/-1 で行いっぱいに広がる */
+.bannerrow.top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+align-items:stretch;gap:8px;margin:14px 0 0}
 /* バナーの幅は画面幅に比例しない（1024pxで276px、540pxで480px）ため、
    タイトルの文字サイズは箱自身の幅に追従させる */
 .bannerrow{container-type:inline-size}
-.banner{display:inline-flex;flex-wrap:wrap;align-items:center;min-height:44px;margin:0;padding:14px 20px;
+.banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;min-height:44px;margin:0;padding:14px 10px;
 background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-decoration:none;position:relative}
-/* バナー内の♫バッジ：8列固定。幅が足りないときは各バッジが縮んで対応するので、
-   どの画面幅でも必ず1行に収まり、バナー全体はタイトル＋♫の2行になる */
-.tbrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;
-flex:1 0 100%;width:100%;max-width:280px;margin:8px 0 0}
-.refbadge.tb{position:static;top:auto;right:auto;width:100%;min-width:0;height:auto;
-aspect-ratio:1;padding:0;font-size:clamp(13px,4.4vw,20px)}
-
 .banner .pop{display:none}
-.banner .lbl{font-size:min(24px,5.1cqi);font-weight:800;letter-spacing:.04em;line-height:1.4;color:var(--blue);white-space:nowrap}
+/* a[target=_blank] の🔗はフレックス項目として1行を占めてしまうため、隅に絶対配置する */
+.banner::after{position:absolute;right:5px;bottom:2px;margin:0}
+/* 3等分になり1枠が狭いので、箱の幅に追従させつつ折り返しも許す */
+.banner .lbl{font-size:min(19px,4.2cqi);font-weight:800;letter-spacing:.02em;line-height:1.35;color:var(--blue);text-align:center}
 /* 文中リンクのフワッとプレビュー */
 .ilink{position:relative}
 .ilink .pop{display:none}
@@ -516,7 +501,7 @@ a.pk::after,a.row::after{content:none}
 /* QR下の🔗を消す。a[target="_blank"]::after と詳細度が同値のため後ろに置いて後勝ちさせる */
 a.qr::after{content:none}
 /* スマホのカードタイトルは最大4行 */
-@media(max-width:939.98px){.pk p{-webkit-line-clamp:4;text-overflow:ellipsis}}
+@media(max-width:939.98px){.pk p{-webkit-line-clamp:5;text-overflow:ellipsis}}
 /* 末尾4ブロック：スマホ2x2 / PC1x4 */
 @media(max-width:699.98px){.pks.endgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:700px){.pks.endgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,1.4fr)}.pks.endgrid .masc{width:100%;max-width:250px}}
@@ -543,50 +528,48 @@ details.item[open] .closelbl{background:#276B3B}
 /* 外部リンクの一覧：スマホ・パソコンとも最下部に出す。
    バッジを押したときの挙動だけが端末で異なる（スマホ＝一覧へ移動／PC＝外部リンクを開く）。
    「逆戻」ボタンはどちらの端末でもサムネイルへ戻すアンカー元。 */
-/* ♫／＠の2つはカテゴリと同じ「＋」開閉式。閉じている間は左右に横並び（スマホも同じ）、
-   開いた側だけが全幅になり、もう一方は次の行へ回る */
-.mlwrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;
- margin:56px 0 0;padding-bottom:24px}
-/* 開いている間だけ末尾に画面半分の余白を足す。最終行のバッジから飛んでも上下中央に来られる。
-   閉じている間は小さな箱が2つ並ぶだけなので、空白は最小限にとどめる */
-.mlwrap:has(details[open]){padding-bottom:50vh}
-.musiclist{position:relative;min-width:0;padding:18px 16px;background:#FCE4EC;
+/* ♫／＠の2つはカテゴリと同じ「＋」開閉式。上段バナー行の2枠目・3枠目に入る */
+.musiclist{position:relative;min-width:0;padding:14px 10px;background:#FCE4EC;
  border:1px solid #E6A3C0;border-radius:8px}
 details.musiclist[open]{grid-column:1/-1;background:#FFF;border-color:var(--line)}
-.musiclist>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;min-height:44px}
+/* 一覧を開くと数百行になる。ヒーローの横並びのままでは のりこめ画像・QR と
+   高さが噛み合わないため、開いている間だけ縦積みにして全幅で読ませる */
+.ahawrap:has(.musiclist[open]){display:block}
+.ahawrap:has(.musiclist[open]) .leadcol{max-width:none;width:100%}
+.ahawrap:has(.musiclist[open]) .noripc{display:none}
+.musiclist>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;min-height:44px}
 .musiclist>summary::-webkit-details-marker{display:none}
 .musiclist>summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
-.musiclist .pm{flex:0 0 auto;font-size:26px;font-weight:700;line-height:1;color:#A32063;
+.musiclist .pm{flex:0 0 auto;font-size:22px;font-weight:700;line-height:1;color:#A32063;
  transition:transform .15s ease}
 details.musiclist[open] .pm{transform:rotate(45deg)}
-.musiclist .mlh{flex:1;min-width:0;font-size:20px;font-weight:800;letter-spacing:.04em;color:#A32063}
+.musiclist .mlh{flex:1;min-width:0;font-size:17px;font-weight:800;letter-spacing:0;color:#A32063;white-space:nowrap}
 .musiclist .closelbl{display:none}
 details.musiclist[open] .closelbl{display:inline-block;flex:0 0 auto;margin-left:auto;
  font-size:17px;font-weight:800;color:#fff;background:#A32063;padding:6px 14px;
  border-radius:20px;white-space:nowrap}
 /* 開いている間、見出しを閉じるボタンとして画面上端に貼り付ける（一覧が長いため） */
-details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-18px -16px 0;
+details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10px 0;
  padding:14px 16px;background:#FCE4EC;border-bottom:2px solid #A32063;
  box-shadow:0 3px 10px rgba(20,35,50,.14)}
 .musiclist .mlbody{margin:14px 0 0;padding-top:14px;border-top:1px solid var(--line2)}
 @media(max-width:939.98px){
- .mlwrap{gap:10px}
- .musiclist{padding:12px 10px}
- details.musiclist[open]>summary{margin:-12px -10px 0;padding:10px 10px}
- .musiclist>summary{gap:6px}
- .musiclist .pm{font-size:20px}
- .musiclist .mlh{font-size:15px;letter-spacing:0}
+ .musiclist{padding:10px 7px}
+ details.musiclist[open]>summary{margin:-10px -7px 0;padding:10px 8px}
+ .banner{padding:10px 5px}
+ .musiclist>summary{gap:3px}
+ .musiclist .pm{font-size:16px}
+ .musiclist .mlh{font-size:13px}
  details.musiclist[open] .closelbl{font-size:14px;padding:5px 10px}
 }
-/* 番号の領域：＠一覧は3桁（267.=42.3px）まで出るため、1.4emでは画面外へはみ出す。
-   ♫一覧と左端を揃えるため両方に同じ値を与える */
-.musiclist ol{margin:0;padding:0 0 0 2.5em;list-style:decimal}
+/* 行番号は出さない（左端をボタンに揃える） */
+.musiclist ol{margin:0;padding:0;list-style:none}
 .musiclist li{margin:0 0 10px}
 /* 見出しの♫は .refbadge と同じ #FF0000 / #fff。絵文字ではCSSのcolorが効かないため記号+丸で再現 */
-.musiclist .mlbadge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:32px;
- height:32px;padding:0 7px;border-radius:16px;background:#FF0000;color:#fff;font-size:22px;
+.musiclist .mlbadge{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:28px;
+ height:28px;padding:0 5px;border-radius:14px;background:#FF0000;color:#fff;font-size:19px;
  font-weight:700;line-height:1;box-shadow:0 1px 4px rgba(0,0,0,.35)}
-@media(max-width:939.98px){.musiclist .mlbadge{min-width:26px;height:26px;padding:0 5px;font-size:18px}}
+@media(max-width:939.98px){.musiclist .mlbadge{min-width:22px;height:22px;padding:0 4px;font-size:15px}}
 /* 1行を 戻る 1/8 ｜ タイトル 6/8 ｜ LM 1/8 の3分割にする（♫一覧・＠一覧で共通） */
 .music-item{display:grid;grid-template-columns:1fr 6fr 1fr;align-items:center;gap:10px}
 .music-item .ml-title{min-width:0;font-size:15px;line-height:1.5;color:var(--sub);
@@ -604,17 +587,15 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-18px -16
 /* 右向き矢羽根：左端がV字に凹み、右端が尖る */
 .music-item .lmlink{clip-path:polygon(0 0,78% 0,100% 50%,78% 100%,0 100%,22% 50%)}
 .music-item .backlink::after,.music-item .lmlink::after{content:none}
-/* アンカー到達時のハイライト：黒背景＋ごく薄いピンク文字 */
+/* アンカー到達時のハイライト：黒背景＋ごく薄いピンク文字。
+   飛び先がひと目で分かるよう、その行だけ文字を5px大きくする（15→20px） */
 .musiclist li:target{background:#000;color:#FFF0F5;border-radius:6px;padding:4px 6px;margin-left:-6px}
-.musiclist li:target .ml-title{color:#FFF0F5}
-/* 番号（::marker）は li の背景の外＝白地に描かれるため、薄ピンクだと読めなくなる */
-.musiclist li:target::marker{color:#000;font-weight:700}
-/* 一覧の最後は十分な余白をあけてから区切り線へ（.mlwrap の padding-bottom:50vh）。
-   画面の半分を確保することで、最終行のバッジから飛んだときも画面の上下中央に来られる */
+.musiclist li:target .ml-title{color:#FFF0F5;font-size:20px}
 /* パソコンは1行が長くなりすぎるので、読める幅で止める */
 @media(min-width:940px){
  .musiclist ol{max-width:760px}
  .music-item .ml-title{font-size:16px}
+ .musiclist li:target .ml-title{font-size:21px}   /* 16→21px */
  .music-item .backlink,.music-item .lmlink{font-size:13px;padding:7px 4px}
 }
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
@@ -668,8 +649,9 @@ HTML=f'''<!DOCTYPE html>
 <p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
 <div class="bannerrow top">
 <a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" style="--th:url({tnhq(ID_ICHIMI)})">
-<span class="lbl">{html.escape(TXT_ICHIMI)}</span><span class="tbrow">{TOPBADGES}</span>
+<span class="lbl">{html.escape(TXT_ICHIMI)}</span>
 <span class="pop" aria-hidden="true"></span></a>
+<!--MUSICLIST-->
 </div>
 </div>
 <div class="qrbox"><div class="qrcol">
@@ -722,7 +704,6 @@ HTML=f'''<!DOCTYPE html>
 <p class="techdesc">{vlink(ID_KEITORA,'軽トラ４ナンバー')}ダイハツハイゼットのような「{vlink(ID_CFRZ6,'CF-RZ6')}（{vlink(ID_XUBUNTU,'xubuntu')}）」と、スズキ{vlink(ID_SWIFT,'2020スイフト')}（{vlink(ID_M1,'M1')}；{vlink(ID_A2337,'A2337')}；{vlink(ID_ASAHI,'AsahiLinuxFedoraKDEplasma')}）M1MacbookAirを使ってます。</p>
 <p class="owariend">{ilink(wu(ID_OWARI),ID_OWARI,html.escape(TXT_OWARI))}</p>
 </div>
-<!--MUSICLIST-->
 <div class="tail"></div>
 </div>
 <script>
@@ -897,52 +878,42 @@ def _minify_html(html_str):
 def build_ref_lists(doc):
     """組み上がったHTMLを文書順に1回だけ走査し、♫/＠バッジへ
     music-N / thumb-N（♫）と video-N / vthumb-N（＠）を1対1で採番する。
-    バッジは .pk カード内のほか、一気見バナー内にも置かれる。
+    バッジは .pk カード内にのみ置かれる。
     採番は必ず最終的な文書順で行うため、ここで後処理している
     （テンプレート内の各パーツは文書順とは異なる順で組み立てられているため）。"""
     SPEC={
-     '\u266b':{'cls':'musiclist','head':'\u95a2\u9023\u306e\u97f3\u697d','li':'music','th':'thumb'},
-     '\uff20':{'cls':'musiclist videolist','head':'\u95a2\u9023\u306e\u52d5\u753b','li':'video','th':'vthumb'},
+     '\u266b':{'cls':'musiclist','head':'\u306e\u97f3\u697d','li':'music','th':'thumb'},
+     '\uff20':{'cls':'musiclist videolist','head':'\u306e\u52d5\u753b','li':'video','th':'vthumb'},
     }
     out=[]; items={k:[] for k in SPEC}; cnt={k:0 for k in SPEC}; pos=0
     for b in re.finditer(r'<span class="reflink refbadge([^"]*)" data-url="([^"]+)">(.)</span>', doc):
         sym=b.group(3)
         if sym not in SPEC:
             continue
-        # バッジを囲む .pk カードがあるか。.row 内（ハーモニカ等）は一覧の対象外で、
-        # バナー内のバッジだけは tb クラスで明示的に見分ける
+        # バッジを囲む .pk カードがあるか。.row 内（ハーモニカ等）は一覧の対象外
         ts=doc.rfind('<a class="pk', 0, b.start())
         te=doc.find('>', ts)+1 if ts!=-1 else -1
         inside = ts!=-1 and doc.find('</a>', te) > b.start()
-        is_tb = 'tb' in b.group(1).split()
-        if not inside and not is_tb:
+        if not inside:
             continue
         sp=SPEC[sym]; cnt[sym]+=1; n=cnt[sym]
         url=html.unescape(b.group(2))
         vid=re.search(r'(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_\-]{11})', url)
         vid=vid.group(1) if vid else ''
-        if inside:
-            card=doc[te:doc.find('</a>', te)]
-            lt=re.search(r'<p>(.*?)</p>', card, re.S)
-            local=html.unescape(lt.group(1)) if lt else ''
-            # カードのhrefがその動画の自チャンネルURL。外部音源リンク(data-url)とは別物
-            own=html.unescape(re.search(r'href="([^"]*)"', doc[ts:te]).group(1))
-            ovid=re.search(r'v=([A-Za-z0-9_\-]{11})', own)
-            if ovid and ovid.group(1) in HARMONICA_IDS:
-                own=''   # ハーモニカ演奏系はNotebookLM制作ではないため対象外
-            # 開始タグに id="thumb-N"、バッジに data-anchor="music-N" を注入
-            out.append(doc[pos:ts])
-            out.append(doc[ts:te-1]+f' id="{sp["th"]}-{n}">')
-            out.append(doc[te:b.start()])
-            out.append(b.group(0).replace(' data-url=',
-                       f' data-anchor="{sp["li"]}-{n}" data-url=', 1))
-        else:
-            # カード外（バナー内）のバッジ。戻り先はバッジ自身に置く
-            local=TOPREF_LOCAL.get(vid,'')
-            own=''   # バナーのバッジは1502本のいずれにも対応しないためLMボタンなし
-            out.append(doc[pos:b.start()])
-            out.append(b.group(0).replace(' data-url=',
-                       f' id="{sp["th"]}-{n}" data-anchor="{sp["li"]}-{n}" data-url=', 1))
+        card=doc[te:doc.find('</a>', te)]
+        lt=re.search(r'<p>(.*?)</p>', card, re.S)
+        local=html.unescape(lt.group(1)) if lt else ''
+        # カードのhrefがその動画の自チャンネルURL。外部音源リンク(data-url)とは別物
+        own=html.unescape(re.search(r'href="([^"]*)"', doc[ts:te]).group(1))
+        ovid=re.search(r'v=([A-Za-z0-9_\-]{11})', own)
+        if ovid and ovid.group(1) in HARMONICA_IDS:
+            own=''   # ハーモニカ演奏系はNotebookLM制作ではないため対象外
+        # 開始タグに id="thumb-N"、バッジに data-anchor="music-N" を注入
+        out.append(doc[pos:ts])
+        out.append(doc[ts:te-1]+f' id="{sp["th"]}-{n}">')
+        out.append(doc[te:b.start()])
+        out.append(b.group(0).replace(' data-url=',
+                   f' data-anchor="{sp["li"]}-{n}" data-url=', 1))
         pos=b.end()
         title=(OEMBED_CACHE.get(vid) or {}).get('title') or local   # 取得失敗時はローカル題名へ
         items[sym].append({'n':n,'url':b.group(2),'title':title,'own':own})
@@ -953,22 +924,22 @@ def build_ref_lists(doc):
     for sym,sp in SPEC.items():
         lis=''
         for i in items[sym]:
-            # 右の枠：自チャンネル動画へのLMボタン。対応動画が無い行（バナー由来）と
-            # ハーモニカ演奏系の行は枠だけ残して空欄にする
+            # 右の枠：自チャンネル動画へのLMボタン。ハーモニカ演奏系の行は
+            # 枠だけ残して空欄にする
             lm=(f'<a class="lmlink" href="{html.escape(i["own"])}" target="_blank" rel="noopener">'
                 f'LM</a>') if i['own'] else '<span class="lmnone"></span>'
             lis+=(f'<li id="{sp["li"]}-{i["n"]}"><div class="music-item">'
                   f'<a class="backlink" href="#{sp["th"]}-{i["n"]}">\u623b</a>'
                   f'<a class="ml-title" href="{i["url"]}" target="_blank" rel="noopener">{html.escape(cut(i["title"]))}</a>'
                   f'{lm}</div></li>')
-        # \u30ab\u30c6\u30b4\u30ea\u3068\u540c\u3058 details \u958b\u9589\u5f0f\u3002\u9589\u3058\u3066\u3044\u308b\u9593\u306f .mlwrap \u306e\u30b0\u30ea\u30c3\u30c9\u3067\u5de6\u53f3\u306b\u4e26\u3076
+        # カテゴリと同じ details 開閉式。閉じている間は .bannerrow.top の3等分グリッドに並ぶ
         secs+=(f'<details class="{sp["cls"]}">'
                f'<summary><span class="pm" aria-hidden="true">\uff0b</span>'
                f'<span class="mlbadge">{sym}</span>'
                f'<span class="mlh">{sp["head"]}</span>'
                f'<span class="closelbl" aria-hidden="true">\u2191 \u3068\u3058\u308b</span></summary>'
                f'<div class="mlbody"><ol>{lis}</ol></div></details>')
-    return doc.replace('<!--MUSICLIST-->', f'<div class="mlwrap">{secs}</div>'), {k:len(v) for k,v in items.items()}
+    return doc.replace('<!--MUSICLIST-->', secs), {k:len(v) for k,v in items.items()}
 
 HTML,_REF_N=build_ref_lists(HTML)
 
