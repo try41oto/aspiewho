@@ -218,7 +218,7 @@ NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
 
-def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=False):
+def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=False,gid=''):
     """cls は details に足すクラス（神回★の ' solo' など）。
     hide=False にすると HIDE_FROM_CAT の除外を行わない（神回★専用に載せる動画があるため）。
     name が空ならブロック名のバッジを出さない。"""
@@ -231,7 +231,8 @@ def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=
         body=pkgrid(ids,cls=f' g{g} pc{pc}',anchor=anchor)
     else:
         body=rows(vids)
-    lbl=(f'<span class="blklabel{" grouptop" if firstlabel else ""}">{html.escape(name)}</span>'
+    lbl=(f'<span class="blklabel{" grouptop" if firstlabel else ""}"'
+         f'{f" id={chr(34)}{gid}{chr(34)}" if gid else ""}>{html.escape(name)}</span>'
          if name else '')
     return (f'<details class="item{cls}" id="c{c["category_id"]}">'
      f'<summary>{lbl}'
@@ -253,6 +254,12 @@ KAMI_CAT={'category_id':'kamikai','name':'\u795e\u56de\u2605','description':'\u3
 DESC_BOX=('<p class="shinkai-description full">'
  '<strong>\u5de6\u300e\uff0b\u300f\u30dc\u30bf\u30f3\u3092\u62bc\u3059\u3068\u3001\u305d\u306e\u4e0b\u5074\u306b\u30ba\u30e9\u30c3\u30c8</strong>'
  '\u30bf\u30a4\u30c8\u30eb\u8868\u793a\u3055\u308c\u307e\u3059\u3002</p>')
+# 上位カテゴリ（サブカル〜AI）。青バッジをアンカー先にし、ページ上部に矢羽の飛び先を並べる
+GROUPTOP=[nm for nm,_ in groups if nm not in (tname,NEWCAT_GROUP)]
+GNAV=('<nav class="gnav" aria-label="\u4e0a\u4f4d\u30ab\u30c6\u30b4\u30ea\u3078\u79fb\u52d5">'
+ +''.join(f'<a class="gjump" href="#g{i:02d}">{html.escape(nm)}</a>'
+          for i,nm in enumerate(GROUPTOP))+'</nav>')
+
 gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>', DESC_BOX,
         catbox('',KAMI_CAT,grid=True,cls=' solo',hide=False)]
 n=1
@@ -260,7 +267,8 @@ for gi,(name,cats) in enumerate(groups):
     if name in (tname,NEWCAT_GROUP):
         continue
     for ci,c in enumerate(cats):
-        gitems.append(catbox(name,c,grid=True,firstlabel=(ci==0),anchor=True))
+        gitems.append(catbox(name,c,grid=True,firstlabel=(ci==0),anchor=True,
+                             gid=(f'g{GROUPTOP.index(name):02d}' if ci==0 else '')))
         n+=1
         if c['category_id']==NORI_AT_CAT:
             gitems.append(f'<img class="stk masc noridex" src="{IMGS["nori"]}" alt="" width="270" height="254" loading="lazy" decoding="async">')
@@ -303,11 +311,14 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .hero{display:flex;flex-wrap:wrap;align-items:center;column-gap:10px}
  .thankswrap,.ahatop{display:contents}
  .hero .mins{order:1;flex:0 0 100%}
- .hero .thanks{order:2;flex:1 1 240px;min-width:0}
+ .hero .thanks{order:2;flex:0 1 380px;min-width:0}
  .hero .arig{order:3}
- .hero .aha{order:4;margin:0 auto;text-align:center}
+ .hero .aha{order:4;margin:0;text-align:center}
  .hero .nana{order:5;margin-left:0}
- .hero .ahawrap{order:6;flex:0 0 100%;margin-top:14px}
+ /* 左に詰めた残りが矢羽の置き場。幅に応じて列数が増える */
+ .hero .gnav{order:6;flex:1 1 260px;grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+ .hero .gjump{font-size:13px}
+ .hero .ahawrap{order:7;flex:0 0 100%;margin-top:14px}
  .ahatop .norimobile{display:none}
  .ahawrap .noripc{display:block}
 }
@@ -315,9 +326,26 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
    こちらは隠し、逆にスマホでは挨拶行の側を隠す（同じ画像が二重に出ないようにする） */
 .leadrow{display:flex;align-items:center;gap:8px}
 .leadrow .lead{flex:1 1 auto;min-width:0}
+@media(max-width:939.98px){.leadrow .lead{font-size:13px;line-height:1.6}}   /* 例示語と同寸。後方の .lead に勝たせる */
 .leadrow .leadicon{flex:0 0 auto;margin:0}
 @media(min-width:940px){.leadrow{display:block}.leadrow .leadicon{display:none}}   /* .stk が後方にあるため詳細度を上げる */
-@media(max-width:939.98px){.thankswrap .arig,.thankswrap .nana{display:none}}
+@media(max-width:939.98px){.thankswrap .arig,.thankswrap .nana{display:none}
+ /* 「1つ視聴に25分」と挨拶文を左半分に収め、空いた右半分に矢羽を2列で並べる */
+ .hero{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
+ .hero>.mins{grid-area:1/1;margin:10px 0 0}
+ .hero>.thankswrap{grid-area:2/1}
+ .hero>.gnav{grid-area:1/2/3/3;margin:10px 0 0}
+ .hero>.ahatop{grid-area:3/1/4/-1}
+ .hero>.ahawrap{grid-area:4/1/5/-1}
+}
+/* 上位カテゴリへ飛ぶ矢羽。色は飛び先の青バッジと同じ #2563EB / 白。
+   ＠一覧のLMボタンと同じ形・同じ文字サイズだが、左端は閉じた（まっすぐな）右向き矢羽にする */
+.gnav{display:grid;grid-template-columns:1fr 1fr;gap:3px;align-content:start;min-width:0}
+.gjump{display:flex;align-items:center;justify-content:center;min-width:0;
+ background:#2563EB;color:#fff;font-size:12px;font-weight:700;line-height:1.15;
+ padding:6px 13px 6px 5px;text-decoration:none;text-align:center;
+ clip-path:polygon(0 0,89% 0,100% 50%,89% 100%,0 100%)}
+.gjump:hover{background:#1D4ED8}
 .ahawrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px;margin:16px 0 0}
 .leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
@@ -709,12 +737,11 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
 .haibokuwrap{display:block}
 .hblink.top{margin:0 0 6px}
 .hblink{display:block;margin:6px 0 0;font-size:15px;line-height:1.5;color:var(--sub);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
-/* 修正4 上位カテゴリ 連続先頭の強調：スマホのみ。PCには一切効かせない */
-@media(max-width:939.98px){
- .item .blklabel.grouptop,.item:nth-of-type(even) .blklabel.grouptop{
-  background:#2563EB;color:#fff;font-size:21px;letter-spacing:.08em;
-  padding:3px 12px;border-radius:6px;top:-18px;left:10px}
-}
+/* 上位カテゴリの先頭だけ青バッジで強調する。スマホ・パソコン共通 */
+.item .blklabel.grouptop,.item:nth-of-type(even) .blklabel.grouptop{
+ background:#2563EB;color:#fff;font-size:21px;letter-spacing:.08em;
+ padding:3px 12px;border-radius:6px;top:-18px;left:10px;
+ scroll-margin-top:16px}
 '''
 
 HTML=f'''<!DOCTYPE html>
@@ -734,6 +761,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 </div>
+{GNAV}
 <div class="ahawrap">
 <img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 <div class="leadcol">
