@@ -513,6 +513,14 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 .findhitbtn:hover,.findhitbtn:focus-visible{background:var(--ltblue)}
 .findhitbtn mark{background:#FFE58A;color:inherit;font-weight:700;padding:0 1px;border-radius:2px}
 .findhitbtn .findcat{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+/* スマホは検索結果が読みにくいので、「あらかじめ」と同じ18pxに上げ、
+   一覧の高さも広げる。検索語を画面最上部へ寄せるぶん下に余地ができる */
+@media(max-width:939.98px){
+ .findrow{scroll-margin-top:8px}
+ .findlist{max-height:62vh}
+ .findhitbtn{font-size:18px;line-height:1.6;padding:10px 12px}
+ .findhitbtn .findcat{font-size:13px;margin-top:3px}
+}
 /* 検索から飛んだ先を一時的に光らせる */
 .findhit{outline:4px solid #B02E24;outline-offset:3px;border-radius:6px}
 /* 文中リンクのフワッとプレビュー */
@@ -1148,6 +1156,8 @@ document.addEventListener('click',function(e){{
    list.appendChild(b);
   }});
   list.hidden=false;
+  /* スマホは結果が画面外に出やすいので、入力欄を最上部に寄せて一覧を広く見せる */
+  if(SP())document.querySelector('.findrow').scrollIntoView({{block:'start'}});
  }}
  var timer=null;
  q.addEventListener('input',function(){{clearTimeout(timer);timer=setTimeout(run,180);}});
