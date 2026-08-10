@@ -645,11 +645,15 @@ a.pk::after,a.row::after{content:none}
   opacity:0;transform:translate(-50%,-50%) scale(.96);
   transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
  .row.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
- /* プレビューの真下に動画タイトル。口ぐせの帯と同じ明朝・同じ寸法の白文字 */
+ /* プレビューの真下に動画タイトル。紺地に白（コントラスト比16.5:1）、本文と同じ
+    ゴシックで、大きさは「脳アハ！」と同じ。題名が長い画面外へ出ないよう2行で止める */
  .pk .pop::after,.row .pop::after{content:attr(data-t);position:absolute;left:0;right:0;top:100%;
-  padding:10px 16px;background:#000;color:#fff;font-family:"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","游明朝","YuMincho","Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif;
-  font-size:clamp(21px,5.4vw,29px);line-height:1.4;font-weight:400;text-align:left;
-  border-radius:0 0 6px 6px}
+  padding:12px 18px;background:#0B1F3B;color:#fff;font-family:inherit;
+  font-size:clamp(34px,10vw,54px);line-height:1.25;font-weight:700;text-align:left;
+  border-radius:0 0 6px 6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ /* 題名のぶんだけ下へ伸びるので、プレビュー全体をやや上寄せにして画面内に収める */
+ .pk .pop,.row .pop{top:44%}
  .row:hover .ttl{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--accent)}
 }
 @media(min-width:1600px) and (hover:hover) and (pointer:fine){
