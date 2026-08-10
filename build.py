@@ -774,11 +774,13 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
    黒背景・白文字にして「視聴する」「戻る」を重ねる */
 .zoomui{display:none}
 @media(max-width:939.98px){
- .pks .pk.zoom{grid-column:1/-1;background:#000;border-radius:8px;padding:6px}
- /* 拡大時のタイトルは、口ぐせの帯（まさにそこなんですよ）と同じ明朝・同じ寸法 */
- .pks .pk.zoom p{color:#fff;font-family:"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","游明朝","YuMincho","Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif;
-  font-size:clamp(25px,6.4vw,34px);line-height:1.4;-webkit-line-clamp:3}
- .pks .pk.zoom .thumb img{border-color:#000}
+ .pks .pk.zoom{grid-column:1/-1;background:#0B1F3B;border-radius:8px;padding:6px}
+ /* 拡大時のタイトル：紺地に白（コントラスト比16.5:1）。本文と同じゴシックで、
+    大きさは「脳アハ！」と同じ。行数は制限せず、長い題名も最後まで出す */
+ .pks .pk.zoom p{color:#fff;font-family:inherit;
+  font-size:clamp(34px,10vw,54px);line-height:1.3;font-weight:700;
+  display:block;overflow:visible;-webkit-line-clamp:none;text-overflow:clip}
+ .pks .pk.zoom .thumb img{border-color:#0B1F3B}
  .pks .pk.zoom .clipicon{display:none}   /* 視聴するボタンと同じ隅にあるため */
  .pk.zoom .zoomui{display:block}
  /* 2つのボタンはサムネイルの下の隅へ。中身が隠れず、下のタイトルとも重ならない */
@@ -941,9 +943,13 @@ function zoomCard(card,origin){{
  ZOOM=card;ZOOMORIGIN=origin||null;
  card.classList.add('zoom');
  (card.querySelector('.thumb')||card).appendChild(zoomUI());
- /* 行いっぱいに広がってから位置を測るため2フレーム待つ */
+ /* 行いっぱいに広がってから位置を測るため2フレーム待つ。
+    題名が長く画面より高くなる場合は、中央寄せだと上下が切れるので上端に合わせる */
  requestAnimationFrame(function(){{
-  requestAnimationFrame(function(){{card.scrollIntoView({{block:'center'}});}});
+  requestAnimationFrame(function(){{
+   var tall=card.getBoundingClientRect().height>window.innerHeight-16;
+   card.scrollIntoView({{block:tall?'start':'center'}});
+  }});
  }});
 }}
 document.addEventListener('toggle',function(e){{
