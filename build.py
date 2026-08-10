@@ -170,9 +170,12 @@ def best_cols(n,options):
     def empty(g): return (-n)%g
     return max(options,key=lambda g:(-empty(g),g))
 
-def pkgrid(ids,extra='',cls=''):
+def pkgrid(ids,extra='',cls='',anchor=False,jump=False):
+    """anchor=True でカードに id="v-動画ID" を振る（飛び先。カテゴリ一覧だけに振ること）。
+    jump=True で data-jump を付け、スマホでは動画を開かずその id へ飛ばす。"""
+    at=lambda i:(f' id="v-{i}"' if anchor else '')+(f' data-jump="v-{i}"' if jump else '')
     return f'<div class="pks{cls}">'+''.join(
-     f'<a class="pk" href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
+     f'<a class="pk"{at(i)} href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
      f'<span class="thumb"><img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}{CLIPICON}</span>'
      f'<p>{html.escape(V[i]["title"])}</p><span class="pop" aria-hidden="true"></span></a>' for i in ids)+extra+'</div>'
 
@@ -208,14 +211,14 @@ KAMI=[v['video_id'] for _,cats in groups for c in cats for v in c['videos']
 
 CHIKO=('<img class="stk masc chikoimg" src="'+IMGS['chiko']+'" alt="" width="300" height="265" decoding="async" fetchpriority="high">')
 first=''.join((f'<p class="pkcap">{html.escape(c)}</p>' if c else '')+
- pkgrid([x for x in i+MORE if x not in BELOW_PRIORITY_IDS],cls=' pksfirst') for c,i in FIRST)
+ pkgrid([x for x in i+MORE if x not in BELOW_PRIORITY_IDS],cls=' pksfirst',jump=True) for c,i in FIRST)
 
 TOTAL_CATS=sum(len(cats) for name,cats in groups if name!=tname)
 NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
 
-def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True):
+def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=False):
     """cls は details に足すクラス（神回★の ' solo' など）。
     hide=False にすると HIDE_FROM_CAT の除外を行わない（神回★専用に載せる動画があるため）。
     name が空ならブロック名のバッジを出さない。"""
@@ -225,7 +228,7 @@ def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True):
         n=len(vids)
         g=best_cols(n,(2,3)); pc=best_cols(n,(5,6))
         ids=[v['video_id'] for v in vids]
-        body=pkgrid(ids,cls=f' g{g} pc{pc}')
+        body=pkgrid(ids,cls=f' g{g} pc{pc}',anchor=anchor)
     else:
         body=rows(vids)
     lbl=(f'<span class="blklabel{" grouptop" if firstlabel else ""}">{html.escape(name)}</span>'
@@ -257,7 +260,7 @@ for gi,(name,cats) in enumerate(groups):
     if name in (tname,NEWCAT_GROUP):
         continue
     for ci,c in enumerate(cats):
-        gitems.append(catbox(name,c,grid=True,firstlabel=(ci==0)))
+        gitems.append(catbox(name,c,grid=True,firstlabel=(ci==0),anchor=True))
         n+=1
         if c['category_id']==NORI_AT_CAT:
             gitems.append(f'<img class="stk masc noridex" src="{IMGS["nori"]}" alt="" width="270" height="254" loading="lazy" decoding="async">')
@@ -308,6 +311,13 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .ahatop .norimobile{display:none}
  .ahawrap .noripc{display:block}
 }
+/* スマホは2つの動くアイコンでリード文を挟む。パソコンでは挨拶行の側を使うので、
+   こちらは隠し、逆にスマホでは挨拶行の側を隠す（同じ画像が二重に出ないようにする） */
+.leadrow{display:flex;align-items:center;gap:8px}
+.leadrow .lead{flex:1 1 auto;min-width:0}
+.leadrow .leadicon{flex:0 0 auto;margin:0}
+@media(min-width:940px){.leadrow{display:block}.leadrow .leadicon{display:none}}   /* .stk が後方にあるため詳細度を上げる */
+@media(max-width:939.98px){.thankswrap .arig,.thankswrap .nana{display:none}}
 .ahawrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px;margin:16px 0 0}
 .leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
@@ -669,6 +679,14 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  .musiclist li:target .ml-title{font-size:21px}   /* 16→21px */
  .music-item .backlink,.music-item .lmlink{font-size:13px;padding:7px 4px}
 }
+/* 「まずはこのあたりから」から飛んだ先の目印（スマホのみ）。
+   行いっぱいに広げてサムネイルを大きく見せ、そのまま押せば動画が開く */
+@media(max-width:939.98px){
+ .pks .pk:target{grid-column:1/-1;background:#000;border-radius:8px;padding:6px;
+  scroll-margin:0}
+ .pks .pk:target p{color:#fff;font-size:19px;-webkit-line-clamp:3}
+ .pks .pk:target .thumb img{border-color:#000}
+}
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 /* 神回★はカテゴリ一覧の一員だが、お気に入りとして薄緑で見分けられるようにする。
    :nth-of-type(even) の縞より後に置き、詳細度も高いので確実に上書きされる */
@@ -719,7 +737,11 @@ HTML=f'''<!DOCTYPE html>
 <div class="ahawrap">
 <img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 <div class="leadcol">
+<div class="leadrow">
+<img class="stk arig leadicon" src="{IMGS['arigatou']}" alt="" width="200" height="151" loading="lazy" decoding="async">
 <p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
+<img class="stk nana leadicon" src="{IMGS['nanananana']}" alt="" width="180" height="150" loading="lazy" decoding="async">
+</div>
 <div class="bannerrow top">
 <a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" style="--th:url({tnhq(ID_ICHIMI)})">
 <span class="lbl">{html.escape(TXT_ICHIMI)}</span>
@@ -849,6 +871,29 @@ document.addEventListener('click',function(e){{
    }});
   }}
   return;
+ }}
+ /* 「まずはこのあたりから」の18枚。スマホでは動画を直接開かず、
+    同じ動画がカテゴリ一覧のどこに居るかへ飛ばす（飛んだ先でもう一度押すと再生）。
+    バッジ（.reflink）の上を押したときは従来どおりバッジの動作を優先する */
+ if(!e.target.closest('.reflink')){{
+  var jp=e.target.closest('.pk[data-jump]');
+  if(jp&&window.matchMedia('(max-width:939.98px)').matches){{
+   var tg=document.getElementById(jp.dataset.jump);
+   if(tg){{
+    e.preventDefault();
+    var dd=tg.parentElement?tg.parentElement.closest('details'):null;
+    while(dd){{
+     if(!dd.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+800;dd.open=true;}}
+     dd=dd.parentElement?dd.parentElement.closest('details'):null;
+    }}
+    requestAnimationFrame(function(){{
+     location.hash=jp.dataset.jump;          /* :target で黒背景にする */
+     /* :target で行いっぱいに広がってから位置を測るため、もう1フレーム待つ */
+     requestAnimationFrame(function(){{tg.scrollIntoView({{block:'center'}});}});
+    }});
+    return;
+   }}
+  }}
  }}
  var t=e.target.closest('.reflink');
  if(!t)return;
