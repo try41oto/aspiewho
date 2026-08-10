@@ -173,7 +173,7 @@ def best_cols(n,options):
 def pkgrid(ids,extra='',cls='',anchor=False,jump=False):
     """anchor=True でカードに id="v-動画ID" を振る（飛び先。カテゴリ一覧だけに振ること）。
     jump=True で data-jump を付け、スマホでは動画を開かずその id へ飛ばす。"""
-    at=lambda i:(f' id="v-{i}"' if anchor else '')+(f' data-jump="v-{i}"' if jump else '')
+    at=lambda i:(f' id="v-{i}"' if anchor else '')+(f' id="s-{i}" data-jump="v-{i}"' if jump else '')
     return f'<div class="pks{cls}">'+''.join(
      f'<a class="pk"{at(i)} href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
      f'<span class="thumb"><img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}{CLIPICON}</span>'
@@ -262,8 +262,14 @@ DESC_BOX=('<p class="shinkai-description full">'
  '\u30bf\u30a4\u30c8\u30eb\u8868\u793a\u3055\u308c\u307e\u3059\u3002</p>')
 # 上位カテゴリ（サブカル〜AI）。青バッジをアンカー先にし、ページ上部に矢羽の飛び先を並べる
 GROUPTOP=[nm for nm,_ in groups if nm not in (tname,NEWCAT_GROUP)]
+def _w(t):
+    """矢羽のおおよその幅。半角は狭いので0.55文字ぶんとして数える"""
+    return sum(0.55 if c.isascii() else 1 for c in t)
+# スマホは順不同でよいので、幅の広い順に並べ替えて隙間を減らす（4行に収めるため）。
+# 並べ替えは CSS の order だけで行い、DOM順＝パソコンの表示順は変えない
+_rank={nm:i for i,nm in enumerate(sorted(GROUPTOP,key=_w,reverse=True))}
 GNAV=('<nav class="gnav" aria-label="\u4e0a\u4f4d\u30ab\u30c6\u30b4\u30ea\u3078\u79fb\u52d5">'
- +''.join(f'<a class="gjump" href="#g{i:02d}">{html.escape(nm)}</a>'
+ +''.join(f'<a class="gjump" style="--o:{_rank[nm]}" href="#g{i:02d}">{html.escape(nm)}</a>'
           for i,nm in enumerate(GROUPTOP))+'</nav>')
 
 gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>', DESC_BOX,
@@ -323,7 +329,9 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .hero .nana{order:5;margin-left:0}
  /* 矢羽はスマホと同じくページ最上部へ。全幅を使うぶん行数が最小になる */
  .hero .gnav{order:0;flex:0 0 100%;margin:0 0 6px}
- .hero .gjump{font-size:13px}
+ /* きちんと2行に収まる上限まで大きくする。1行の必要幅は文字寸法にほぼ比例するので、
+    画面幅から線形に決め、広い画面では21pxで止める */
+ .hero .gjump{font-size:clamp(11px,calc(2.4vw - 11px),21px);padding:8px 22px 8px 12px;line-height:1.2}
  .hero .ahawrap{order:7;flex:0 0 100%;margin-top:14px}
  .ahatop .norimobile{display:none}
  .ahawrap .noripc{display:block}
@@ -335,27 +343,41 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 @media(max-width:939.98px){.leadrow .lead{font-size:13px;line-height:1.6}}   /* 例示語と同寸。後方の .lead に勝たせる */
 .leadrow .leadicon{flex:0 0 auto;margin:0}
 @media(min-width:940px){.leadrow{display:block}.leadrow .leadicon{display:none}}   /* .stk が後方にあるため詳細度を上げる */
+/* ありがとうは「必ずみつかる、脳アハ！」の左へ。パソコンでは挨拶行の側を使うので隠す */
+@media(min-width:940px){.ahatop .ahaicon{display:none}}
+@media(max-width:939.98px){
+ /* ありがとうが入ったぶん行が狭くなる。「脳アハ！」を折り返させないよう周囲を詰める */
+ .ahatop .ahaicon{flex:0 0 auto;align-self:center;margin:0;width:52px}
+ .ahatop .norimobile{width:clamp(80px,24vw,150px)}
+ .ahatop .aha{white-space:nowrap}
+}
+/* 「ありがとうございます」等はパソコンだけ。スマホは短い文面にする */
+@media(max-width:939.98px){.ponly{display:none}}
 @media(max-width:939.98px){.thankswrap .arig,.thankswrap .nana{display:none}
  /* スマホの並び順：矢羽 → 脳アハ！ → 1つ視聴に25分 → 挨拶文 → 以降。
     1列グリッドにして order だけで入れ替える（DOMは触らない） */
  .hero{display:grid;grid-template-columns:1fr;padding-top:12px}
  .hero>.gnav{order:1;margin:0;grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
- .hero>.ahatop{order:2;margin:18px 0 0}
- .hero>.greet{order:3;margin:14px 0 0}
+ /* 25分・挨拶は「必ずみつかる、」の真上へ。両者は改行して2行にする */
+ .hero>.greet{order:2;margin:16px 0 0}
+ .hero>.ahatop{order:3;margin:6px 0 0}
  .hero>.ahawrap{order:4}
- /* 「1つ視聴に25分。」の直後に改行せず続ける。文字サイズはそれぞれ元のまま */
- .greet .mins,.greet .thankswrap,.greet .thanks{display:inline;margin:0}
- .greet .thanks{font-size:13px;margin-left:.25em}
+ .greet .mins{margin:0}
+ .greet .thankswrap{margin:2px 0 0}
+ .greet .thanks{font-size:13px}
 }
 /* 上位カテゴリへ飛ぶ矢羽。色は飛び先の青バッジと同じ #2563EB / 白。
    ＠一覧のLMボタンと同じ形・同じ文字サイズだが、左端は閉じた（まっすぐな）右向き矢羽にする */
 /* 文字数なりの幅で左から詰める。1行に入るだけ入れるので、画面幅がいくつでも行数が最小になる */
 .gnav{display:flex;flex-wrap:wrap;align-content:start;gap:3px;min-width:0}
 .gjump{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
- background:#2563EB;color:#fff;font-size:12px;font-weight:700;line-height:1.15;
- padding:6px 15px 6px 7px;text-decoration:none;white-space:nowrap;
+ background:#2563EB;color:#fff;font-size:11px;font-weight:700;line-height:1.15;
+ padding:5px 12px 5px 5px;text-decoration:none;white-space:nowrap;
  /* 矢羽の先端は幅によらず10px固定。%指定だと短い項目で尖りが潰れる */
  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%)}
+/* スマホだけ幅の広い順に並べ替える。パソコンはDOM順＝上位カテゴリの並び順のまま */
+@media(max-width:939.98px){.gjump{order:var(--o)}}
+@media(max-width:359.98px){.gjump{font-size:10px;padding:4px 11px 4px 4px}}
 .gjump:hover{background:#1D4ED8}
 /* アンカー先の右上に置く「戻る」。ページ最上部の矢羽一覧へ戻す。スマホのみ。
    左向き矢羽（左端が尖り右端はまっすぐ）で、色は濃い緑・白文字 */
@@ -733,13 +755,24 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  .musiclist li:target .ml-title{font-size:21px}   /* 16→21px */
  .music-item .backlink,.music-item .lmlink{font-size:13px;padding:7px 4px}
 }
-/* 「まずはこのあたりから」から飛んだ先の目印（スマホのみ）。
-   行いっぱいに広げてサムネイルを大きく見せ、そのまま押せば動画が開く */
+/* サムネイルを押したときの拡大表示（スマネのみ）。行いっぱいに広げ、
+   黒背景・白文字にして「視聴する」「戻る」を重ねる */
+.zoomui{display:none}
 @media(max-width:939.98px){
- .pks .pk:target{grid-column:1/-1;background:#000;border-radius:8px;padding:6px;
-  scroll-margin:0}
- .pks .pk:target p{color:#fff;font-size:19px;-webkit-line-clamp:3}
- .pks .pk:target .thumb img{border-color:#000}
+ .pks .pk.zoom{grid-column:1/-1;background:#000;border-radius:8px;padding:6px}
+ .pks .pk.zoom p{color:#fff;font-size:19px;-webkit-line-clamp:3}
+ .pks .pk.zoom .thumb img{border-color:#000}
+ /* ♫／＠バッジは既定で右上。戻ると重なるので拡大中だけ左へ寄せる */
+ .pks .pk.zoom .thumb .refbadge{right:auto;left:6px}
+ .pk.zoom .zoomui{display:block}
+ .zwatch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;
+  display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
+  background:#D6350F;color:#fff;font-size:19px;font-weight:800;letter-spacing:.06em;
+  padding:11px 24px;border-radius:26px;box-shadow:0 3px 14px rgba(0,0,0,.55);cursor:pointer}
+ .zback{position:absolute;right:6px;top:6px;z-index:5;
+  display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
+  background:#276B3B;color:#fff;font-size:15px;font-weight:700;
+  padding:6px 13px;border-radius:6px;cursor:pointer}
 }
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 /* 神回★はカテゴリ一覧の一員だが、お気に入りとして薄緑で見分けられるようにする。
@@ -786,8 +819,9 @@ HTML=f'''<!DOCTYPE html>
 <div class="wrap" id="top">
 <div class="hero">
 <div class="greet"><p class="mins">1つ視聴に25分。🥴</p>
-<div class="thankswrap"><p class="thanks">大切なお時間をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"><img class="stk nana" src="{IMGS['nanananana']}" alt="" width="180" height="150" decoding="async"></div></div>
+<div class="thankswrap"><p class="thanks">大切なお時間をもって<span class="ponly">、</span>ご視聴いただく方、<span class="ponly">ありがとうございます。</span></p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"><img class="stk nana" src="{IMGS['nanananana']}" alt="" width="180" height="150" decoding="async"></div></div>
 <div class="ahatop">
+<img class="stk arig ahaicon" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high">
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 </div>
@@ -796,7 +830,6 @@ HTML=f'''<!DOCTYPE html>
 <img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 <div class="leadcol">
 <div class="leadrow">
-<img class="stk arig leadicon" src="{IMGS['arigatou']}" alt="" width="200" height="151" loading="lazy" decoding="async">
 <p class="lead">年代や性別・日々の環境・経験・人生フェーズに応じた、新たな気づきに出会ってくださいますと嬉しいです。</p>
 <img class="stk nana leadicon" src="{IMGS['nanananana']}" alt="" width="180" height="150" loading="lazy" decoding="async">
 </div>
@@ -866,6 +899,35 @@ HTML=f'''<!DOCTYPE html>
 </div>
 <script>
 var SKIP_TOGGLE_SCROLL_UNTIL=0;
+/* サムネイル拡大のしくみ。ボタンは1組だけ作り、拡大したカードへ差し替えて使い回す。
+   カードは <a> なので中に <button> は置けない。span を role=button として扱う */
+var ZOOM=null,ZOOMORIGIN=null,ZUI=null;
+function SP(){{return window.matchMedia('(max-width:939.98px)').matches;}}
+function zoomUI(){{
+ if(!ZUI){{
+  ZUI=document.createElement('span');
+  ZUI.className='zoomui';
+  ZUI.innerHTML='<span class="zwatch" role="button" tabindex="0">\u8996\u8074\u3059\u308b</span>'+
+                '<span class="zback" role="button" tabindex="0">\u623b\u308b</span>';
+ }}
+ return ZUI;
+}}
+function unzoom(){{
+ if(!ZOOM)return;
+ ZOOM.classList.remove('zoom');
+ if(ZUI&&ZUI.parentNode)ZUI.parentNode.removeChild(ZUI);
+ ZOOM=null;ZOOMORIGIN=null;
+}}
+function zoomCard(card,origin){{
+ unzoom();
+ ZOOM=card;ZOOMORIGIN=origin||null;
+ card.classList.add('zoom');
+ (card.querySelector('.thumb')||card).appendChild(zoomUI());
+ /* 行いっぱいに広がってから位置を測るため2フレーム待つ */
+ requestAnimationFrame(function(){{
+  requestAnimationFrame(function(){{card.scrollIntoView({{block:'center'}});}});
+ }});
+}}
 document.addEventListener('toggle',function(e){{
  var d=e.target;
  if(d.tagName!=='DETAILS')return;
@@ -938,26 +1000,52 @@ document.addEventListener('click',function(e){{
   }}
   return;
  }}
- /* 「まずはこのあたりから」の18枚。スマホでは動画を直接開かず、
-    同じ動画がカテゴリ一覧のどこに居るかへ飛ばす（飛んだ先でもう一度押すと再生）。
+ /* サムネイルの拡大表示（スマホのみ）。
+    ・「まずはこのあたりから」の18枚 … 同じ動画がカテゴリ一覧のどこに居るかへ飛んで拡大。
+      「戻る」は元の18枚の位置まで返す
+    ・カテゴリを展開した3列のカード … その場で拡大。「戻る」は3列に戻すだけ
     バッジ（.reflink）の上を押したときは従来どおりバッジの動作を優先する */
- if(!e.target.closest('.reflink')){{
-  var jp=e.target.closest('.pk[data-jump]');
-  if(jp&&window.matchMedia('(max-width:939.98px)').matches){{
-   var tg=document.getElementById(jp.dataset.jump);
-   if(tg){{
-    e.preventDefault();
-    var dd=tg.parentElement?tg.parentElement.closest('details'):null;
-    while(dd){{
-     if(!dd.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+800;dd.open=true;}}
-     dd=dd.parentElement?dd.parentElement.closest('details'):null;
+ if(SP()){{
+  var zb=e.target.closest('.zback');
+  if(zb){{
+   e.preventDefault();
+   var org=ZOOMORIGIN; unzoom();
+   if(org){{
+    var oe=document.getElementById(org);
+    if(oe)oe.scrollIntoView({{block:'center'}});
+   }}
+   return;
+  }}
+  if(e.target.closest('.zwatch')){{
+   e.preventDefault();
+   if(ZOOM)window.open(ZOOM.href,'_blank','noopener');
+   return;
+  }}
+  if(!e.target.closest('.reflink')){{
+   var pk=e.target.closest('.pk');
+   if(pk){{
+    if(pk===ZOOM){{                      /* 拡大中のカード自体を押したら再生 */
+     e.preventDefault();
+     window.open(pk.href,'_blank','noopener');
+     return;
     }}
-    requestAnimationFrame(function(){{
-     location.hash=jp.dataset.jump;          /* :target で黒背景にする */
-     /* :target で行いっぱいに広がってから位置を測るため、もう1フレーム待つ */
-     requestAnimationFrame(function(){{tg.scrollIntoView({{block:'center'}});}});
-    }});
-    return;
+    if(pk.dataset.jump){{
+     var tg=document.getElementById(pk.dataset.jump);
+     if(tg){{
+      e.preventDefault();
+      var dd=tg.parentElement?tg.parentElement.closest('details'):null;
+      while(dd){{
+       if(!dd.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+800;dd.open=true;}}
+       dd=dd.parentElement?dd.parentElement.closest('details'):null;
+      }}
+      zoomCard(tg,pk.id||null);
+      return;
+     }}
+    }} else if(pk.closest('.catbody')){{   /* 展開したカテゴリの中のカード */
+     e.preventDefault();
+     zoomCard(pk,null);
+     return;
+    }}
    }}
   }}
  }}
