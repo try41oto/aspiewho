@@ -247,7 +247,10 @@ NEWCAT_BOX=catbox(NEWCAT_GROUP,NEWCAT,desc=False,grid=True)
 # KAMI_ONLY_IDS はカテゴリ側では隠すが神回★には載せるため hide=False にする
 KAMI_CAT={'category_id':'kamikai','name':'\u795e\u56de\u2605','description':'\u304a\u6c17\u306b\u5165\u308a',
  'videos':[V[i] for i in KAMI]}
-gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>',
+DESC_BOX=('<p class="shinkai-description full">'
+ '<strong>\u5de6\u300e\uff0b\u300f\u30dc\u30bf\u30f3\u3092\u62bc\u3059\u3068\u3001\u305d\u306e\u4e0b\u5074\u306b\u30ba\u30e9\u30c3\u30c8</strong>'
+ '\u30bf\u30a4\u30c8\u30eb\u8868\u793a\u3055\u308c\u307e\u3059\u3002</p>')
+gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>', DESC_BOX,
         catbox('',KAMI_CAT,grid=True,cls=' solo',hide=False)]
 n=1
 for gi,(name,cats) in enumerate(groups):
@@ -291,8 +294,17 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .ahatop .aha{text-align:left;flex:1 1 auto;min-width:0}
 .ahawrap .noripc{display:none}
 @media(min-width:940px){
- .ahatop{display:block}
- .ahatop .aha{text-align:center}
+ /* 「必ずみつかる、脳アハ！」を、ありがとう と ナナナナ のちょうど中間へ移す。
+    DOMは動かさず、hero を1本のフレックス行に畳んで（display:contents）order で並べ替える。
+    .aha の左右 auto マージンが余白を二等分するので、2つのアイコンの中間に来る */
+ .hero{display:flex;flex-wrap:wrap;align-items:center;column-gap:10px}
+ .thankswrap,.ahatop{display:contents}
+ .hero .mins{order:1;flex:0 0 100%}
+ .hero .thanks{order:2;flex:1 1 240px;min-width:0}
+ .hero .arig{order:3}
+ .hero .aha{order:4;margin:0 auto;text-align:center}
+ .hero .nana{order:5;margin-left:0}
+ .hero .ahawrap{order:6;flex:0 0 100%;margin-top:14px}
  .ahatop .norimobile{display:none}
  .ahawrap .noripc{display:block}
 }
@@ -394,6 +406,7 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 .findbox{margin:8px 0 0}
 /* 例示は語数が多く4〜5行に折り返る。見出し行は置かず、これだけを検索欄の上に出す */
 .findeg{margin:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--dim)}
+.findeg.under{margin:4px 0 0}   /* 検索欄を上下の語群で挟む */
 .findrow{display:flex;gap:6px;margin:4px 0 0}
 .findinput{flex:1;min-width:0;min-height:40px;padding:6px 10px;font-size:16px;font-family:inherit;
  color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:6px}
@@ -553,14 +566,21 @@ a.qr::after{content:none}
 @media(min-width:700px){.pks.endgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,1.4fr)}.pks.endgrid .masc{width:100%;max-width:250px}}
 @media(max-width:939.98px){.pks.endgrid .item{padding:20px 10px 12px}.pks.endgrid .item .t{font-size:17px}.pks.endgrid .item .pm{font-size:17px}.pks.endgrid .item .blklabel{font-size:14px;left:10px;top:-11px}.pks.endgrid .row1{gap:6px}}
 /* 神回★エリア：スマホ左右2列＋説明文 / PC3列 */
-.shinkai-description{display:none}
-@media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr 1fr;gap:12px}.shinkai-description{display:block;grid-area:1/1/3/2;align-self:center;font-size:16px;line-height:1.5;color:#333;margin:0;padding:12px;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;word-break:break-word}.shinkai-description strong{color:var(--blue);font-weight:700}.items.shinkai-wrapper>.pkcap{grid-area:1/2;margin:0;align-self:end}.items.shinkai-wrapper>.pk{grid-area:2/2}}
+/* 「＋を押すと開きます」の案内。口ぐせの帯と神回★のあいだに、行いっぱいで置く。
+   配色は神回★のボックスと同じ薄緑 */
+.shinkai-description{display:block;margin:0;padding:12px 14px;font-size:16px;line-height:1.5;
+ color:#333;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;
+ word-break:break-word}
+.shinkai-description strong{color:var(--blue);font-weight:700}
+/* 説明文が抜けたので、スマホでは「量産のきっかけは、戦争の話。」を右半分ではなく1列で大きく出す */
+@media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr;gap:8px}.items.shinkai-wrapper>.pkcap{margin:0}}
 /* 「量産のきっかけは、戦争の話。」の真上に出すイチオシ表示。スマホ専用。
    ⭐️は絵文字なので朱色を継がせず、そのままの色で出す */
 .oshi{display:block;font-size:17px;font-weight:800;letter-spacing:.06em;line-height:1.3;
  color:#D6350F}   /* 白地とのコントラスト比4.80:1 */
 .oshistar{color:initial}
-@media(min-width:940px){.oshi{display:none}}
+/* パソコンは .warpc 側にだけ出す。見出しの直後に続けて置くので inline にする */
+.warpc .oshi{display:inline;margin-left:.45em;white-space:nowrap}
 /* 青帯：スマホのみ上下余白を半分・文字を拡大 */
 @media(max-width:939.98px){.say{padding:15px 22px;font-size:clamp(25px,6.4vw,34px);line-height:1.4}}
 /* 自己紹介・終わりリンクの下線を消す */
@@ -707,11 +727,12 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
+<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」</p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
 </div>
+<p class="findeg under">「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
 <p class="findmsg" id="findmsg" role="status" aria-live="polite"></p>
 <div class="findlist" id="findlist" hidden></div>
 </div>
@@ -743,11 +764,11 @@ HTML=f'''<!DOCTYPE html>
 <span class="red">倍速や早送りなど推奨</span>(⇒<a href="{LINK_STAR}" target="_blank" rel="noopener">★</a>)　<span class="red">どうぞ！早送りくださいませ。</span>
 </div>
 </div>
-<div class="warpc"><p class="pkcap">{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
+<div class="warpc"><p class="pkcap">{html.escape(CAP_WAR)}<span class="oshi">イチオシ<span class="oshistar">⭐️</span></span></p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 </div>
 <div class="pkwrap"><h2>まずはこのあたりから</h2>{first}
-<div class="items shinkai-wrapper"><div class="shinkai-description"><strong>左『＋』ボタンを押すと、その下側にズラット</strong>タイトル表示されます。</div><p class="pkcap"><span class="oshi">イチオシ<span class="oshistar">⭐️</span></span>{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
+<div class="items shinkai-wrapper"><p class="pkcap"><span class="oshi">イチオシ<span class="oshistar">⭐️</span></span>{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 {idx}
 <div class="endwrap">
