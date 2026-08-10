@@ -658,6 +658,18 @@ a.pk::after,a.row::after{content:none}
 @media(min-width:1600px) and (hover:hover) and (pointer:fine){
  .rows{grid-template-columns:repeat(3,1fr)}
 }
+/* ページ先頭へ戻るボタン。右下に固定し、少しスクロールしてから出す。
+   白地の上に置くので、地色を site の青にして白い↑を載せる */
+.totop{position:fixed;right:14px;bottom:14px;z-index:30;display:none;
+ align-items:center;justify-content:center;width:44px;height:44px;
+ padding:0;border-radius:50%;background:var(--blue);color:#fff;border:2px solid #fff;
+ font-size:22px;font-weight:800;line-height:1;font-family:inherit;cursor:pointer;
+ box-shadow:0 3px 12px rgba(10,18,28,.45)}
+.totop.show{display:flex}
+.totop:hover{background:var(--deep)}
+.totop:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+/* パソコンは画面が広いので大きめに、余白もとる */
+@media(min-width:940px){.totop{right:28px;bottom:28px;width:64px;height:64px;font-size:32px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 
 /* ===== 以下、index.html に直接入れていた修正を build.py に移植 ===== */
@@ -920,6 +932,7 @@ HTML=f'''<!DOCTYPE html>
 </div>
 <div class="tail"></div>
 </div>
+<button type="button" class="totop" id="topButton" aria-label="ページの先頭へ戻る">↑</button>
 <script>
 var SKIP_TOGGLE_SCROLL_UNTIL=0;
 /* サムネイル拡大のしくみ。ボタンは1組だけ作り、拡大したカードへ差し替えて使い回す。
@@ -1178,6 +1191,17 @@ document.addEventListener('click',function(e){{
  q.addEventListener('input',function(){{clearTimeout(timer);timer=setTimeout(run,180);}});
  q.addEventListener('keydown',function(e){{if(e.key==='Enter'){{e.preventDefault();run();}}}});
  btn.addEventListener('click',run);
+}})();
+(function(){{
+ /* ページ先頭へ戻る。スクロールは毎フレーム大量に発生するので、
+    requestAnimationFrame で1フレーム1回にまとめ、passive で描画を妨げない */
+ var btn=document.getElementById('topButton'),queued=false;
+ function upd(){{queued=false;btn.classList.toggle('show',window.scrollY>300);}}
+ window.addEventListener('scroll',function(){{
+  if(!queued){{queued=true;requestAnimationFrame(upd);}}
+ }},{{passive:true}});
+ btn.addEventListener('click',function(){{window.scrollTo({{top:0,behavior:'smooth'}});}});
+ upd();
 }})();
 if('serviceWorker' in navigator){{
  window.addEventListener('load',function(){{navigator.serviceWorker.register('sw.js');}});
