@@ -46,7 +46,7 @@ PHRASES=['学ぶことがだいすきなアナタ、本日もようこそ、こ�
 # 1504本のうち外に出した2本（入れ替わっていたら下の2行を交換）
 ID_ICHIMI='uBtnbr0gu80'   # 1500タイトルを24分で一気見！
 ID_OWARI ='76XZgkPmg2s'   # 終わり☆AI能力把握実験、脳内発散訓練、遺言】動画量産1500本
-TXT_ICHIMI='全タイトルを24分で！'
+TXT_ICHIMI_HTML='全タイトルを<br>24分一気見！'   # 明示改行で必ず2行にする
 TXT_OWARI='終わり☆AI能力把握実験、脳内発散訓練、ポートフォリオ、遺言】動画量産1500本'
 ID_SELFINTRO='zQP6i3wEvPY'   # 自己紹介】積極奇異型アスペルガー(ASD)症候群、ワタシはココに居ます！(自慢)
 TXT_SELFINTRO='自己紹介'
@@ -231,12 +231,15 @@ def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=
         body=pkgrid(ids,cls=f' g{g} pc{pc}',anchor=anchor)
     else:
         body=rows(vids)
-    lbl=(f'<span class="blklabel{" grouptop" if firstlabel else ""}"'
+    # 名前が長いと絶対配置の青バッジが「戻る」に重なるため、8文字以上は別クラスで小さくする
+    lbl=(f'<span class="blklabel{" grouptop" if firstlabel else ""}'
+         f'{" longname" if firstlabel and len(name)>=8 else ""}"'
          f'{f" id={chr(34)}{gid}{chr(34)}" if gid else ""}>{html.escape(name)}</span>'
          if name else '')
     # 上位カテゴリの先頭にだけ、枠の右上に「戻る」（ページ最上部の矢羽一覧へ）。スマホのみ表示
     if gid:
-        lbl+='<a class="gback" href="#top">\u623b\u308b</a>'
+        # 青バッジと「戻る」を1行にまとめる。絶対配置で個別に置くと画面幅次第で重なるため
+        lbl='<span class="toprow">'+lbl+'<a class="gback" href="#top">\u623b\u308b</a></span>'
     return (f'<details class="item{cls}" id="c{c["category_id"]}">'
      f'<summary>{lbl}'
      f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
@@ -312,14 +315,14 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
     DOMは動かさず、hero を1本のフレックス行に畳んで（display:contents）order で並べ替える。
     .aha の左右 auto マージンが余白を二等分するので、2つのアイコンの中間に来る */
  .hero{display:flex;flex-wrap:wrap;align-items:center;column-gap:10px}
- .thankswrap,.ahatop{display:contents}
+ .greet,.thankswrap,.ahatop{display:contents}
  .hero .mins{order:1;flex:0 0 100%}
- .hero .thanks{order:2;flex:0 1 380px;min-width:0}
+ .hero .thanks{order:2;flex:0 1 auto;min-width:0}
  .hero .arig{order:3}
  .hero .aha{order:4;margin:0;text-align:center}
  .hero .nana{order:5;margin-left:0}
- /* 左に詰めた残りが矢羽の置き場。幅に応じて列数が増える */
- .hero .gnav{order:6;flex:1 1 260px;grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+ /* 矢羽はスマホと同じくページ最上部へ。全幅を使うぶん行数が最小になる */
+ .hero .gnav{order:0;flex:0 0 100%;margin:0 0 6px}
  .hero .gjump{font-size:13px}
  .hero .ahawrap{order:7;flex:0 0 100%;margin-top:14px}
  .ahatop .norimobile{display:none}
@@ -338,31 +341,37 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .hero{display:grid;grid-template-columns:1fr;padding-top:12px}
  .hero>.gnav{order:1;margin:0;grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
  .hero>.ahatop{order:2;margin:18px 0 0}
- .hero>.mins{order:3;margin:14px 0 0}
- .hero>.thankswrap{order:4;margin:2px 0 0}
- .hero>.ahawrap{order:5}
- /* 挨拶文はリード文・例示語と同じ13pxに落とす */
- .thankswrap .thanks{font-size:13px;line-height:1.6}
+ .hero>.greet{order:3;margin:14px 0 0}
+ .hero>.ahawrap{order:4}
+ /* 「1つ視聴に25分。」の直後に改行せず続ける。文字サイズはそれぞれ元のまま */
+ .greet .mins,.greet .thankswrap,.greet .thanks{display:inline;margin:0}
+ .greet .thanks{font-size:13px;margin-left:.25em}
 }
 /* 上位カテゴリへ飛ぶ矢羽。色は飛び先の青バッジと同じ #2563EB / 白。
    ＠一覧のLMボタンと同じ形・同じ文字サイズだが、左端は閉じた（まっすぐな）右向き矢羽にする */
-.gnav{display:grid;grid-template-columns:1fr 1fr;gap:3px;align-content:start;min-width:0}
-.gjump{display:flex;align-items:center;justify-content:center;min-width:0;
+/* 文字数なりの幅で左から詰める。1行に入るだけ入れるので、画面幅がいくつでも行数が最小になる */
+.gnav{display:flex;flex-wrap:wrap;align-content:start;gap:3px;min-width:0}
+.gjump{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
  background:#2563EB;color:#fff;font-size:12px;font-weight:700;line-height:1.15;
- padding:6px 13px 6px 5px;text-decoration:none;text-align:center;
- clip-path:polygon(0 0,89% 0,100% 50%,89% 100%,0 100%)}
+ padding:6px 15px 6px 7px;text-decoration:none;white-space:nowrap;
+ /* 矢羽の先端は幅によらず10px固定。%指定だと短い項目で尖りが潰れる */
+ clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%)}
 .gjump:hover{background:#1D4ED8}
 /* アンカー先の右上に置く「戻る」。ページ最上部の矢羽一覧へ戻す。スマホのみ。
    左向き矢羽（左端が尖り右端はまっすぐ）で、色は濃い緑・白文字 */
-.gback{display:none}
-@media(max-width:939.98px){
- .item .gback{position:absolute;top:-18px;right:10px;z-index:3;
-  display:inline-flex;align-items:center;justify-content:center;
-  background:#276B3B;color:#fff;font-size:21px;font-weight:700;letter-spacing:.08em;
-  line-height:1.4;padding:3px 12px 3px 22px;text-decoration:none;white-space:nowrap;
-  clip-path:polygon(11% 0,100% 0,100% 100%,11% 100%,0 50%)}
- details.item[open]>summary .gback{display:none}
-}
+/* 上位カテゴリの先頭だけ、枠の上辺に「名前 … 戻る」の1行を渡す。
+   フレックスなので、名前が長くても戻るに重なることはない */
+.item .toprow{position:absolute;top:-18px;left:10px;right:10px;z-index:3;
+ display:flex;align-items:center;gap:6px}
+.item .toprow .blklabel.grouptop{position:static;flex:0 1 auto;min-width:0;top:auto;left:auto}
+details.item[open]>summary .toprow{display:none}
+.item .gback{flex:0 0 auto;margin-left:auto;
+ display:inline-flex;align-items:center;justify-content:center;
+ background:#276B3B;color:#fff;font-size:21px;font-weight:700;letter-spacing:.08em;
+ line-height:1.4;padding:3px 10px 3px 16px;text-decoration:none;white-space:nowrap;
+ clip-path:polygon(10px 0,100% 0,100% 100%,10px 100%,0 50%)}
+details.item[open]>summary .gback{display:none}
+@media(min-width:940px){.item .gback{font-size:16px;padding:3px 9px 3px 15px}}
 .ahawrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px;margin:16px 0 0}
 .leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
@@ -759,6 +768,10 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  background:#2563EB;color:#fff;font-size:21px;letter-spacing:.08em;
  padding:3px 12px;border-radius:6px;top:-18px;left:10px;
  scroll-margin-top:16px}
+/* 「デバイス・デジタル生活」のような長い名前だけ、右上の「戻る」に重ならない大きさへ落とす。
+   上の指定より後ろに置き、詳細度も1つ高くして確実に上書きする */
+.item .blklabel.grouptop.longname{font-size:16px;line-height:1.2;white-space:normal}
+@media(min-width:940px){.item .blklabel.grouptop.longname{font-size:14px}}
 '''
 
 HTML=f'''<!DOCTYPE html>
@@ -772,8 +785,8 @@ HTML=f'''<!DOCTYPE html>
 <style>{CSS}</style></head><body>
 <div class="wrap" id="top">
 <div class="hero">
-<p class="mins">1つ視聴に25分。🥴</p>
-<div class="thankswrap"><p class="thanks">大切なお時間をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"><img class="stk nana" src="{IMGS['nanananana']}" alt="" width="180" height="150" decoding="async"></div>
+<div class="greet"><p class="mins">1つ視聴に25分。🥴</p>
+<div class="thankswrap"><p class="thanks">大切なお時間をもって、ご視聴いただく方、ありがとうございます。</p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"><img class="stk nana" src="{IMGS['nanananana']}" alt="" width="180" height="150" decoding="async"></div></div>
 <div class="ahatop">
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
@@ -789,7 +802,7 @@ HTML=f'''<!DOCTYPE html>
 </div>
 <div class="bannerrow top">
 <a class="banner" href="{wu(ID_ICHIMI,0)}" target="_blank" rel="noopener" style="--th:url({tnhq(ID_ICHIMI)})">
-<span class="lbl">{html.escape(TXT_ICHIMI)}</span>
+<span class="lbl">{TXT_ICHIMI_HTML}</span>
 <span class="pop" aria-hidden="true"></span></a>
 <!--MUSICLIST-->
 </div>
