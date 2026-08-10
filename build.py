@@ -494,7 +494,6 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 .findbox{margin:8px 0 0}
 /* 例示は語数が多く4〜5行に折り返る。見出し行は置かず、これだけを検索欄の上に出す */
 .findeg{margin:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--dim)}
-.findeg.under{margin:4px 0 0}   /* 検索欄を上下の語群で挟む */
 .findrow{display:flex;gap:6px;margin:4px 0 0}
 .findinput{flex:1;min-width:0;min-height:40px;padding:6px 10px;font-size:16px;font-family:inherit;
  color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:6px}
@@ -765,32 +764,33 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
 .music-item .backlink::after,.music-item .lmlink::after{content:none}
 /* アンカー到達時のハイライト：黒背景＋ごく薄いピンク文字。
    飛び先がひと目で分かるよう、その行だけ文字を5px大きくする（15→20px） */
-.musiclist li:target{background:#000;color:#FFF0F5;border-radius:6px;padding:4px 6px;margin-left:-6px}
-.musiclist li:target .ml-title{color:#FFF0F5;font-size:20px}
+.musiclist li.hit{background:#000;color:#FFF0F5;border-radius:6px;padding:4px 6px;margin-left:-6px}
+.musiclist li.hit .ml-title{color:#FFF0F5;font-size:20px}
 /* パソコンは1行が長くなりすぎるので、読める幅で止める */
 @media(min-width:940px){
  .musiclist ol{max-width:760px}
  .music-item .ml-title{font-size:16px}
- .musiclist li:target .ml-title{font-size:21px}   /* 16→21px */
+ .musiclist li.hit .ml-title{font-size:21px}   /* 16→21px */
  .music-item .backlink,.music-item .lmlink{font-size:13px;padding:7px 4px}
 }
 /* サムネイルを押したときの拡大表示（スマネのみ）。行いっぱいに広げ、
    黒背景・白文字にして「視聴する」「戻る」を重ねる */
 .zoomui{display:none}
 @media(max-width:939.98px){
- .pks .pk.zoom{grid-column:1/-1;background:#0B1F3B;border-radius:8px;padding:6px}
- /* 拡大時のタイトル：紺地に白（コントラスト比16.5:1）。本文と同じゴシックで、
-    大きさは「脳アハ！」と同じ。行数は制限せず、長い題名も最後まで出す */
+ /* 題名の地色と「視聴する」は、検索の「さがす」と同じ青（白文字とのコントラスト比7.2:1）。
+    同じ色にすることで、押せば見られる場所だと目で結びつく */
+ .pks .pk.zoom{grid-column:1/-1;background:var(--blue);border-radius:8px;padding:6px}
+ /* 大きさは「「温かく」聞き流しを。」と同じ24px。行数は制限せず最後まで出す */
  .pks .pk.zoom p{color:#fff;font-family:inherit;
-  font-size:clamp(34px,10vw,54px);line-height:1.3;font-weight:700;
+  font-size:24px;line-height:1.45;font-weight:700;
   display:block;overflow:visible;-webkit-line-clamp:none;text-overflow:clip}
- .pks .pk.zoom .thumb img{border-color:#0B1F3B}
+ .pks .pk.zoom .thumb img{border-color:var(--blue)}
  .pks .pk.zoom .clipicon{display:none}   /* 視聴するボタンと同じ隅にあるため */
  .pk.zoom .zoomui{display:block}
  /* 2つのボタンはサムネイルの下の隅へ。中身が隠れず、下のタイトルとも重ならない */
  .zwatch{position:absolute;right:6px;bottom:6px;z-index:5;
   display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
-  background:#D6350F;color:#fff;font-size:15px;font-weight:800;line-height:1.2;
+  background:var(--blue);color:#fff;font-size:15px;font-weight:800;line-height:1.2;
   letter-spacing:.04em;padding:7px 9px;border-radius:0;
   box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
  .zback{position:absolute;left:6px;bottom:6px;z-index:5;
@@ -864,12 +864,11 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」</p>
+<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
 </div>
-<p class="findeg under">「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
 <p class="findmsg" id="findmsg" role="status" aria-live="polite"></p>
 <div class="findlist" id="findlist" hidden></div>
 </div>
@@ -1022,8 +1021,7 @@ document.addEventListener('click',function(e){{
    var d=el.closest('details');
    if(d&&!d.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+600;d.open=true;}}
    requestAnimationFrame(function(){{
-    location.hash=id;
-    el.scrollIntoView({{block:'center'}});
+    requestAnimationFrame(function(){{el.scrollIntoView({{block:'center'}});}});
    }});
   }}
   return;
@@ -1090,9 +1088,16 @@ document.addEventListener('click',function(e){{
     if(!dd.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+600;dd.open=true;}}
     dd=dd.parentElement?dd.parentElement.closest('details'):null;
    }}
+   /* ハイライトはクラスで付ける。location.hash を使うとブラウザ既定の
+      「断片へスクロール」が後から走り、こちらの中央寄せを上書きしてしまう */
+   var prev=document.querySelector('.musiclist li.hit');
+   if(prev)prev.classList.remove('hit');
+   el.classList.add('hit');
+   /* 267件の一覧を開いた直後は1フレームでは座標が確定しないので2フレーム待つ */
    requestAnimationFrame(function(){{
-    location.hash=t.dataset.anchor;      /* :target のハイライトを効かせる */
-    el.scrollIntoView({{block:'center'}});  /* 既定は瞬間移動。画面の上下中央へ */
+    requestAnimationFrame(function(){{
+     el.scrollIntoView({{block:'center'}});  /* 画面の上下中央へ */
+    }});
    }});
   }}
   return;
@@ -1288,10 +1293,14 @@ def build_ref_lists(doc):
         ovid=re.search(r'v=([A-Za-z0-9_\-]{11})', own)
         if ovid and ovid.group(1) in HARMONICA_IDS:
             own=''   # ハーモニカ演奏系はNotebookLM制作ではないため対象外
-        # 開始タグに id="thumb-N"、バッジに data-anchor="music-N" を注入
-        out.append(doc[pos:ts])
-        out.append(doc[ts:te-1]+f' id="{sp["th"]}-{n}">')
-        out.append(doc[te:b.start()])
+        # サムネイルの span に id="thumb-N"、バッジに data-anchor="music-N" を注入。
+        # カードの <a> 側は pkgrid が id="v-…"/"s-…" を付けている場合があり、
+        # そこへ足すと id 属性が二重になって後から書いた方が無視される
+        TH='<span class="thumb">'
+        tp=doc.rfind(TH, ts, b.start())
+        out.append(doc[pos:tp])
+        out.append(f'<span class="thumb" id="{sp["th"]}-{n}">')
+        out.append(doc[tp+len(TH):b.start()])
         out.append(b.group(0).replace(' data-url=',
                    f' data-anchor="{sp["li"]}-{n}" data-url=', 1))
         pos=b.end()
