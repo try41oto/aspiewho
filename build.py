@@ -177,12 +177,14 @@ def pkgrid(ids,extra='',cls='',anchor=False,jump=False):
     return f'<div class="pks{cls}">'+''.join(
      f'<a class="pk"{at(i)} href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
      f'<span class="thumb"><img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}{CLIPICON}</span>'
-     f'<p>{html.escape(V[i]["title"])}</p><span class="pop" aria-hidden="true"></span></a>' for i in ids)+extra+'</div>'
+     f'<p>{html.escape(V[i]["title"])}</p>'
+     f'<span class="pop" aria-hidden="true" data-t="{html.escape(V[i]["title"])}"></span></a>' for i in ids)+extra+'</div>'
 
 def pkcard(href,thumb,title,cls='',vid=None):
     return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener">'
             f'<span class="thumb"><img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(vid) if vid else ""}{CLIPICON}</span>'
-            f'<p>{html.escape(title)}</p><span class="pop" aria-hidden="true"></span></a>')
+            f'<p>{html.escape(title)}</p>'
+            f'<span class="pop" aria-hidden="true" data-t="{html.escape(title)}"></span></a>')
 
 def ilink(href,vid,text):
     return (f'<a class="ilink" href="{href}" target="_blank" rel="noopener" style="--th:url({tnhq(vid)})">'
@@ -199,7 +201,7 @@ def rows(vids):
         out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener">'
               f'<span class="thumb"><img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(v["video_id"])}{CLIPICON}</span>'
               f'<span class="ttl"><span class="ttlx">{t}</span>{reflink(v["video_id"])}</span>'
-              f'<span class="pop" aria-hidden="true"></span></a>')
+              f'<span class="pop" aria-hidden="true" data-t="{t}"></span></a>')
     return f'<div class="rows">{out}</div>'
 
 # ピックアップ枠の重複防止：FIRST/MORE（最上部）と WAR・HAIBOKU・ハーモニカ移設組（末尾の専用カード）は
@@ -635,6 +637,11 @@ a.pk::after,a.row::after{content:none}
   opacity:0;transform:translate(-50%,-50%) scale(.96);
   transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
  .row.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
+ /* プレビューの真下に動画タイトル。口ぐせの帯と同じ明朝・同じ寸法の白文字 */
+ .pk .pop::after,.row .pop::after{content:attr(data-t);position:absolute;left:0;right:0;top:100%;
+  padding:10px 16px;background:#000;color:#fff;font-family:"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","游明朝","YuMincho","Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif;
+  font-size:clamp(21px,5.4vw,29px);line-height:1.4;font-weight:400;text-align:left;
+  border-radius:0 0 6px 6px}
  .row:hover .ttl{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--accent)}
 }
 @media(min-width:1600px) and (hover:hover) and (pointer:fine){
@@ -760,19 +767,22 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
 .zoomui{display:none}
 @media(max-width:939.98px){
  .pks .pk.zoom{grid-column:1/-1;background:#000;border-radius:8px;padding:6px}
- .pks .pk.zoom p{color:#fff;font-size:19px;-webkit-line-clamp:3}
+ /* 拡大時のタイトルは、口ぐせの帯（まさにそこなんですよ）と同じ明朝・同じ寸法 */
+ .pks .pk.zoom p{color:#fff;font-family:"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","游明朝","YuMincho","Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif;
+  font-size:clamp(25px,6.4vw,34px);line-height:1.4;-webkit-line-clamp:3}
  .pks .pk.zoom .thumb img{border-color:#000}
- /* ♫／＠バッジは既定で右上。戻ると重なるので拡大中だけ左へ寄せる */
- .pks .pk.zoom .thumb .refbadge{right:auto;left:6px}
+ .pks .pk.zoom .clipicon{display:none}   /* 視聴するボタンと同じ隅にあるため */
  .pk.zoom .zoomui{display:block}
- .zwatch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;
-  display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
-  background:#D6350F;color:#fff;font-size:19px;font-weight:800;letter-spacing:.06em;
-  padding:11px 24px;border-radius:26px;box-shadow:0 3px 14px rgba(0,0,0,.55);cursor:pointer}
- .zback{position:absolute;right:6px;top:6px;z-index:5;
+ /* 2つのボタンはサムネイルの下の隅へ。中身が隠れず、下のタイトルとも重ならない */
+ .zwatch{position:absolute;right:6px;bottom:6px;z-index:5;
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#D6350F;color:#fff;font-size:15px;font-weight:800;line-height:1.2;
+  letter-spacing:.04em;padding:7px 9px;border-radius:0;
+  box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
+ .zback{position:absolute;left:6px;bottom:6px;z-index:5;
   display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
   background:#276B3B;color:#fff;font-size:15px;font-weight:700;
-  padding:6px 13px;border-radius:6px;cursor:pointer}
+  padding:6px 13px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
 }
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 /* 神回★はカテゴリ一覧の一員だが、お気に入りとして薄緑で見分けられるようにする。
@@ -907,7 +917,7 @@ function zoomUI(){{
  if(!ZUI){{
   ZUI=document.createElement('span');
   ZUI.className='zoomui';
-  ZUI.innerHTML='<span class="zwatch" role="button" tabindex="0">\u8996\u8074\u3059\u308b</span>'+
+  ZUI.innerHTML='<span class="zwatch" role="button" tabindex="0">\u8996\u8074<br>\u3059\u308b</span>'+
                 '<span class="zback" role="button" tabindex="0">\u623b\u308b</span>';
  }}
  return ZUI;
