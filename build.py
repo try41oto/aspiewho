@@ -170,6 +170,14 @@ def best_cols(n,options):
     def empty(g): return (-n)%g
     return max(options,key=lambda g:(-empty(g),g))
 
+def popfs(t):
+    """パソコンのプレビュー題名を全文表示するための文字サイズ。
+    幅W・高さHの枠にN文字を収めるとき、行数は N*F/W、高さは 1.3*N*F^2/W なので
+    F = sqrt(H*W/(1.3*N))。上限は「脳アハ！」と同じ54px"""
+    # 基準は高さ700pxの画面。そこに収まる寸法を出し、背の高い画面ではCSS側で少し上げる
+    n=max(len(t),1)
+    return min(54, max(18, int((150*620/(1.3*n))**0.5)))
+
 def pkgrid(ids,extra='',cls='',anchor=False,jump=False):
     """anchor=True でカードに id="v-動画ID" を振る（飛び先。カテゴリ一覧だけに振ること）。
     jump=True で data-jump を付け、スマホでは動画を開かずその id へ飛ばす。"""
@@ -178,13 +186,15 @@ def pkgrid(ids,extra='',cls='',anchor=False,jump=False):
      f'<a class="pk"{at(i)} href="{V[i]["watch_url"]}" target="_blank" rel="noopener">'
      f'<span class="thumb"><img src="{V[i]["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(i)}{CLIPICON}</span>'
      f'<p>{html.escape(V[i]["title"])}</p>'
-     f'<span class="pop" aria-hidden="true" data-t="{html.escape(V[i]["title"])}"></span></a>' for i in ids)+extra+'</div>'
+     f'<span class="pop" aria-hidden="true" style="--tfs:{popfs(V[i]["title"])}px"'
+     f' data-t="{html.escape(V[i]["title"])}"></span></a>' for i in ids)+extra+'</div>'
 
 def pkcard(href,thumb,title,cls='',vid=None):
     return (f'<a class="pk{cls}" href="{href}" target="_blank" rel="noopener">'
             f'<span class="thumb"><img src="{thumb}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(vid) if vid else ""}{CLIPICON}</span>'
             f'<p>{html.escape(title)}</p>'
-            f'<span class="pop" aria-hidden="true" data-t="{html.escape(title)}"></span></a>')
+            f'<span class="pop" aria-hidden="true" style="--tfs:{popfs(title)}px"'
+            f' data-t="{html.escape(title)}"></span></a>')
 
 def ilink(href,vid,text):
     return (f'<a class="ilink" href="{href}" target="_blank" rel="noopener" style="--th:url({tnhq(vid)})">'
@@ -201,7 +211,8 @@ def rows(vids):
         out+=(f'<a class="row" href="{v["watch_url"]}" target="_blank" rel="noopener">'
               f'<span class="thumb"><img class="mini" src="{v["thumbnail_url"]}" alt="" width="320" height="180" loading="lazy" decoding="async">{refbadge(v["video_id"])}{CLIPICON}</span>'
               f'<span class="ttl"><span class="ttlx">{t}</span>{reflink(v["video_id"])}</span>'
-              f'<span class="pop" aria-hidden="true" data-t="{t}"></span></a>')
+              f'<span class="pop" aria-hidden="true" style="--tfs:{popfs(v["title"])}px"'
+              f' data-t="{t}"></span></a>')
     return f'<div class="rows">{out}</div>'
 
 # ピックアップ枠の重複防止：FIRST/MORE（最上部）と WAR・HAIBOKU・ハーモニカ移設組（末尾の専用カード）は
@@ -493,7 +504,7 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 /* ページ内検索：3等分のすぐ下。1502本の題名から絞り込み、押すとその場所へ飛ぶ */
 .findbox{margin:8px 0 0}
 /* 例示は語数が多く4〜5行に折り返る。見出し行は置かず、これだけを検索欄の上に出す */
-.findeg{margin:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--dim)}
+.findeg{margin:0;font-size:12px;font-weight:500;line-height:1.5;color:var(--dim)}
 .findrow{display:flex;gap:6px;margin:4px 0 0}
 .findinput{flex:1;min-width:0;min-height:40px;padding:6px 10px;font-size:16px;font-family:inherit;
  color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:6px}
@@ -644,15 +655,20 @@ a.pk::after,a.row::after{content:none}
   opacity:0;transform:translate(-50%,-50%) scale(.96);
   transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
  .row.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
- /* プレビューの真下に動画タイトル。紺地に白（コントラスト比16.5:1）、本文と同じ
-    ゴシックで、大きさは「脳アハ！」と同じ。題名が長い画面外へ出ないよう2行で止める */
+ /* プレビューの真下に動画タイトル。上部の矢羽と同じ青地に白、本文と同じゴシック。
+    題名は省略せず全文出す。長いものは popfs() が算出した寸法まで小さくして収める */
  .pk .pop::after,.row .pop::after{content:attr(data-t);position:absolute;left:0;right:0;top:100%;
-  padding:12px 18px;background:#0B1F3B;color:#fff;font-family:inherit;
-  font-size:clamp(34px,10vw,54px);line-height:1.25;font-weight:700;text-align:left;
-  border-radius:0 0 6px 6px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  padding:12px 18px;background:#2563EB;color:#fff;font-family:inherit;
+  font-size:var(--tfs,54px);line-height:1.25;font-weight:700;text-align:left;
+  border-radius:0 0 6px 6px;display:block}
  /* 題名のぶんだけ下へ伸びるので、プレビュー全体をやや上寄せにして画面内に収める */
  .pk .pop,.row .pop{top:44%}
+ /* --tfs は高さ700pxの画面向け。縦に余裕がある画面では上限54pxまで大きくする */
+ @media(min-height:840px){.pk .pop::after,.row .pop::after{font-size:min(54px,calc(var(--tfs,54px)*1.15))}}
+ @media(min-height:1000px){.pk .pop::after,.row .pop::after{font-size:min(54px,calc(var(--tfs,54px)*1.3))}}
+ /* 背の低い画面では、短めの題名でも下がはみ出すので上限を設ける */
+ @media(max-height:780px){.pk .pop::after,.row .pop::after{font-size:min(var(--tfs,54px),40px)}}
+ @media(max-height:700px){.pk .pop::after,.row .pop::after{font-size:min(var(--tfs,54px),30px)}}
  .row:hover .ttl{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--accent)}
 }
 @media(min-width:1600px) and (hover:hover) and (pointer:fine){
@@ -789,20 +805,19 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
    黒背景・白文字にして「視聴する」「戻る」を重ねる */
 .zoomui{display:none}
 @media(max-width:939.98px){
- /* 題名の地色と「視聴する」は、検索の「さがす」と同じ青（白文字とのコントラスト比7.2:1）。
-    同じ色にすることで、押せば見られる場所だと目で結びつく */
- .pks .pk.zoom{grid-column:1/-1;background:var(--blue);border-radius:8px;padding:6px}
+ /* 題名の地色と「視聴する」は、ページ上部の矢羽と同じ青（#2563EB、白文字とのコントラスト比5.2:1） */
+ .pks .pk.zoom{grid-column:1/-1;background:#2563EB;border-radius:8px;padding:6px}
  /* 大きさは「「温かく」聞き流しを。」と同じ24px。行数は制限せず最後まで出す */
  .pks .pk.zoom p{color:#fff;font-family:inherit;
   font-size:24px;line-height:1.45;font-weight:700;
   display:block;overflow:visible;-webkit-line-clamp:none;text-overflow:clip}
- .pks .pk.zoom .thumb img{border-color:var(--blue)}
+ .pks .pk.zoom .thumb img{border-color:#2563EB}
  .pks .pk.zoom .clipicon{display:none}   /* 視聴するボタンと同じ隅にあるため */
  .pk.zoom .zoomui{display:block}
  /* 2つのボタンはサムネイルの下の隅へ。中身が隠れず、下のタイトルとも重ならない */
  .zwatch{position:absolute;right:6px;bottom:6px;z-index:5;
   display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
-  background:var(--blue);color:#fff;font-size:15px;font-weight:800;line-height:1.2;
+  background:#2563EB;color:#fff;font-size:15px;font-weight:800;line-height:1.2;
   letter-spacing:.04em;padding:7px 9px;border-radius:0;
   box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
  .zback{position:absolute;left:6px;bottom:6px;z-index:5;
@@ -876,7 +891,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
+<p class="findeg">「楽しい」「苦しい」「面白い」「ドラえもん」「かわいい」「サッカー」「野球」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
