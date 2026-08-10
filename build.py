@@ -234,6 +234,9 @@ def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=
     lbl=(f'<span class="blklabel{" grouptop" if firstlabel else ""}"'
          f'{f" id={chr(34)}{gid}{chr(34)}" if gid else ""}>{html.escape(name)}</span>'
          if name else '')
+    # 上位カテゴリの先頭にだけ、枠の右上に「戻る」（ページ最上部の矢羽一覧へ）。スマホのみ表示
+    if gid:
+        lbl+='<a class="gback" href="#top">\u623b\u308b</a>'
     return (f'<details class="item{cls}" id="c{c["category_id"]}">'
      f'<summary>{lbl}'
      f'<span class="row1"><span class="pm" aria-hidden="true">＋</span>'
@@ -330,13 +333,16 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .leadrow .leadicon{flex:0 0 auto;margin:0}
 @media(min-width:940px){.leadrow{display:block}.leadrow .leadicon{display:none}}   /* .stk が後方にあるため詳細度を上げる */
 @media(max-width:939.98px){.thankswrap .arig,.thankswrap .nana{display:none}
- /* 「1つ視聴に25分」と挨拶文を左半分に収め、空いた右半分に矢羽を2列で並べる */
- .hero{display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
- .hero>.mins{grid-area:1/1;margin:10px 0 0}
- .hero>.thankswrap{grid-area:2/1}
- .hero>.gnav{grid-area:1/2/3/3;margin:10px 0 0}
- .hero>.ahatop{grid-area:3/1/4/-1}
- .hero>.ahawrap{grid-area:4/1/5/-1}
+ /* スマホの並び順：矢羽 → 脳アハ！ → 1つ視聴に25分 → 挨拶文 → 以降。
+    1列グリッドにして order だけで入れ替える（DOMは触らない） */
+ .hero{display:grid;grid-template-columns:1fr;padding-top:12px}
+ .hero>.gnav{order:1;margin:0;grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
+ .hero>.ahatop{order:2;margin:18px 0 0}
+ .hero>.mins{order:3;margin:14px 0 0}
+ .hero>.thankswrap{order:4;margin:2px 0 0}
+ .hero>.ahawrap{order:5}
+ /* 挨拶文はリード文・例示語と同じ13pxに落とす */
+ .thankswrap .thanks{font-size:13px;line-height:1.6}
 }
 /* 上位カテゴリへ飛ぶ矢羽。色は飛び先の青バッジと同じ #2563EB / 白。
    ＠一覧のLMボタンと同じ形・同じ文字サイズだが、左端は閉じた（まっすぐな）右向き矢羽にする */
@@ -346,6 +352,17 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  padding:6px 13px 6px 5px;text-decoration:none;text-align:center;
  clip-path:polygon(0 0,89% 0,100% 50%,89% 100%,0 100%)}
 .gjump:hover{background:#1D4ED8}
+/* アンカー先の右上に置く「戻る」。ページ最上部の矢羽一覧へ戻す。スマホのみ。
+   左向き矢羽（左端が尖り右端はまっすぐ）で、色は濃い緑・白文字 */
+.gback{display:none}
+@media(max-width:939.98px){
+ .item .gback{position:absolute;top:-18px;right:10px;z-index:3;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#276B3B;color:#fff;font-size:21px;font-weight:700;letter-spacing:.08em;
+  line-height:1.4;padding:3px 12px 3px 22px;text-decoration:none;white-space:nowrap;
+  clip-path:polygon(11% 0,100% 0,100% 100%,11% 100%,0 50%)}
+ details.item[open]>summary .gback{display:none}
+}
 .ahawrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px;margin:16px 0 0}
 .leadcol{flex:1 1 260px;min-width:220px;max-width:480px}
 .stk{display:block;height:auto;flex:0 0 auto}
@@ -883,6 +900,14 @@ document.addEventListener('toggle',function(e){{
  }});
 }})();
 document.addEventListener('click',function(e){{
+ /* 上位カテゴリの「戻る」。summary の中にあるので、そのままだと開閉が起きる。
+    既定動作を止めてページ最上部（矢羽一覧）へ戻す */
+ var gb=e.target.closest('.gback');
+ if(gb){{
+  e.preventDefault();
+  document.getElementById('top').scrollIntoView({{block:'start'}});
+  return;
+ }}
  /* 「戻る」：対象が閉じた details の中にあると、ブラウザ既定のハッシュ移動では
     自動展開で高さが変わり、着地位置が大きくずれる。開いてから自前で移動する */
  var bk=e.target.closest('.backlink');
