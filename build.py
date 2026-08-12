@@ -505,6 +505,10 @@ background:var(--ltblue);border:1px solid var(--blue);border-radius:8px;text-dec
 .findbox{margin:8px 0 0}
 /* 例示は語数が多く4〜5行に折り返る。見出し行は置かず、これだけを検索欄の上に出す */
 .findeg{margin:0;font-size:12px;font-weight:500;line-height:1.5;color:var(--dim)}
+/* 呼びかけの一文だけ黒地に黄色（コントラスト比17.2:1）。折り返しても各行に
+   背景と余白が付くよう box-decoration-break を効かせる */
+.findcta{background:#000;color:#FFEB3B;font-weight:700;padding:2px 6px;border-radius:3px;
+ -webkit-box-decoration-break:clone;box-decoration-break:clone}
 .findrow{display:flex;gap:6px;margin:4px 0 0}
 .findinput{flex:1;min-width:0;min-height:40px;padding:6px 10px;font-size:16px;font-family:inherit;
  color:var(--fg);background:#fff;border:1px solid var(--line);border-radius:6px}
@@ -891,7 +895,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">「楽しい」「苦しい」「面白い」「ドラえもん」「かわいい」「サッカー」「野球」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など</p>
+<p class="findeg">「楽しい」「苦しい」「面白い」「ドラえもん」「かわいい」「サッカー」「野球」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など、<span class="findcta">なんでも思いついた言葉をご検索ください！</span></p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
