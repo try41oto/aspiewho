@@ -33,7 +33,7 @@ TXT_HAIBOKU='技術的敗北と再生の物語'
 IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
 IMGS['nanananana']='img/nanananana_anim.webp'
-MORE=['TCe2SvES2x4','2Zky_cifOmw','_BnfibpgX-A','GNnv5kXhJJs','bsVYxPsVdCQ',
+MORE=['TCe2SvES2x4','2Zky_cifOmw','CAMnGoHd9G0','GNnv5kXhJJs','bsVYxPsVdCQ',
       '3D6P6cqT1X8','nEayqs5K8x8','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','I4Mx8zksrh0',
       'TfRZv5DW3Es']
 
@@ -659,20 +659,18 @@ a.pk::after,a.row::after{content:none}
   opacity:0;transform:translate(-50%,-50%) scale(.96);
   transition:opacity .18s ease,transform .18s ease;pointer-events:none;z-index:20}
  .row.popshow .pop{background-image:var(--th);opacity:1;transform:translate(-50%,-50%) scale(1)}
- /* プレビューの真下に動画タイトル。上部の矢羽と同じ青地に白、本文と同じゴシック。
-    題名は省略せず全文出す。長いものは popfs() が算出した寸法まで小さくして収める */
- .pk .pop::after,.row .pop::after{content:attr(data-t);position:absolute;left:0;right:0;top:100%;
-  padding:12px 18px;background:#2563EB;color:#fff;font-family:inherit;
-  font-size:var(--tfs,54px);line-height:1.25;font-weight:700;text-align:left;
-  border-radius:0 0 6px 6px;display:block}
- /* 題名のぶんだけ下へ伸びるので、プレビュー全体をやや上寄せにして画面内に収める */
- .pk .pop,.row .pop{top:44%}
- /* --tfs は高さ700pxの画面向け。縦に余裕がある画面では上限54pxまで大きくする */
+ /* サムネイルのプレビューは画像を出さず、動画タイトルだけをフワッと出す。
+    上部の矢羽と同じ青地に白、本文と同じゴシックで、題名は省略せず全文 */
+ .pk .pop,.row .pop{top:50%;width:min(720px,66vw);aspect-ratio:auto;height:auto;
+  background:#2563EB;border:none;border-radius:8px}
+ .pk.popshow .pop,.row.popshow .pop{background-image:none}
+ .pk .pop::after,.row .pop::after{content:attr(data-t);display:block;position:static;
+  padding:18px 24px;color:#fff;font-family:inherit;
+  font-size:var(--tfs,54px);line-height:1.25;font-weight:700;text-align:left}
+ /* --tfs は画像があった頃の寸法。画像が無くなり縦に余裕ができたので、
+    背の低い画面向けの上限は外し、縦に余裕がある画面での拡大だけ残す */
  @media(min-height:840px){.pk .pop::after,.row .pop::after{font-size:min(54px,calc(var(--tfs,54px)*1.15))}}
  @media(min-height:1000px){.pk .pop::after,.row .pop::after{font-size:min(54px,calc(var(--tfs,54px)*1.3))}}
- /* 背の低い画面では、短めの題名でも下がはみ出すので上限を設ける */
- @media(max-height:780px){.pk .pop::after,.row .pop::after{font-size:min(var(--tfs,54px),40px)}}
- @media(max-height:700px){.pk .pop::after,.row .pop::after{font-size:min(var(--tfs,54px),30px)}}
  .row:hover .ttl{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--accent)}
 }
 @media(min-width:1600px) and (hover:hover) and (pointer:fine){
