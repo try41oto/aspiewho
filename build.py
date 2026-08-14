@@ -410,7 +410,8 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .hero>.ahawrap{order:4}
  .greet .mins{margin:0}
  .greet .thankswrap{margin:2px 0 0}
- .greet .thanks{font-size:19px}   /* すぐ上の「1つ視聴に25分。」と同寸 */
+ /* 挨拶文は「必ずみつかる、」（.aha small）と同じ字づかいにそろえる */
+ .greet .thanks{font-size:18px;font-weight:600;letter-spacing:.06em;line-height:1.3}
 }
 /* 上位カテゴリへ飛ぶ矢羽。色は飛び先の青バッジと同じ #2563EB / 白。
    ＠一覧のLMボタンと同じ形・同じ文字サイズだが、左端は閉じた（まっすぐな）右向き矢羽にする */
@@ -947,7 +948,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg"><span class="findcta">なんでも思いついた言葉を</span>「おかあさん」「糞」「マクドナルド」「便」「トイレ」「ちんこ」「Notebook」「尿」「リハビリ」「狂」「クーラー」「阿呆」「ドラえもん」「バカ」「ネットワーク」「罪」「ダジャレ」「死」「セキュリティ」「恥」「少子化」「病」「障害」「血」「歌詞」「泣」「温泉」「闇」「相撲」「悪」「実験」「怖」「地球」「鹿」「テレビ」「嘘」「歴史」「老」「男女」「婚」「寿命」「恋」「経済」「核」「教育」「金」「スマホ」「騙」「時代」など、<span class="findcta">ご検索ください！</span></p>
+<p class="findeg"><span class="findcta">なんでも思いついた言葉を</span>「おかあさん」「糞」「マクドナルド」「便」「トイレ」「医療」「Notebook」「尿」「リハビリ」「地獄」「クーラー」「阿呆」「ドラえもん」「バカ」「ネットワーク」「罪」「ダジャレ」「死」「セキュリティ」「恥」「少子化」「病」「障害」「血」「歌詞」「泣く」「温泉」「闇」「相撲」「悪」「実験」「怖い」「地球」「詐欺」「テレビ」「高齢」「歴史」「結婚」「経済」「恋愛」「教育」「核兵器」「スマホ」「お金」「時代」「騙す」など、<span class="findcta">ご検索ください！</span></p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
