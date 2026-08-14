@@ -295,19 +295,27 @@ def sayband(k):
     かつ 90度・180度のようなきりのよい角度には揃わない"""
     amp =(3.5, 7, 11, 16, 23, 31)[k]     # 回転の振れ幅（度）
     step=(0.42,0.63,0.88,1.17,1.51,1.94)[k]  # 1文字ごとに進む位相
-    dy  =(0,   1.5, 3,   5,   8,   12)[k]    # 上下のずれ（px）
+    dy  =(0,0.05,0.10,0.16,0.26,0.38)[k]     # 上下のずれ（em）
     sw  =(0,   0.01,0.02,0.035,0.05,0.075)[k] # 大きさの揺れ
     ph  =0.7*k                            # 段ごとに波の始まりをずらす
     out=[]
+    gap=0.0
     for i,ch in enumerate(PHRASES[k]):
         if ch==' ' or ch=='\u3000':
             out.append(ch); continue
         a=amp*math.sin(i*step+ph)
         y=dy*math.cos(i*step*1.27+ph)
         sc=1+sw*math.sin(i*step*0.73+ph)
-        out.append(f'<span class="sc" style="--r:{a:.1f}deg;--y:{y:.1f}px;--s:{sc:.3f}">'
-                   f'{html.escape(ch)}</span>')
-    return f'<p class="say lv{k} full">{"".join(out)}</p>'
+        # 1字の枠（横 W em ×縦 1em）を a 度傾けると、占める幅と高さが膨らむ。
+        # はみ出たぶんを左右のマージンに配り、行間にも足して、隣と重ならないようにする
+        r=math.radians(a); co=abs(math.cos(r)); si=abs(math.sin(r))
+        W=1.06                              # 書体差を見込んだ字幅の上限
+        exw=sc*(W*co+si); exh=sc*(W*si+co)
+        m=0.03+max(0.0,exw-1.0)/2
+        gap=max(gap,exh-1.0+2*abs(y))   # 行どうしが重ならない最小の行間
+        out.append(f'<span class="sc" style="--r:{a:.1f}deg;--y:{y:.3f}em;'
+                   f'--s:{sc:.3f};--m:{m:.3f}em">{html.escape(ch)}</span>')
+    return f'<p class="say lv{k} full" style="--g:{gap:.2f}em">{"".join(out)}</p>'
 
 gitems=[sayband(0),
         catbox('',KAMI_CAT,grid=True,cls=' solo',hide=False,note=KAMI_NOTE)]
@@ -482,10 +490,16 @@ border:1px solid var(--line);border-radius:5px;image-rendering:pixelated}
 .say{margin:36px 0;padding:30px 22px;background:var(--deep);color:#fff;border-radius:6px;
 font-family:"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","游明朝","YuMincho",
 "Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif;
-font-size:clamp(21px,5.4vw,29px);line-height:2;letter-spacing:.08em;font-weight:400}
+font-size:clamp(21px,5.4vw,29px);line-height:2;letter-spacing:.08em;font-weight:400;
+/* 1字ずつを横並びにして左端から右端まで均等に散らす。字数の少ない段ほど字間が広がる */
+display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;
+row-gap:max(var(--gbase,1em),var(--g,0em))}
 /* 1文字ずつ回転・上下ずれ・大小。値は sayband() が段ごとに決めて style で渡す */
-.say .sc{display:inline-block;transform:rotate(var(--r,0deg)) translateY(var(--y,0px)) scale(var(--s,1));
- transform-origin:50% 62%}
+/* 行の折り返し位置を揃えるために JS が挿入する（行数はそのまま、字数だけ均す） */
+.say .brk{flex:0 0 100%;height:0;margin:0}
+.say .sc{display:inline-block;line-height:1;letter-spacing:0;margin-inline:var(--m,0em);
+ transform:translateY(var(--y,0px)) rotate(var(--r,0deg)) scale(var(--s,1));
+ transform-origin:50% 50%}
 /* 傾きが強い段は文字が帯からはみ出すので、上下の余白を足す */
 .say.lv3{padding-top:36px;padding-bottom:36px}
 .say.lv4{padding-top:42px;padding-bottom:42px}
@@ -753,7 +767,7 @@ details.item[open]>summary .itemnote{display:none}
 /* パソコンは .warpc 側にだけ出す。見出しの直後に続けて置くので inline にする */
 .warpc .oshi{display:inline;margin-left:.45em;white-space:nowrap}
 /* 青帯：スマホのみ上下余白を半分・文字を拡大 */
-@media(max-width:939.98px){.say{padding:15px 22px;font-size:clamp(25px,6.4vw,34px);line-height:1.4}
+@media(max-width:939.98px){.say{padding:18px 10px;font-size:clamp(25px,6.4vw,34px);--gbase:.62em}
  .say.lv3{padding-top:26px;padding-bottom:26px}
  .say.lv4{padding-top:32px;padding-bottom:32px}
  .say.lv5{padding-top:40px;padding-bottom:40px}}
@@ -1293,6 +1307,31 @@ if('serviceWorker' in navigator){{
    var isMac=/Mac/.test(navigator.platform)&&!isIOS;
    showModal((isMac?'<b>Cmd + D</b>':'<b>Ctrl + D</b>')+' でブックマークできます。');
   }}
+ }});
+
+ /* 口ぐせの帯は1字ずつを両端まで散らすので、素直に折り返すと最終行が
+    1〜2字だけになって間延びする。行数は変えずに1行あたりの字数を均す */
+ function evensay(){{
+  document.querySelectorAll('.say').forEach(function(p){{
+   p.querySelectorAll('.brk').forEach(function(b){{b.remove();}});
+   var sc=p.querySelectorAll('.sc'),n=sc.length;
+   if(n<2)return;
+   var tops=[],i;
+   for(i=0;i<n;i++){{var t=sc[i].offsetTop;if(!tops.length||t!==tops[tops.length-1])tops.push(t);}}
+   var rows=tops.length;
+   if(rows<2)return;
+   var per=Math.ceil(n/rows);
+   for(i=per;i<n;i+=per){{
+    var b=document.createElement('b');b.className='brk';
+    p.insertBefore(b,sc[i]);
+   }}
+  }});
+ }}
+ evensay();
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(evensay);
+ var sayt=null;
+ window.addEventListener('resize',function(){{
+  clearTimeout(sayt);sayt=setTimeout(evensay,150);
  }});
 
  var shareBtn=document.getElementById('shareBtn');
