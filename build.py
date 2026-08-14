@@ -288,15 +288,19 @@ GNAV=('<nav class="gnav" aria-label="\u4e0a\u4f4d\u30ab\u30c6\u30b4\u30ea\u3078\
  +''.join(f'<a class="gjump" style="--o:{_rank[nm]}" href="#g{i:02d}">{html.escape(nm)}</a>'
           for i,nm in enumerate(GROUPTOP))+'</nav>')
 
+# 口ぐせの帯の傾き（度）。PHRASES と同じ並び
+AMPS=(14, 7, 24, 31, 22, 3.5)
+
 def sayband(k):
     """口ぐせの帯。1文字ずつ回転・上下ずれ・わずかな大小をつける。
     k が大きい（ページ下方）ほど振れ幅と歩幅を増やし、遊び心を強くしていく。
     正弦波で位相を進めるので、タイヤが転がるように角度が移り変わり、
     かつ 90度・180度のようなきりのよい角度には揃わない"""
-    amp =(3.5, 7, 11, 16, 23, 31)[k]     # 回転の振れ幅（度）
-    step=(0.42,0.63,0.88,1.17,1.51,1.94)[k]  # 1文字ごとに進む位相
-    dy  =(0,0.05,0.10,0.16,0.26,0.38)[k]     # 上下のずれ（em）
-    sw  =(0,   0.01,0.02,0.035,0.05,0.075)[k] # 大きさの揺れ
+    amp =AMPS[k]                          # 回転の振れ幅（度）。段ごとに指定する
+    lv  =sorted(AMPS).index(amp)          # 振れ幅の小さい順の位置。揺らし方はこれで決める
+    step=(0.42,0.63,0.88,1.17,1.51,1.94)[lv]  # 1文字ごとに進む位相
+    dy  =(0,0.05,0.10,0.16,0.26,0.38)[lv]     # 上下のずれ（em）
+    sw  =(0,   0.01,0.02,0.035,0.05,0.075)[lv] # 大きさの揺れ
     ph  =0.7*k                            # 段ごとに波の始まりをずらす
     out=[]
     gap=0.0
@@ -315,7 +319,7 @@ def sayband(k):
         gap=max(gap,exh-1.0+2*abs(y))   # 行どうしが重ならない最小の行間
         out.append(f'<span class="sc" style="--r:{a:.1f}deg;--y:{y:.3f}em;'
                    f'--s:{sc:.3f};--m:{m:.3f}em">{html.escape(ch)}</span>')
-    return f'<p class="say lv{k} full" style="--g:{gap:.2f}em">{"".join(out)}</p>'
+    return f'<p class="say lv{lv} full" style="--g:{gap:.2f}em">{"".join(out)}</p>'
 
 gitems=[sayband(0),
         catbox('',KAMI_CAT,grid=True,cls=' solo',hide=False,note=KAMI_NOTE)]
@@ -771,7 +775,10 @@ details.item[open]>summary .itemnote{display:none}
 @media(max-width:939.98px){.say{padding:18px 10px;font-size:clamp(25px,6.4vw,34px);--gbase:.62em}
  .say.lv3{padding-top:26px;padding-bottom:26px}
  .say.lv4{padding-top:32px;padding-bottom:32px}
- .say.lv5{padding-top:40px;padding-bottom:40px}}
+ .say.lv5{padding-top:40px;padding-bottom:40px}
+ /* 1行だけの帯は薄くて見落とすので、上下の余白を足して2行ぶんの高さにする。
+    .one は JS が行数を数えて付け外しする */
+ .say.one{padding-top:calc(.5em + var(--g,0em));padding-bottom:calc(.5em + var(--g,0em))}}
 /* 自己紹介・終わりリンクの下線を消す */
 .selfline>a,.owariend>a{text-decoration:none}
 
@@ -1320,6 +1327,7 @@ if('serviceWorker' in navigator){{
    var tops=[],i;
    for(i=0;i<n;i++){{var t=sc[i].offsetTop;if(!tops.length||t!==tops[tops.length-1])tops.push(t);}}
    var rows=tops.length;
+   p.classList.toggle('one',rows===1);
    if(rows<2)return;
    var per=Math.ceil(n/rows);
    for(i=per;i<n;i+=per){{
