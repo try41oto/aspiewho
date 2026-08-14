@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # aspiewho 動画目次サイト ジェネレーター v7
-import json, html, os, gzip, sys, re
+import json, html, os, gzip, sys, re, math
 # 引数なしの `python3 build.py` だけで動くよう、既定の入出力は build.py と同じ場所にする
 # （どのディレクトリから実行しても、リポジトリ直下の index.html を作る）
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -231,11 +231,13 @@ NPHR=len(PHRASES)
 SEG=24  # 4の倍数で行が割れず、さいごが最後尾固定でも末尾の区切りが大きくなりすぎない
 THR={SEG*i:i for i in range(1,NPHR-1)}
 
-def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=False,gid=''):
+def catbox(name,c,desc=True,grid=False,firstlabel=False,cls='',hide=True,anchor=False,gid='',note=''):
     """cls は details に足すクラス（神回★の ' solo' など）。
     hide=False にすると HIDE_FROM_CAT の除外を行わない（神回★専用に載せる動画があるため）。
     name が空ならブロック名のバッジを出さない。"""
     d=f'<span class="d">{html.escape(c["description"])}</span>' if desc else ''
+    if note:
+        d+=f'<span class="itemnote">{note}</span>'
     vids=[v for v in c['videos'] if not hide or v['video_id'] not in HIDE_FROM_CAT]
     if grid:
         n=len(vids)
@@ -270,9 +272,10 @@ NEWCAT_BOX=catbox(NEWCAT_GROUP,NEWCAT,desc=False,grid=True)
 # KAMI_ONLY_IDS はカテゴリ側では隠すが神回★には載せるため hide=False にする
 KAMI_CAT={'category_id':'kamikai','name':'\u795e\u56de\u2605','description':'\u304a\u6c17\u306b\u5165\u308a',
  'videos':[V[i] for i in KAMI]}
-DESC_BOX=('<p class="shinkai-description full">'
- '<strong>\u5de6\u300e\uff0b\u300f\u30dc\u30bf\u30f3\u3092\u62bc\u3059\u3068\u3001\u305d\u306e\u4e0b\u5074\u306b\u30ba\u30e9\u30c3\u30c8</strong>'
- '\u30bf\u30a4\u30c8\u30eb\u8868\u793a\u3055\u308c\u307e\u3059\u3002</p>')
+# 神回★の枠内に入れる案内文（スマホは枠の右半分、パソコンは「お気に入り」の下）
+KAMI_NOTE=('<strong>\u5de6\u300e\uff0b\u300f\u30dc\u30bf\u30f3\u3092\u62bc\u3059\u3068\u3001'
+ '\u305d\u306e\u4e0b\u5074\u306b\u30ba\u30e9\u30c3\u30c8</strong>'
+ '\u30bf\u30a4\u30c8\u30eb\u8868\u793a\u3055\u308c\u307e\u3059\u3002')
 # 上位カテゴリ（サブカル〜AI）。青バッジをアンカー先にし、ページ上部に矢羽の飛び先を並べる
 GROUPTOP=[nm for nm,_ in groups if nm not in (tname,NEWCAT_GROUP)]
 def _w(t):
@@ -285,8 +288,29 @@ GNAV=('<nav class="gnav" aria-label="\u4e0a\u4f4d\u30ab\u30c6\u30b4\u30ea\u3078\
  +''.join(f'<a class="gjump" style="--o:{_rank[nm]}" href="#g{i:02d}">{html.escape(nm)}</a>'
           for i,nm in enumerate(GROUPTOP))+'</nav>')
 
-gitems=[f'<p class="say full">{html.escape(PHRASES[0])}</p>', DESC_BOX,
-        catbox('',KAMI_CAT,grid=True,cls=' solo',hide=False)]
+def sayband(k):
+    """口ぐせの帯。1文字ずつ回転・上下ずれ・わずかな大小をつける。
+    k が大きい（ページ下方）ほど振れ幅と歩幅を増やし、遊び心を強くしていく。
+    正弦波で位相を進めるので、タイヤが転がるように角度が移り変わり、
+    かつ 90度・180度のようなきりのよい角度には揃わない"""
+    amp =(3.5, 7, 11, 16, 23, 31)[k]     # 回転の振れ幅（度）
+    step=(0.42,0.63,0.88,1.17,1.51,1.94)[k]  # 1文字ごとに進む位相
+    dy  =(0,   1.5, 3,   5,   8,   12)[k]    # 上下のずれ（px）
+    sw  =(0,   0.01,0.02,0.035,0.05,0.075)[k] # 大きさの揺れ
+    ph  =0.7*k                            # 段ごとに波の始まりをずらす
+    out=[]
+    for i,ch in enumerate(PHRASES[k]):
+        if ch==' ' or ch=='\u3000':
+            out.append(ch); continue
+        a=amp*math.sin(i*step+ph)
+        y=dy*math.cos(i*step*1.27+ph)
+        sc=1+sw*math.sin(i*step*0.73+ph)
+        out.append(f'<span class="sc" style="--r:{a:.1f}deg;--y:{y:.1f}px;--s:{sc:.3f}">'
+                   f'{html.escape(ch)}</span>')
+    return f'<p class="say lv{k} full">{"".join(out)}</p>'
+
+gitems=[sayband(0),
+        catbox('',KAMI_CAT,grid=True,cls=' solo',hide=False,note=KAMI_NOTE)]
 n=1
 for gi,(name,cats) in enumerate(groups):
     if name in (tname,NEWCAT_GROUP):
@@ -300,9 +324,9 @@ for gi,(name,cats) in enumerate(groups):
             n+=1
         if n in THR:
             k=THR[n]
-            gitems.append(f'<p class="say{" l" if k%2 else ""} full">{html.escape(PHRASES[k])}</p>')
+            gitems.append(sayband(k))
 klast=NPHR-1
-gitems.append(f'<p class="say{" l" if klast%2 else ""} full">{html.escape(PHRASES[klast])}</p>')
+gitems.append(sayband(klast))
 idx=f'<div class="items">{"".join(gitems)}</div>'
 
 CSS='''
@@ -366,6 +390,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 }
 /* 「ありがとうございます」等はパソコンだけ。スマホは短い文面にする */
 @media(max-width:939.98px){.ponly{display:none}}
+@media(min-width:940px){.sponly{display:none}}
 @media(max-width:939.98px){.thankswrap .arig,.thankswrap .nana{display:none}
  /* スマホの並び順：矢羽 → 脳アハ！ → 1つ視聴に25分 → 挨拶文 → 以降。
     1列グリッドにして order だけで入れ替える（DOMは触らない） */
@@ -377,7 +402,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .hero>.ahawrap{order:4}
  .greet .mins{margin:0}
  .greet .thankswrap{margin:2px 0 0}
- .greet .thanks{font-size:13px}
+ .greet .thanks{font-size:19px}   /* すぐ上の「1つ視聴に25分。」と同寸 */
 }
 /* 上位カテゴリへ飛ぶ矢羽。色は飛び先の青バッジと同じ #2563EB / 白。
    ＠一覧のLMボタンと同じ形・同じ文字サイズだが、左端は閉じた（まっすぐな）右向き矢羽にする */
@@ -457,9 +482,14 @@ border:1px solid var(--line);border-radius:5px;image-rendering:pixelated}
 .say{margin:36px 0;padding:30px 22px;background:var(--deep);color:#fff;border-radius:6px;
 font-family:"Hiragino Mincho ProN","ヒラギノ明朝 ProN","Yu Mincho","游明朝","YuMincho",
 "Noto Serif JP","Noto Serif CJK JP","MS PMincho",serif;
-font-size:clamp(21px,5.4vw,29px);line-height:2;letter-spacing:.08em;font-weight:400;
-font-style:italic;font-style:oblique 12deg}
-.say.l{font-style:normal;font-style:oblique -12deg}
+font-size:clamp(21px,5.4vw,29px);line-height:2;letter-spacing:.08em;font-weight:400}
+/* 1文字ずつ回転・上下ずれ・大小。値は sayband() が段ごとに決めて style で渡す */
+.say .sc{display:inline-block;transform:rotate(var(--r,0deg)) translateY(var(--y,0px)) scale(var(--s,1));
+ transform-origin:50% 62%}
+/* 傾きが強い段は文字が帯からはみ出すので、上下の余白を足す */
+.say.lv3{padding-top:36px;padding-bottom:36px}
+.say.lv4{padding-top:42px;padding-bottom:42px}
+.say.lv5{padding-top:50px;padding-bottom:50px}
 /* ピックアップ */
 .pkwrap{margin:32px 0 0}
 .pkwrap h2{margin:0 0 14px;font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--blue)}
@@ -700,12 +730,19 @@ a.qr::after{content:none}
 @media(min-width:700px){.pks.endgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr) minmax(0,1.4fr)}.pks.endgrid .masc{width:100%;max-width:250px}}
 @media(max-width:939.98px){.pks.endgrid .item{padding:20px 10px 12px}.pks.endgrid .item .t{font-size:17px}.pks.endgrid .item .pm{font-size:17px}.pks.endgrid .item .blklabel{font-size:14px;left:10px;top:-11px}.pks.endgrid .row1{gap:6px}}
 /* 神回★エリア：スマホ左右2列＋説明文 / PC3列 */
-/* 「＋を押すと開きます」の案内。口ぐせの帯と神回★のあいだに、行いっぱいで置く。
-   配色は神回★のボックスと同じ薄緑 */
-.shinkai-description{display:block;margin:0;padding:12px 14px;font-size:16px;line-height:1.5;
- color:#333;background:#E9F5EA;border:1px solid var(--greenline);border-radius:8px;
- word-break:break-word}
-.shinkai-description strong{color:var(--blue);font-weight:700}
+/* 「＋を押すと開きます」の案内。神回★の枠の中に置く。
+   パソコンは「お気に入り」の真下、スマホは枠の右半分（下の grid 指定） */
+.itemnote{display:block;margin-top:8px;padding-left:29px;font-size:16px;line-height:1.5;
+ color:#333;font-weight:500;word-break:break-word}
+.itemnote strong{color:var(--blue);font-weight:700}
+details.item[open]>summary .itemnote{display:none}
+@media(max-width:939.98px){
+ /* 神回★の枠は左半分が空くので、右半分に案内文を回す */
+ .item.solo>summary{display:grid;grid-template-columns:1fr 1fr;column-gap:10px;align-items:start}
+ .item.solo>summary .row1{grid-column:1}
+ .item.solo>summary .d{grid-column:1;margin-top:6px}
+ .item.solo>summary .itemnote{grid-column:2;grid-row:1/3;align-self:center;margin-top:0;padding-left:0}
+}
 /* 説明文が抜けたので、スマホでは「量産のきっかけは、戦争の話。」を右半分ではなく1列で大きく出す */
 @media(max-width:939.98px){.items.shinkai-wrapper{grid-template-columns:1fr;gap:8px}.items.shinkai-wrapper>.pkcap{margin:0}}
 /* 「量産のきっかけは、戦争の話。」の真上に出すイチオシ表示。スマホ専用。
@@ -716,7 +753,10 @@ a.qr::after{content:none}
 /* パソコンは .warpc 側にだけ出す。見出しの直後に続けて置くので inline にする */
 .warpc .oshi{display:inline;margin-left:.45em;white-space:nowrap}
 /* 青帯：スマホのみ上下余白を半分・文字を拡大 */
-@media(max-width:939.98px){.say{padding:15px 22px;font-size:clamp(25px,6.4vw,34px);line-height:1.4}}
+@media(max-width:939.98px){.say{padding:15px 22px;font-size:clamp(25px,6.4vw,34px);line-height:1.4}
+ .say.lv3{padding-top:26px;padding-bottom:26px}
+ .say.lv4{padding-top:32px;padding-bottom:32px}
+ .say.lv5{padding-top:40px;padding-bottom:40px}}
 /* 自己紹介・終わりリンクの下線を消す */
 .selfline>a,.owariend>a{text-decoration:none}
 
@@ -872,7 +912,7 @@ HTML=f'''<!DOCTYPE html>
 <div class="wrap" id="top">
 <div class="hero">
 <div class="greet"><p class="mins">1つ視聴に25分。🥴</p>
-<div class="thankswrap"><p class="thanks">大切なお時間をもって<span class="ponly">、</span>ご視聴いただく方、<span class="ponly">ありがとうございます。</span></p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"><img class="stk nana" src="{IMGS['nanananana']}" alt="" width="180" height="150" decoding="async"></div></div>
+<div class="thankswrap"><p class="thanks">大切なお時間をもって<span class="ponly">、</span>ご視聴いただく<span class="sponly">と、</span><span class="ponly">方、ありがとうございます。</span></p><img class="stk arig" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high"><img class="stk nana" src="{IMGS['nanananana']}" alt="" width="180" height="150" decoding="async"></div></div>
 <div class="ahatop">
 <img class="stk arig ahaicon" src="{IMGS['arigatou']}" alt="" width="200" height="151" decoding="async" fetchpriority="high">
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
@@ -893,7 +933,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg">「楽しい」「苦しい」「面白い」「ドラえもん」「かわいい」「サッカー」「野球」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など、<span class="findcta">なんでも思いついた言葉をご検索ください！</span></p>
+<p class="findeg"><span class="findcta">なんでも思いついた言葉を</span>「楽しい」「苦しい」「面白い」「ドラえもん」「かわいい」「サッカー」「野球」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など、<span class="findcta">ご検索ください！</span></p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
