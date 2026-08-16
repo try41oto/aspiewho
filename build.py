@@ -955,7 +955,7 @@ HTML=f'''<!DOCTYPE html>
 <!--MUSICLIST-->
 </div>
 <div class="findbox">
-<p class="findeg"><span class="findcta">なんでも思いついた言葉を</span>「おかあさん」「糞」「マクドナルド」「便」「トイレ」「医療」「Notebook」「尿」「リハビリ」「地獄」「クーラー」「阿呆」「ドラえもん」「バカ」「ネットワーク」「罪」「ダジャレ」「死」「セキュリティ」「恥」「少子化」「病」「障害」「血」「歌詞」「泣く」「温泉」「闇」「相撲」「悪」「実験」「怖い」「地球」「詐欺」「テレビ」「高齢」「歴史」「結婚」「経済」「恋愛」「教育」「核兵器」「スマホ」「お金」「時代」「騙す」など、<span class="findcta">ご検索ください！</span></p>
+<p class="findeg"><span class="findcta">なんでも思いついた言葉を</span>「ドラえもん」「おかあさん」「お笑い」「エガちゃん」「落語」「発達障害」「LINE」「実験」「経済圏」「なぜ」「ゲーム」「柳川」「ネットワーク」「男女」「仕事」「時代」「ダジャレ」「歌詞」「宗教」「生きる」「死ぬ」「地球」「星」「Notebook」「数学」「トランプ」「マクドナルド」「トイレ」「車」「クーラー」「スマホ」「ゴミ」「教育」「医療」「リハビリ」など、<span class="findcta">ご検索ください！</span></p>
 <div class="findrow">
 <input type="search" id="findq" class="findinput" aria-label="ページ内をさがす" placeholder="ちびまる" autocomplete="off" enterkeyhint="search">
 <button type="button" class="findbtn" id="findbtn">さがす</button>
