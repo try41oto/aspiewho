@@ -34,7 +34,7 @@ IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
 IMGS['nanananana']='img/nanananana_anim.webp'
 MORE=['TCe2SvES2x4','2Zky_cifOmw','E_cFN1_iVPI','GNnv5kXhJJs','bsVYxPsVdCQ',
-      '3D6P6cqT1X8','CALLu-0Gd48','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','I4Mx8zksrh0',
+      '3D6P6cqT1X8','CALLu-0Gd48','v-EOKlp8Vfk','ZCjnlCbS0Iw','SQIpV-Jcpl8','I4Mx8zksrh0',
       'TfRZv5DW3Es']
 
 # NotebookLM の口ぐせ（この順に、ページ全体へ均等に差し込む）
@@ -362,6 +362,9 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .thanks{margin:0;font-size:19px;color:var(--dim)}
 .thanks a,.note a{color:var(--sub);text-underline-offset:3px}
 .aha{margin:0;font-size:clamp(34px,10vw,54px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
+/* 矢羽の上に置く肩書き。字づかいは「必ずみつかる、」（.aha small）に合わせる */
+.asdline{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:.06em;line-height:1.3;color:var(--dim)}
+.asdline a{color:var(--sub);text-underline-offset:3px}
 .ahatop{display:flex;align-items:center;gap:10px;margin:22px 0 0}
 .ahatop .aha{text-align:left;flex:1 1 auto;min-width:0}
 .ahawrap .noripc{display:none}
@@ -377,6 +380,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .hero .aha{order:4;margin:0;text-align:center}
  .hero .nana{order:5;margin-left:0}
  /* 矢羽はスマホと同じくページ最上部へ。全幅を使うぶん行数が最小になる */
+ .hero .asdline{order:-1;flex:0 0 100%;margin:0 0 4px}
  .hero .gnav{order:0;flex:0 0 100%;margin:0 0 6px}
  /* きちんと2行に収まる上限まで大きくする。1行の必要幅は文字寸法にほぼ比例するので、
     画面幅から線形に決め、広い画面では21pxで止める */
@@ -407,6 +411,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  /* スマホの並び順：矢羽 → 脳アハ！ → 1つ視聴に25分 → 挨拶文 → 以降。
     1列グリッドにして order だけで入れ替える（DOMは触らない） */
  .hero{display:grid;grid-template-columns:1fr;padding-top:12px}
+ .hero>.asdline{order:0;margin:0 0 4px}
  .hero>.gnav{order:1;margin:0;grid-template-columns:repeat(auto-fill,minmax(78px,1fr))}
  /* 25分・挨拶は「必ずみつかる、」の真上へ。両者は改行して2行にする */
  .hero>.greet{order:2;margin:16px 0 0}
@@ -940,6 +945,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 </div>
+<p class="asdline"><a href="{wu('zQP6i3wEvPY')}" target="_blank" rel="noopener">積極奇異型ASD者がお届けする</a></p>
 {GNAV}
 <div class="ahawrap">
 <img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
