@@ -907,6 +907,9 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  .selfpk .pk p{display:none}
  .selfpk .pk.zoom p{display:block}   /* 拡大したときだけ題名を出す */
 }
+@media(max-width:939.98px){
+ .owariend{display:none}   /* 終わりはサムネイルで出しているので、この行は畳む */
+}
 @media(min-width:940px){
  .selfline{display:none}
  .selfpk .pk .thumb{display:none}
