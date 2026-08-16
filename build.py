@@ -967,7 +967,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 </div>
-<p class="asdline"><span class="asdjump" role="button" tabindex="0">アラフォーで判明した積極奇異型ASD者がお届け</span></p>
+<p class="asdline"><span class="asdjump" role="button" tabindex="0">アラフォーで判明したASD者がお届け</span></p>
 {GNAV}
 <div class="ahawrap">
 <img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
