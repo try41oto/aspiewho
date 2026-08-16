@@ -364,7 +364,10 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 .aha{margin:0;font-size:clamp(34px,10vw,54px);font-weight:800;letter-spacing:.04em;line-height:1.3;text-align:center}
 /* 矢羽の上に置く肩書き。字づかいは「必ずみつかる、」（.aha small）に合わせる */
 .asdline{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:.06em;line-height:1.3;color:var(--dim)}
-.asdline a{color:var(--sub);text-underline-offset:3px}
+.asdjump,.selfbtn{color:var(--sub);cursor:pointer}
+/* 外部リンクではなくなったので、鎖印は a[target="_blank"]::after と同じ体裁で自前で描く */
+.asdjump::after,.selfbtn::after{content:'🔗';display:inline-block;font-size:.55em;margin-left:3px;vertical-align:middle;opacity:.7}
+.asdjump:focus-visible,.selfbtn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .ahatop{display:flex;align-items:center;gap:10px;margin:22px 0 0}
 .ahatop .aha{text-align:left;flex:1 1 auto;min-width:0}
 .ahawrap .noripc{display:none}
@@ -832,6 +835,7 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  .musiclist>summary{gap:3px}
  .musiclist .pm{font-size:16px}
  .musiclist .mlh{font-size:13px}
+ .banner .lbl{font-size:13px}       /* 隣の「♫の音楽」「＠の動画」と同寸にする */
  details.musiclist[open] .closelbl{font-size:14px;padding:5px 10px}
 }
 /* 行番号は出さない（左端をボタンに揃える） */
@@ -883,17 +887,27 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  .pks .pk.zoom .thumb img{border-color:#2563EB}
  .pks .pk.zoom .clipicon{display:none}   /* 視聴するボタンと同じ隅にあるため */
  .pk.zoom .zoomui{display:block}
- /* 2つのボタンはサムネイルの下の隅へ。中身が隠れず、下のタイトルとも重ならない */
- .zwatch{position:absolute;right:6px;bottom:6px;z-index:5;
-  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
-  background:#2563EB;color:#fff;font-size:15px;font-weight:800;line-height:1.2;
-  letter-spacing:.04em;padding:7px 9px;border-radius:0;
-  box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
- .zback{position:absolute;left:6px;bottom:6px;z-index:5;
-  display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
-  background:#276B3B;color:#fff;font-size:15px;font-weight:700;
-  padding:6px 13px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
 }
+/* 2つのボタンはサムネイルの下の隅へ。中身が隠れず、下のタイトルとも重ならない。
+   自己紹介の拡大はパソコンでも出すので、画面幅の条件の外に置く */
+.zwatch{position:absolute;right:6px;bottom:6px;z-index:5;
+ display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+ background:#2563EB;color:#fff;font-size:15px;font-weight:800;line-height:1.2;
+ letter-spacing:.04em;padding:7px 9px;border-radius:0;
+ box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
+.zback{position:absolute;left:6px;bottom:6px;z-index:5;
+ display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
+ background:#276B3B;color:#fff;font-size:15px;font-weight:700;
+ padding:6px 13px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
+/* 自己紹介の拡大表示。3列カードの拡大と同じ見た目を、画面幅を問わず出す */
+.selfpk{margin:14px 0 0}
+.selfpk .pk.zoom{grid-column:1/-1;background:#2563EB;border-radius:8px;padding:6px}
+.selfpk .pk.zoom p{color:#fff;font-family:inherit;font-size:24px;line-height:1.45;font-weight:700;
+ display:block;overflow:visible;-webkit-line-clamp:none;text-overflow:clip}
+.selfpk .pk.zoom .thumb img{border-color:#2563EB}
+.selfpk .pk.zoom .clipicon{display:none}
+.selfpk .pk.zoom .pop{display:none}
+.selfpk .pk.zoom .zoomui{display:block}
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 /* 神回★はカテゴリ一覧の一員だが、お気に入りとして薄緑で見分けられるようにする。
    :nth-of-type(even) の縞より後に置き、詳細度も高いので確実に上書きされる */
@@ -945,7 +959,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 </div>
-<p class="asdline"><a href="{wu('zQP6i3wEvPY')}" target="_blank" rel="noopener">積極奇異型ASD者がお届けする</a></p>
+<p class="asdline"><span class="asdjump" role="button" tabindex="0">積極奇異型ASD者がお届けする</span></p>
 {GNAV}
 <div class="ahawrap">
 <img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
@@ -1011,7 +1025,8 @@ HTML=f'''<!DOCTYPE html>
 {NEWCAT_BOX}
 {HARMONICA_BOXES}
 </div>
-<p class="selfline">{ilink(wu(ID_SELFINTRO),ID_SELFINTRO,html.escape(TXT_SELFINTRO))}</p>
+<p class="selfline"><span class="selfbtn" id="selfintro" role="button" tabindex="0">{html.escape(TXT_SELFINTRO)}</span></p>
+<div class="pks selfpk" id="selfpk" hidden>{pkcard(V[ID_SELFINTRO]["watch_url"],V[ID_SELFINTRO]["thumbnail_url"],V[ID_SELFINTRO]["title"])}</div>
 <p class="techdesc">{vlink(ID_KEITORA,'軽トラ４ナンバー')}ダイハツハイゼットのような「{vlink(ID_CFRZ6,'CF-RZ6')}（{vlink(ID_XUBUNTU,'xubuntu')}）」と、スズキ{vlink(ID_SWIFT,'2020スイフト')}（{vlink(ID_M1,'M1')}；{vlink(ID_A2337,'A2337')}；{vlink(ID_ASAHI,'AsahiLinuxFedoraKDEplasma')}）M1MacbookAirを使ってます。</p>
 <p class="owariend">{ilink(wu(ID_OWARI),ID_OWARI,html.escape(TXT_OWARI))}</p>
 </div>
@@ -1037,6 +1052,8 @@ function unzoom(){{
  if(!ZOOM)return;
  ZOOM.classList.remove('zoom');
  if(ZUI&&ZUI.parentNode)ZUI.parentNode.removeChild(ZUI);
+ var sp=ZOOM.closest('.selfpk');
+ if(sp)sp.hidden=true;              /* 自己紹介の枠は畳んで元の1行に戻す */
  ZOOM=null;ZOOMORIGIN=null;
 }}
 function zoomCard(card,origin){{
@@ -1129,22 +1146,41 @@ document.addEventListener('click',function(e){{
       「戻る」は元の18枚の位置まで返す
     ・カテゴリを展開した3列のカード … その場で拡大。「戻る」は3列に戻すだけ
     バッジ（.reflink）の上を押したときは従来どおりバッジの動作を優先する */
+ /* 拡大中の「視聴する」「戻る」。自己紹介はパソコンでも拡大するので画面幅では分けない */
+ var zb=e.target.closest('.zback');
+ if(zb){{
+  e.preventDefault();
+  var org=ZOOMORIGIN; unzoom();
+  if(org){{
+   var oe=document.getElementById(org);
+   if(oe)oe.scrollIntoView({{block:'center'}});
+  }}
+  return;
+ }}
+ if(e.target.closest('.zwatch')){{
+  e.preventDefault();
+  if(ZOOM)window.open(ZOOM.href,'_blank','noopener');
+  return;
+ }}
+ /* 冒頭の肩書きは、ページ末尾の「自己紹介」までなめらかに送る */
+ if(e.target.closest('.asdjump')){{
+  e.preventDefault();
+  var si=document.getElementById('selfintro');
+  if(si)si.scrollIntoView({{behavior:'smooth',block:'center'}});
+  return;
+ }}
+ /* 「自己紹介」を押したら、3列カードと同じ拡大表示を開く */
+ if(e.target.closest('.selfbtn')){{
+  e.preventDefault();
+  var box=document.getElementById('selfpk');
+  if(box){{
+   if(!box.hidden){{unzoom();return;}}
+   box.hidden=false;
+   zoomCard(box.querySelector('.pk'),'selfintro');
+  }}
+  return;
+ }}
  if(SP()){{
-  var zb=e.target.closest('.zback');
-  if(zb){{
-   e.preventDefault();
-   var org=ZOOMORIGIN; unzoom();
-   if(org){{
-    var oe=document.getElementById(org);
-    if(oe)oe.scrollIntoView({{block:'center'}});
-   }}
-   return;
-  }}
-  if(e.target.closest('.zwatch')){{
-   e.preventDefault();
-   if(ZOOM)window.open(ZOOM.href,'_blank','noopener');
-   return;
-  }}
   if(!e.target.closest('.reflink')){{
    var pk=e.target.closest('.pk');
    if(pk){{
@@ -1275,6 +1311,13 @@ document.addEventListener('click',function(e){{
  var timer=null;
  q.addEventListener('input',function(){{clearTimeout(timer);timer=setTimeout(run,180);}});
  q.addEventListener('keydown',function(e){{if(e.key==='Enter'){{e.preventDefault();run();}}}});
+ /* span で作ったボタンは、キーボードでも押せるようにする */
+ document.addEventListener('keydown',function(e){{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  var t=e.target.closest&&e.target.closest('.asdjump,.selfbtn,.zwatch,.zback');
+  if(!t)return;
+  e.preventDefault();t.click();
+ }});
  btn.addEventListener('click',run);
 }})();
 (function(){{
