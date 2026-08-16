@@ -424,7 +424,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
  .greet .mins{margin:0}
  .greet .thankswrap{margin:2px 0 0}
  /* 挨拶文は「必ずみつかる、」（.aha small）と同じ字づかいにそろえる */
- .greet .thanks{font-size:18px;font-weight:600;letter-spacing:.06em;line-height:1.3}
+ .greet .thanks{font-size:13px;font-weight:600;letter-spacing:.06em;line-height:1.3}
 }
 /* 上位カテゴリへ飛ぶ矢羽。色は飛び先の青バッジと同じ #2563EB / 白。
    ＠一覧のLMボタンと同じ形・同じ文字サイズだが、左端は閉じた（まっすぐな）右向き矢羽にする */
