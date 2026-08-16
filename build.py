@@ -1215,29 +1215,6 @@ document.addEventListener('click',function(e){{
  if(!t)return;
  e.preventDefault();
  e.stopPropagation();
- if(t.dataset.anchor&&window.matchMedia('(max-width:939.98px)').matches){{
-  var el=document.getElementById(t.dataset.anchor);
-  if(el){{
-   /* 飛び先の一覧は details で畳まれている。閉じたままだと高さ0で座標が取れないため先に開く */
-   var dd=el.parentElement?el.parentElement.closest('details'):null;
-   while(dd){{
-    if(!dd.open){{SKIP_TOGGLE_SCROLL_UNTIL=Date.now()+600;dd.open=true;}}
-    dd=dd.parentElement?dd.parentElement.closest('details'):null;
-   }}
-   /* ハイライトはクラスで付ける。location.hash を使うとブラウザ既定の
-      「断片へスクロール」が後から走り、こちらの中央寄せを上書きしてしまう */
-   var prev=document.querySelector('.musiclist li.hit');
-   if(prev)prev.classList.remove('hit');
-   el.classList.add('hit');
-   /* 267件の一覧を開いた直後は1フレームでは座標が確定しないので2フレーム待つ */
-   requestAnimationFrame(function(){{
-    requestAnimationFrame(function(){{
-     el.scrollIntoView({{block:'center'}});  /* 画面の上下中央へ */
-    }});
-   }});
-  }}
-  return;
- }}
  window.open(t.dataset.url,'_blank','noopener');
 }});
 (function(){{
