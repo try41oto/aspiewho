@@ -19,7 +19,7 @@ MOVE_IDS=['8UFhGDi4YUg','4gZthMfSs2Y','bQJ4fE9GQSI','HvdUHeEzltA','o4HopqoW8ek',
  'H9-7-fHTvoY','ddjkcRM3H4s','nsl3lWw2ZEc','uG0WFwTonJw','DGjNEqHEIDQ','MpkyVKiV1pk',
  'pgQQI_ykxUI']
 
-FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','oVOE2dOOZ7Q','dccoLUinYDQ','KxMbR6po5wA','ARyDkAJ4FBQ'])]
+FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','ARyDkAJ4FBQ','dccoLUinYDQ','KxMbR6po5wA','oVOE2dOOZ7Q'])]
 ID_WAR='cEkx8UrBpAU'
 CAP_WAR='量産のきっかけは、戦争の話。'
 ID_HAIBOKU='NjBJJ3JSqag'
@@ -1022,7 +1022,7 @@ HTML=f'''<!DOCTYPE html>
 <div class="warpc"><p class="pkcap">{html.escape(CAP_WAR)}<span class="oshi">イチオシ<span class="oshistar">⭐️</span></span></p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 </div>
-<div class="pkwrap"><h2>まずはこのあたりから</h2>{first}
+<div class="pkwrap"><h2><span class="ponly">まずはこのあたりから</span><span class="sponly">まずは、、♫＠を押すとか</span></h2>{first}
 <div class="items shinkai-wrapper"><p class="pkcap"><span class="oshi">イチオシ<span class="oshistar">⭐️</span></span>{html.escape(CAP_WAR)}</p>{pkcard(V[ID_WAR]["watch_url"],V[ID_WAR]["thumbnail_url"],V[ID_WAR]["title"])}</div>
 </div>
 {idx}
