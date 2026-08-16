@@ -899,15 +899,19 @@ details.musiclist[open]>summary{position:sticky;top:0;z-index:5;margin:-14px -10
  display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
  background:#276B3B;color:#fff;font-size:15px;font-weight:700;
  padding:6px 13px;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
-/* 自己紹介の拡大表示。3列カードの拡大と同じ見た目を、画面幅を問わず出す */
+/* 自己紹介と終わりの2枚。スマホはサムネイルだけを並べ、押すと3列カードと同じ拡大表示。
+   パソコンはサムネイルを出さず題名だけ（2行）にし、上の「自己紹介」の行も畳む */
 .selfpk{margin:14px 0 0}
-.selfpk .pk.zoom{grid-column:1/-1;background:#2563EB;border-radius:8px;padding:6px}
-.selfpk .pk.zoom p{color:#fff;font-family:inherit;font-size:24px;line-height:1.45;font-weight:700;
- display:block;overflow:visible;-webkit-line-clamp:none;text-overflow:clip}
-.selfpk .pk.zoom .thumb img{border-color:#2563EB}
-.selfpk .pk.zoom .clipicon{display:none}
-.selfpk .pk.zoom .pop{display:none}
-.selfpk .pk.zoom .zoomui{display:block}
+@media(max-width:939.98px){
+ .selfpk .pk p{display:none}
+ .selfpk .pk.zoom p{display:block}   /* 拡大したときだけ題名を出す */
+}
+@media(min-width:940px){
+ .selfline{display:none}
+ .selfpk .pk .thumb{display:none}
+ .selfpk .pk p{margin:0}
+ .selfpk .pk.owaricard{display:none}   /* 終わりの行は下に別にあるので重ねない */
+}
 /* 神回★ボックスの薄緑：PC・スマホで同色にする */
 /* 神回★はカテゴリ一覧の一員だが、お気に入りとして薄緑で見分けられるようにする。
    :nth-of-type(even) の縞より後に置き、詳細度も高いので確実に上書きされる */
@@ -1026,7 +1030,7 @@ HTML=f'''<!DOCTYPE html>
 {HARMONICA_BOXES}
 </div>
 <p class="selfline"><span class="selfbtn" id="selfintro" role="button" tabindex="0">{html.escape(TXT_SELFINTRO)}</span></p>
-<div class="pks selfpk" id="selfpk" hidden>{pkcard(V[ID_SELFINTRO]["watch_url"],V[ID_SELFINTRO]["thumbnail_url"],V[ID_SELFINTRO]["title"])}</div>
+<div class="pks selfpk" id="selfpk">{pkcard(V[ID_SELFINTRO]["watch_url"],V[ID_SELFINTRO]["thumbnail_url"],V[ID_SELFINTRO]["title"])}{pkcard(wu(ID_OWARI),tn(ID_OWARI),TXT_OWARI," owaricard")}</div>
 <p class="techdesc">{vlink(ID_KEITORA,'軽トラ４ナンバー')}ダイハツハイゼットのような「{vlink(ID_CFRZ6,'CF-RZ6')}（{vlink(ID_XUBUNTU,'xubuntu')}）」と、スズキ{vlink(ID_SWIFT,'2020スイフト')}（{vlink(ID_M1,'M1')}；{vlink(ID_A2337,'A2337')}；{vlink(ID_ASAHI,'AsahiLinuxFedoraKDEplasma')}）M1MacbookAirを使ってます。</p>
 <p class="owariend">{ilink(wu(ID_OWARI),ID_OWARI,html.escape(TXT_OWARI))}</p>
 </div>
@@ -1052,8 +1056,6 @@ function unzoom(){{
  if(!ZOOM)return;
  ZOOM.classList.remove('zoom');
  if(ZUI&&ZUI.parentNode)ZUI.parentNode.removeChild(ZUI);
- var sp=ZOOM.closest('.selfpk');
- if(sp)sp.hidden=true;              /* 自己紹介の枠は畳んで元の1行に戻す */
  ZOOM=null;ZOOMORIGIN=null;
 }}
 function zoomCard(card,origin){{
@@ -1165,19 +1167,15 @@ document.addEventListener('click',function(e){{
  /* 冒頭の肩書きは、ページ末尾の「自己紹介」までなめらかに送る */
  if(e.target.closest('.asdjump')){{
   e.preventDefault();
-  var si=document.getElementById('selfintro');
+  var si=document.getElementById('selfpk');
   if(si)si.scrollIntoView({{behavior:'smooth',block:'center'}});
   return;
  }}
- /* 「自己紹介」を押したら、3列カードと同じ拡大表示を開く */
+ /* 「自己紹介」の行を押したときも、その下のサムネイルを拡大する（スマホのみ） */
  if(e.target.closest('.selfbtn')){{
   e.preventDefault();
   var box=document.getElementById('selfpk');
-  if(box){{
-   if(!box.hidden){{unzoom();return;}}
-   box.hidden=false;
-   zoomCard(box.querySelector('.pk'),'selfintro');
-  }}
+  if(box&&SP())zoomCard(box.querySelector('.pk'),'selfpk');
   return;
  }}
  if(SP()){{
@@ -1201,7 +1199,7 @@ document.addEventListener('click',function(e){{
       zoomCard(tg,pk.id||null);
       return;
      }}
-    }} else if(pk.closest('.catbody')){{   /* 展開したカテゴリの中のカード */
+    }} else if(pk.closest('.catbody')||pk.closest('.selfpk')){{   /* 展開したカテゴリの中のカード／自己紹介の2枚 */
      e.preventDefault();
      zoomCard(pk,null);
      return;
