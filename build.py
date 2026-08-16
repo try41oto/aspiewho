@@ -34,7 +34,7 @@ IMGS={n:f'img/{n}.webp' for n in ('norikome','chiko','nori','kome','haiboku')}
 IMGS['arigatou']='img/arigatou_anim.webp'
 IMGS['nanananana']='img/nanananana_anim.webp'
 MORE=['TCe2SvES2x4','2Zky_cifOmw','E_cFN1_iVPI','GNnv5kXhJJs','bsVYxPsVdCQ',
-      '3D6P6cqT1X8','nEayqs5K8x8','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','I4Mx8zksrh0',
+      '3D6P6cqT1X8','CALLu-0Gd48','v-EOKlp8Vfk','lXz5Y8umPxY','SQIpV-Jcpl8','I4Mx8zksrh0',
       'TfRZv5DW3Es']
 
 # NotebookLM の口ぐせ（この順に、ページ全体へ均等に差し込む）
