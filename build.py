@@ -19,7 +19,7 @@ MOVE_IDS=['8UFhGDi4YUg','4gZthMfSs2Y','bQJ4fE9GQSI','HvdUHeEzltA','o4HopqoW8ek',
  'H9-7-fHTvoY','ddjkcRM3H4s','nsl3lWw2ZEc','uG0WFwTonJw','DGjNEqHEIDQ','MpkyVKiV1pk',
  'pgQQI_ykxUI']
 
-FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','1fg64F4OBnU','dccoLUinYDQ','KxMbR6po5wA','ARyDkAJ4FBQ'])]
+FIRST=[(None,['e_sYnb1CdAs','etxG4LU462U','oVOE2dOOZ7Q','dccoLUinYDQ','KxMbR6po5wA','ARyDkAJ4FBQ'])]
 ID_WAR='cEkx8UrBpAU'
 CAP_WAR='量産のきっかけは、戦争の話。'
 ID_HAIBOKU='NjBJJ3JSqag'
