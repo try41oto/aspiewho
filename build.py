@@ -368,6 +368,7 @@ background:var(--face);font-size:17px;color:var(--sub);text-decoration:none;font
 /* 外部リンクではなくなったので、鎖印は a[target="_blank"]::after と同じ体裁で自前で描く */
 .asdjump::after,.selfbtn::after{content:'🔗';display:inline-block;font-size:.55em;margin-left:3px;vertical-align:middle;opacity:.7}
 .asdjump:focus-visible,.selfbtn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:939.98px){.asdline{font-size:13px}}   /* 「年代や性別…」の一行と同寸 */
 .ahatop{display:flex;align-items:center;gap:10px;margin:22px 0 0}
 .ahatop .aha{text-align:left;flex:1 1 auto;min-width:0}
 .ahawrap .noripc{display:none}
@@ -963,7 +964,7 @@ HTML=f'''<!DOCTYPE html>
 <p class="aha"><small>必ずみつかる、</small>脳アハ！</p>
 <img class="stk masc norimobile" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
 </div>
-<p class="asdline"><span class="asdjump" role="button" tabindex="0">積極奇異型ASD者がお届けする</span></p>
+<p class="asdline"><span class="asdjump" role="button" tabindex="0">40歳で判明した積極奇異型ASD者がお届け</span></p>
 {GNAV}
 <div class="ahawrap">
 <img class="stk masc noripc" src="{IMGS['norikome']}" alt="のりこめゲームスタート！" width="274" height="252" decoding="async" fetchpriority="high">
